@@ -1,0 +1,40 @@
+Notes from KINGDOM3.INC
+
+----Keywords/User-defined functions definitions ---- (All user-defined functions are declared in Kingdom1.INC)
+
+0) unit: refers to a separate code module that can be included in a larger program... 
+essentially acting like a library. 
+To import/inlcude these in a program then the keyword 'uses' needs to be used followed my 'unit' name/s
+
+1) procedure: Unlike a "function" in Pascal, a procedure does not return a value when called. 
+
+2) var: Signifies the beginning of a section where you declare variables.
+
+3) label: A label is a named identifier that is used with the "goto"...
+statement to jump to a specific line of code within a program block.
+
+4) 'begin' and 'end': Where a sequence of statements within a procedure or function should be executed;...
+it is always paired with the "end" keyword.
+
+5) ClearKeys(User-define Function): Clears any prior input from the keyboard/mouse.
+
+6) gotoxy: positions the cursor at (X,Y) direction relative to the origin of the current window. 
+
+7) flash(User-define Function): In short, this procedure makes a message flash on the screen at a given position, changing its color rapidly, until the user presses a key.
+
+8) col(User-define Function): This procedure changes the text color based on the state of the Color variable...
+
+9) write: Display text to the screen with no new line.
+
+10) writeln: Display text to the screen with new line.
+
+11) clrscr: Clears the screen to a blank canvas afte a certain event.
+
+12) repeat and untilL: Essentially a 'do{} while()' loop. This is what makes the big "KROZ" word change colors
+
+************ Side note: How functions are created in Pascal ************
+- To create a function in Pascal, use the syntax: function FunctionName(Parameter1: Type1; Parameter2: Type2; ...): ReturnType; followed by a begin block containing the function logic, and ending with end;
+ReturnType; followed by a begin block containing the function logic, and ending with end;
+
+INPUTS:
+- When incorrect mouse/keyboard inputs are giving the game will produce a disturbing sound
