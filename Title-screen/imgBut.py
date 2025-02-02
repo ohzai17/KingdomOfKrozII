@@ -1,5 +1,4 @@
 import pygame
-
 pygame.init()
 
 # Initialize the game window
@@ -14,15 +13,16 @@ TEXT_COLOR = (255, 255, 255)
 
 # Load the button image
 button_img = pygame.image.load('C:/KingdomOfKrozII/Title-screen/Images/coffeeCup.png')  # Replace with your image path
-button_img = pygame.transform.scale(button_img, (100, 100))  # Resize the image if needed
+button_img = pygame.transform.scale(button_img, (200, 200))  # Resize the image if needed
 
 # Define button area (the rect where the button will be clickable)
 button_rect = button_img.get_rect()
 button_rect.topleft = (350, 250)  # Position the button at (350, 250)
 
 # Define fonts for text
-font = pygame.font.SysFont('Orbitron', 30)
+font = pygame.font.SysFont('Orbitron', 50)
 TEXT_COL = (0, 191, 255)  # Deep Sky Blue
+TEXT_SHADOW = (12, 103, 137) # Dark blue
 
 # Game variables
 game_paused = False
@@ -54,8 +54,9 @@ while running:
 
     # Display the correct screen based on current_screen
     if current_screen == MAIN_MENU:
+        draw_text('KINGDOM OF KROZ II', font, TEXT_SHADOW, 253, 53)
         draw_text('KINGDOM OF KROZ II', font, TEXT_COL, 250, 50)
-        draw_text('Click the button below or press C', font, TEXT_COL, 220, 150)
+        draw_text('Click the button below', font, TEXT_COL, 220, 150)
         
         # Draw the button image
         screen.blit(button_img, button_rect)
@@ -80,8 +81,6 @@ while running:
                 current_screen = NEW_SCREEN  # Switch to another screen, for example
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_c:  # Go to new screen
-                current_screen = NEW_SCREEN
             if event.key == pygame.K_b and current_screen == NEW_SCREEN:  # Go back to main menu
                 current_screen = MAIN_MENU
             elif event.key == pygame.K_p and current_screen == GAME_SCREEN:  # Pause game (optional)
