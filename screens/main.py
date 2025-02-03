@@ -1,6 +1,7 @@
 import color_mode
 import pc_speed
-import main_menu
+import title
+import difficulty  # Import your information_screen function
 
 def main():
     color = color_mode.choose_color_mode()
@@ -11,7 +12,12 @@ def main():
     if speed is None:
         return  # Exit if user quits
 
-    main_menu.main_menu(color)  # Pass color mode to the menu
+    title.title(color)  # Pass color mode to the title screen
+
+    player_level = difficulty.information_screen()  # Call the function and store the result
+    if player_level is None:
+        return  # Exit if user quits
 
 if __name__ == "__main__":
     main()
+

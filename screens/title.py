@@ -1,6 +1,6 @@
 import pygame
 
-def main_menu(color_mode):
+def title(color_mode):
     # Initialize Pygame
     pygame.init()
 
