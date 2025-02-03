@@ -1,14 +1,14 @@
-import color_mode
-import pc_speed
+import color
+import speed
 import title
 import difficulty  # Import your information_screen function
 
 def main():
-    color = color_mode.choose_color_mode()
+    colorFunc = color.choose_color_mode()
     if color is None:
         return  # Exit if user quits
 
-    speed = pc_speed.choose_pc_speed()
+    speedFunc = speed.choose_pc_speed()
     if speed is None:
         return  # Exit if user quits
 
