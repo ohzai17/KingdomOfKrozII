@@ -130,7 +130,3 @@ def info_screen1():
             elif event.type == pygame.KEYDOWN:
                 running = False
     pygame.quit()
-
-# Call the function to display the screen
-if __name__ == "__main__":
-    info_screen1()

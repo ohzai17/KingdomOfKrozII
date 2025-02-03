@@ -21,10 +21,9 @@ def main():
         return  # Exit if user quits
     
     infoFunc = game_info.info_screen1() # General info, displayes after choosing the difficulty
-    
-    
+
     endingFunc = ending_credits.ending_creds() # ENDING CREDITS, this function is placed here temporarily
- 
+    
 if __name__ == "__main__":
     main()
 

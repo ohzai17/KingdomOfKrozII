@@ -92,6 +92,3 @@ def ending_creds():
                 running = False  # Exit loop if user closes the window
 
     pygame.quit()
-
-# Run the function
-ending_creds()
