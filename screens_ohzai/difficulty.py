@@ -51,9 +51,9 @@ def information_screen(color_mode):
         INSTRUCTIONS_COLOR = (0, 255, 0)  # Instructions in gray
 
 
-    title_font = pygame.font.Font("assets/PressStart2P.ttf", 12)
-    text_font = pygame.font.Font("assets/PressStart2P.ttf", 12)
-    info_font = pygame.font.Font("assets/PressStart2P.ttf", 10)
+    title_font = pygame.font.Font("screens_ohzai/assets/PressStart2P.ttf", 12)
+    text_font = pygame.font.Font("screens_ohzai/assets/PressStart2P.ttf", 12)
+    info_font = pygame.font.Font("screens_ohzai/assets/PressStart2P.ttf", 10)
     
     subheading1 = text_font.render("An Apogee Software Production", True, (255, 255, 255))
     subheading2 = text_font.render("Created by Scott Miller", True, (255, 255, 255))
