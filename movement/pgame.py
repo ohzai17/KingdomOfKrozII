@@ -1,85 +1,94 @@
-# import pygame module in this program 
-import pygame 
+import pygame
+import random
+import math
 
-# activate the pygame library . 
-# initiate pygame and give permission 
-# to use pygame's functionality. 
-pygame.init() 
+# Initialize Pygame
+pygame.init()
 
-# create the display surface object 
-# of specific dimension..e(500, 500). 
-win = pygame.display.set_mode((800, 600)) 
+# Screen dimensions
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# set the pygame window name 
-pygame.display.set_caption("Moving rectangle") 
+# Colors
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
-# object current co-ordinates 
-x = 200
-y = 200
+# Player settings
+player_size = 20
+player_x, player_y = WIDTH // 2, HEIGHT // 2
+player_speed = 50
 
-# dimensions of the object 
-width = 10
-height = 10
+# Load player image
+player_image = pygame.image.load('KingdomOfKrozII/movement/player.png')
+player_image = pygame.transform.scale(player_image, (player_size, player_size))
 
-# velocity / speed of movement 
-vel = 4  # Adjusted to match the player's speed in KINGDOM5
+# Enemy settings
+enemy_size = 20
+enemy_speed = 2
 
-# Indicates pygame is running 
-run = True
+# Create a list of enemies
+enemies = []
+for _ in range(1):  # Spawn 5 enemies
+    enemy_x = random.randint(0, WIDTH)
+    enemy_y = random.randint(0, HEIGHT)
+    enemies.append([enemy_x, enemy_y])
 
-# infinite loop 
-#Procedure to handle player movement 
-while run: 
-	# creates time delay of 10ms 
-	pygame.time.delay(10) 
-	
-	# iterate over the list of Event objects 
-	# that was returned by pygame.event.get() method. 
-	for event in pygame.event.get(): 
-		
-		# if event object type is QUIT 
-		# then quitting the pygame 
-		# and program both. 
-		if event.type == pygame.QUIT: 
-			
-			# it will make exit the while loop 
-			run = False
-	# stores keys pressed 
-	keys = pygame.key.get_pressed() 
-	
-	# if left arrow key is pressed 
-	if keys[pygame.K_LEFT] and x>0: 
-		
-		# decrement in x co-ordinate 
-		x -= vel 
-		
-	# if right arrow key is pressed 
-	if keys[pygame.K_RIGHT] and x<800-width: 
-		
-		# increment in x co-ordinate 
-		x += vel 
-		
-	# if up arrow key is pressed 
-	if keys[pygame.K_UP] and y>0: 
-		
-		# decrement in y co-ordinate 
-		y -= vel 
-		
-	# if down arrow key is pressed 
-	if keys[pygame.K_DOWN] and y<600-height: 
-		# increment in y co-ordinate 
-		y += vel 
-		
+# Game loop
+running = True
+clock = pygame.time.Clock()
 
-	# completely fill the surface object 
-	# with black colour 
-	win.fill((0, 0, 0)) 
-	
-	# drawing object on screen which is rectangle here 
-	pygame.draw.rect(win, (255, 0, 0), (x, y, width, height)) 
-	
-	# it refreshes the window 
-	pygame.display.update() 
+while running:
+    screen.fill(BLACK)
 
-# closes the pygame window 
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+	#line 130
+    # Get player movement
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player_x -= player_speed
+    if keys[pygame.K_RIGHT]:
+        player_x += player_speed
+    if keys[pygame.K_UP]:
+        player_y -= player_speed
+    if keys[pygame.K_DOWN]:
+        player_y += player_speed
+
+	#line 133 134
+	# Ensure player stays within screen bounds
+    player_x = max(0, min(WIDTH - player_size, player_x))
+    player_y = max(0, min(HEIGHT - player_size, player_y))
+    
+    # Draw player image
+    screen.blit(player_image, (player_x, player_y))
+    
+     # Update enemy positions to chase the player
+    for enemy in enemies:
+        enemy_x, enemy_y = enemy
+
+        # Calculate direction toward player
+        dx, dy = player_x - enemy_x, player_y - enemy_y
+
+        # Move enemy toward player
+        distance = math.hypot(dx, dy)
+        dx, dy = dx / distance, dy / distance
+        enemy_x += dx * enemy_speed
+        enemy_y += dy * enemy_speed
+
+        # Draw enemy
+        pygame.draw.rect(screen, RED, (enemy_x, enemy_y, enemy_size, enemy_size))
+
+        # Update enemy position in the list
+        enemy[0], enemy[1] = enemy_x, enemy_y
+
+    # Update the display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(18.2)
+
 pygame.quit()
