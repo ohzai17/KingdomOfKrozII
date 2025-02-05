@@ -1,10 +1,14 @@
 import color
 import speed
 import title
+<<<<<<< HEAD
 import difficulty  # Import your information_screen function
 import game_info
 import ending_credits
 import load_level
+=======
+import difficulty  
+>>>>>>> af20125848f1e03462c573bd45bf44a70e6bb793
 
 def main():
     colorFunc = color.choose_color_mode()
@@ -17,7 +21,7 @@ def main():
 
     title.title(color)  # Pass color mode to the title screen
 
-    player_level = difficulty.information_screen()  # Call the function and store the result
+    player_level = difficulty.information_screen(color)  # Call the function and store the result
     if player_level is None:
         return  # Exit if user quits
     

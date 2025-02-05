@@ -1,3 +1,6 @@
+# Missing features:
+# - title monochrome mode
+
 import pygame
 
 def choose_pc_speed():
