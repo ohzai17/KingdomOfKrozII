@@ -1,5 +1,4 @@
 {//-------------------------------------------------------------------------}
-// License and copyright information
 {/*                                                                         }
 {Copyright (C) 1987, 2009 - Apogee Software, Ltd.                           }
 {                                                                           }
@@ -24,199 +23,198 @@
 {//-------------------------------------------------------------------------}
 {*** KINGDOM OF KROZ II title screens.  By Scott Miller 11/12/89 ***}
 
-unit KINGDOM3; // Library name
+unit KINGDOM3;
 
 interface 
 
-procedure Title; // Declaration of the Title procedure
+procedure Title;
 
 implementation {--------------------------------------------------------------}
 
-uses CRT, Turbo3, DOS, Kingdom1, Kingdom2; // Import necessary libry712aries
+uses CRT, Turbo3, DOS, Kingdom1, Kingdom2;
 
 procedure Title;
- var StartGame : boolean; // Boolean variable to control game start
- label DESCENT; // Label used for jumping in the program (not used in this snippet)
+ var StartGame : boolean;
+ label DESCENT;
  begin
-  nosound; // Turn off any sound
-  ClearKeys; // Clear keyboard buffer
-  Cur(3); // Set cursor style
-  col(15,15);bak(0,0);clrscr;Cur(3); // Set text and background color, clear screen, and set cursor
-  gotoxy(28,2); // Position cursor at (28,2)
-  writeln('Apogee Software Presents'); // Display title
+  nosound;
+  ClearKeys;Cur(3);
+  col(15,15);bak(0,0);clrscr;Cur(3);
+  gotoxy(28,2);
+  writeln('Apogee Software Presents');
   ClearKeys;
   repeat
-   gotoxy(1,5); // Move cursor to (1,5)
-   col(random(15)+1,7); // Set random foreground color with background 7
-   writeln('     ï¿½ï¿½ï¿½     ï¿½ï¿½ï¿½     ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½         ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½        ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  (R)'); // ASCII art title
-   writeln('     ï¿½ï¿½Û±ï¿½  ï¿½ï¿½Û±ï¿½ï¿½   ï¿½ï¿½Û±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û±      ï¿½ï¿½Û±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û±        ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û±ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½ ï¿½ï¿½Û±ï¿½ï¿½    ï¿½ï¿½Û±ï¿½   ï¿½ï¿½Û±ï¿½     ï¿½ï¿½Û±ï¿½     ï¿½ï¿½Û±ï¿½            ï¿½ï¿½Û±ï¿½ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½ï¿½ï¿½Û±ï¿½ï¿½     ï¿½ï¿½Û±ï¿½   ï¿½ï¿½Û±ï¿½    ï¿½ï¿½Û±ï¿½ï¿½      ï¿½ï¿½Û±           ï¿½ï¿½Û±ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½ï¿½Û±ï¿½ï¿½      ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û±ï¿½ï¿½    ï¿½ï¿½Û±ï¿½       ï¿½ï¿½Û±ï¿½         ï¿½ï¿½Û±ï¿½ï¿½');
-   writeln('     ï¿½ï¿½ï¿½ï¿½ï¿½Û±ï¿½ï¿½       ï¿½ï¿½Û±ï¿½ï¿½ï¿½Û±ï¿½ï¿½ï¿½     ï¿½ï¿½Û±ï¿½       ï¿½ï¿½Û±ï¿½        ï¿½ï¿½Û±ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½ï¿½Û±        ï¿½ï¿½Û±ï¿½ ï¿½ï¿½Û±        ï¿½ï¿½Û±      ï¿½ï¿½Û±ï¿½ï¿½       ï¿½ï¿½Û±ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½ï¿½ï¿½Û±       ï¿½ï¿½Û±ï¿½  ï¿½ï¿½Û±       ï¿½ï¿½Û±ï¿½     ï¿½ï¿½Û±ï¿½      ï¿½ï¿½ï¿½Û±ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½ ï¿½ï¿½Û±      ï¿½ï¿½Û±ï¿½   ï¿½ï¿½Û±       ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û±ï¿½ï¿½     ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½  ï¿½ï¿½Û±       ï¿½ï¿½ï¿½     ï¿½ï¿½ï¿½        ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½        ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
-   writeln('     ï¿½ï¿½Û±ï¿½   ï¿½ï¿½Û±');       
-   writeln('     ï¿½ï¿½Û±ï¿½    ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
-   writeln('       ï¿½ï¿½ï¿½      ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+   gotoxy(1,5);
+   col(random(15)+1,7);
+   writeln('     ÛÛÛ     ÛÛÛ     ÛÛÛÛÛÛÛÛÛÛ         ÛÛÛÛÛÛÛÛÛÛÛ        ÛÛÛÛÛÛÛÛÛÛÛÛÛ  (R)');
+   writeln('     ÛÛÛ±±  ÛÛÛ±±±   ÛÛÛ±±±±±ÛÛÛ±      ÛÛÛ±±±±±±±ÛÛÛ±        ±±±±±±ÛÛÛÛ±±±');
+   writeln('     ÛÛÛ±± ÛÛÛ±±±    ÛÛÛ±±   ÛÛÛ±±     ÛÛÛ±±     ÛÛÛ±±            ÛÛÛ±±±±');
+   writeln('     ÛÛÛ±±ÛÛÛ±±±     ÛÛÛ±±   ÛÛÛ±±    ÛÛÛ±±±      ÛÛÛ±           ÛÛÛ±±±');
+   writeln('     ÛÛÛ±ÛÛÛ±±±      ÛÛÛÛÛÛÛÛÛÛ±±±    ÛÛÛ±±       ÛÛÛ±±         ÛÛÛ±±±');
+   writeln('     ÛÛÛÛÛÛ±±±       ÛÛÛ±±ÛÛÛ±±±±     ÛÛÛ±±       ÛÛÛ±±        ÛÛÛ±±±');
+   writeln('     ÛÛÛ±ÛÛÛ±        ÛÛÛ±± ÛÛÛ±        ÛÛÛ±      ÛÛÛ±±±       ÛÛÛ±±±');
+   writeln('     ÛÛÛ±±ÛÛÛ±       ÛÛÛ±±  ÛÛÛ±       ÛÛÛ±±     ÛÛÛ±±      ÛÛÛÛ±±±');
+   writeln('     ÛÛÛ±± ÛÛÛ±      ÛÛÛ±±   ÛÛÛ±       ÛÛÛÛÛÛÛÛÛÛÛ±±±     ÛÛÛÛÛÛÛÛÛÛÛÛÛ');
+   writeln('     ÛÛÛ±±  ÛÛÛ±       ±±±     ±±±        ±±±±±±±±±±±        ±±±±±±±±±±±±±');
+   writeln('     ÛÛÛ±±   ÛÛÛ±');       
+   writeln('     ÛÛÛ±±    ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ');
+   writeln('       ±±±      ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±');
    writeln;
-   col(14,15);gotoxy(10,wherey); // Set color and position cursor
-   writeln('KINGDOM OF KROZ II -- UPDATED VOLUME THREE OF THE KROZ SERIES'); // Subtitle
-   writeln;gotoxy(24,wherey);col(14,7); // Position cursor and set color
-   writeln('Copyright (C) 1990 Scott Miller'); // Copyright notice
+   col(14,15);gotoxy(10,wherey);
+   writeln('KINGDOM OF KROZ II -- UPDATED VOLUME THREE OF THE KROZ SERIES');
+   writeln;gotoxy(24,wherey);col(14,7);
+   writeln('Copyright (C) 1990 Scott Miller');
    writeln;
-   writeln('           User-Supported Software -- $7.50 Registration Fee Required'); 
-   col(11,7);gotoxy(27,25); // Set color and position cursor
-   write('Press any key to continue.');  
-   delay(300); // Short delay
-  until keypressed; // Wait until a key is pressed
-  ClearKeys; // Clear keyboard buffer
-  bak(1,0);bor(4); // Set background and border color
-  clrscr;cur(3); // Clear screen and set cursor style
-  gotoxy(30,1); // Position cursor
-  col(4,7);bak(1,0); // Set text and background color
-  write('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½'); // Display border
-  gotoxy(30,3); // Position cursor
-  write('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½'); // Display border
-  gotoxy(25,5);col(15,15); // Position cursor and set color
-  write('An Apogee Software Production'); // Display production info
-  gotoxy(28,7); // Position cursor
+   writeln('           User-Supported Software -- $7.50 Registration Fee Required');
+   col(11,7);gotoxy(27,25);
+   write('Press any key to continue.');
+   delay(300);
+  until keypressed;
+  ClearKeys;
+  bak(1,0);bor(4);
+  clrscr;cur(3);
+  gotoxy(30,1);
+  col(4,7);bak(1,0);
+  write('ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ');
+  gotoxy(30,3);
+  write('ßßßßßßßßßßßßßßßßßßßß');
+  gotoxy(25,5);col(15,15);
+  write('An Apogee Software Production');
+  gotoxy(28,7);
   write('Created by Scott Miller');
-  gotoxy(1,9);col(11,7); // Position cursor and set color
+  gotoxy(1,9);col(11,7);
   writeln('  Kingdom of Kroz is a game of adventure, exploration and survival.   You are');
   writeln('  a fearless archaeologist in search of the Magical Amulet,  hidden somewhere');
   writeln('  deep in the vast and dangerous underground kingdom.   You enter the kingdom');
   writeln('  through a secret tunnel and ignite your brass lantern. Your only protection');
   writeln('  is a worn leather whip and your ingenuity.  Sweat beading on your forehead,');
   writeln('                you embark on a journey that may be your last...');
-  gotoxy(1,17);col(10,7); // Position cursor and set color
+  gotoxy(1,17);col(10,7);
   write('         Use the cursor keys to move yourself (');
-  col(14,15);write(#2);col(10,7); // Set color and display character
+  col(14,15);write(#2);col(10,7);
   writeln(') through the kingdom.');
   writeln('            Use your whip (press W) to destroy all nearby creatures.');
   writeln('       You are on your own to discover what other mysteries await--some');
   writeln('                           helpful, others deadly...');
-  col(14,7); // Set color
-  gotoxy(13,22); // Position cursor
-  write('Are you a ');col(15,15);write('N');col(14,7); // Set color and display text
-  write('ovice, an ');col(15,15);write('E');col(14,7); // Set color and display text
-  write('xperienced or an ');col(15,15);write('A');col(14,7); // Set color and display text
+  col(14,7);
+  gotoxy(13,22);
+  write('Are you a ');col(15,15);write('N');col(14,7);
+  write('ovice, an ');col(15,15);write('E');col(14,7);
+  write('xperienced or an ');col(15,15);write('A');col(14,7);
   write('dvanced player?');
-  col(28,16);write(#219); // Display difficulty selection prompt
-  sound(220);delay(100);nosound; // Play sound
-  bak(4,7); // Set background color
+  col(28,16);write(#219);
+  sound(220);delay(100);nosound;
+  bak(4,7);
   repeat
    repeat
-    gotoxy(30,2);col(random(16),0);write(' KINGDOM OF KROZ II ');delay(50); // Display flashing title
-   until keypressed; // Wait until a key is pressed
-   read(kbd,ch); // Read user input
-   sound(300);delay(100);nosound; // Play sound
-  until upcase(ch) in [#13,'N',' ','E','A','X']; // Wait for user to select difficulty
-  sound(700);delay(100);nosound; // Play sound
-  gotoxy(13,22);col(0,0);bak(1,0); // Position cursor and set color
-  for x:=1 to 28 do write('  '); // Clear selection line
-  col(30,31);bak(1,0); // Set color and background
+    gotoxy(30,2);col(random(16),0);write(' KINGDOM OF KROZ II ');delay(50);
+   until keypressed;
+   read(kbd,ch);
+   sound(300);delay(100);nosound;
+  until upcase(ch) in [#13,'N',' ','E','A','X'];
+  sound(700);delay(100);nosound;
+  gotoxy(13,22);col(0,0);bak(1,0);
+  for x:=1 to 28 do write('  ');
+  col(30,31);bak(1,0);
   case upcase(ch) of
-   'N',' ',#13:begin Difficulty:=8;gotoxy(37,22);write('NOVICE');end; // Set difficulty level
+   'N',' ',#13:begin Difficulty:=8;gotoxy(37,22);write('NOVICE');end;
    'E':begin Difficulty:=5;gotoxy(34,22);write('EXPERIENCED');end;
    'A':begin Difficulty:=2;gotoxy(36,22);write('ADVANCED');end;
    'X':begin Difficulty:=9;gotoxy(34,22);write('SECRET MODE');end;
   end;
-  ClearKeys; // Clear keyboard buffer
-  gotoxy(33,25); // Position cursor
-  col(7,7); // Set color
-  write('Press any key.'); // Prompt user to start game
-  bak(4,7); // Set background color
+  ClearKeys;
+  gotoxy(33,25);
+  col(7,7);
+  write('Press any key.');
+  bak(4,7);
   repeat
-   gotoxy(30,2);col(random(16),0);write(' KINGDOM OF KROZ II ');delay(50); // Display flashing title
-  until keypressed; // Wait until a key is pressed
-  ClearKeys; // Clear keyboard buffer
+   gotoxy(30,2);col(random(16),0);write(' KINGDOM OF KROZ II ');delay(50);
+  until keypressed;
+  ClearKeys;
   
-  Shareware(true); // Display the shareware notice
+  Shareware(true);
   
-  StartGame := false; // Initialize the game start flag
-  
-  repeat // Main menu loop
-   bor(1); // Set border color
-   bak(0,0); // Set background color
-   clrscr; // Clear the screen
-   cur(3); // Set cursor type
-   col(15,9);  
-   gotoxy(31,2); 
-   write('KINGDOM OF KROZ II'); // Display game title
-   gotoxy(17,4); 
-   col(6,7);  
-   write('Copyright (c) 1990 Apogee Software Productions'); // Display copyright notice
-   gotoxy(25,6); 
-   write('Version 2.0 -- by Scott Miller'); // Display version and author
-   gotoxy(6,8); 
-   col(2,7);  
-   writeln('THIS GAME MAY BE DISTRIBUTED BY SHAREWARE OR PUBLIC DOMAIN LIBRARIES,'); // Display distribution notice
-   gotoxy(6,9); 
-   writeln('OR BULLETIN BOARD SYSTEMS. NO NEED TO INQUIRE FOR WRITTEN PERMISSION.'); // Display distribution notice
-   gotoxy(1,10); 
-   col(4,7);  
-   for x := 1 to 80 do write(#196); // Draw a horizontal line
-   col(14,15);  
-   gotoxy(28,12); 
-   write('B'); // Display menu options
-   col(11,7);  
+  { New menu screen starts here. }
+  StartGame := false;
+  repeat
+   bor(1);
+   bak(0,0);
+   clrscr;
+   cur(3);
+   col(15,9);
+   gotoxy(31,2);
+   write('KINGDOM OF KROZ II');
+   gotoxy(17,4);
+   col(6,7);
+   write('Copyright (c) 1990 Apogee Software Productions');
+   gotoxy(25,6);
+   write('Version 2.0 -- by Scott Miller');
+   gotoxy(6,8);
+   col(2,7);
+   writeln('THIS GAME MAY BE DISTRIBUTED BY SHAREWARE OR PUBLIC DOMAIN LIBRARIES,');
+   gotoxy(6,9);
+   writeln('OR BULLETIN BOARD SYSTEMS. NO NEED TO INQUIRE FOR WRITTEN PERMISSION.');
+   gotoxy(1,10);
+   col(4,7);
+   for x := 1 to 80 do write(#196);
+   col(14,15);
+   gotoxy(28,12);
+   write('B');
+   col(11,7);
    write('egin your descent into Kroz...');
-   col(14,15);  
-   gotoxy(28,14); 
+   col(14,15);
+   gotoxy(28,14);
    write('I');
-   col(11,7);  
+   col(11,7);
    write('nstructions');
-   col(14,15);  
-   gotoxy(28,16); 
+   col(14,15);
+   gotoxy(28,16);
    write('M');
-   col(11,7);  
+   col(11,7);
    write('arketing Kroz');
-   col(14,15);  
-   gotoxy(28,18); 
+   col(14,15);
+   gotoxy(28,18);
    write('S');
-   col(11,7);  
+   col(11,7);
    write('tory Behind Kroz');
-   col(14,15);  
-   gotoxy(28,20); 
+   col(14,15);
+   gotoxy(28,20);
    write('O');
-   col(11,7);  
+   col(11,7);
    write('riginal Kroz Games');
-   col(14,15);  
-   gotoxy(28,22); 
+   col(14,15);
+   gotoxy(28,22);
    write('A');
-   col(11,7);  
+   col(11,7);
    write('bout the Author');
-   gotoxy(26,24); 
-   col(15,0);bak(1,7); // Set text and background color
-   write('Your choice (B/I/M/S/O/A)? B');gotoxy(wherex-1,wherey);  
-   cur(2); // Set cursor type
-   ClearKeys; // Clear keyboard buffer
-   read(kbd,ch); // Read user input
-   if upcase(ch)='R' then MixUp:=true else MixUp:=false; // Check for 'R' key
-   ClearKeys; // Clear keyboard buffer
-   cur(3); // Set cursor type
+   gotoxy(26,24);
+   col(15,0);bak(1,7);
+   write('Your choice (B/I/M/S/O/A)? B');gotoxy(wherex-1,wherey);
+   cur(2);
+   ClearKeys;
+   read(kbd,ch);
+   if upcase(ch)='R' then MixUp:=true else MixUp:=false;
+   ClearKeys;
+   cur(3);
    case upcase(ch) of
     'B':begin
-         DESCENT: // Label for descent
+         DESCENT:
          for x:=100 downto 20 do
           for y := 10 downto 1 do
-           begin sound(x*y*y);delay(y div 2);end; // Play descent sound
-         nosound; // Turn off sound
-         StartGame := true; // Start the game
+           begin sound(x*y*y);delay(y div 2);end;
+         nosound;
+         StartGame := true;
         end;
     'I':begin
-         bak(1,0); // Set background color
-         bor(4); // Set border color
-         clrscr; // Clear screen
-         cur(3); // Set cursor type
-         ClearKeys; // Clear keyboard buffer
-         gotoxy(32,2);col(14,7);writeln('THE INSTRUCTIONS'); // Display instructions
-         gotoxy(32,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         bak(1,0);
+         bor(4);
+         clrscr;
+         cur(3);
+         ClearKeys;
+         gotoxy(32,2);col(14,7);writeln('THE INSTRUCTIONS');
+         gotoxy(32,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
-         col(15,7);  
+         col(15,7);
          writeln('   Kingdom of Kroz is a game of exploration and survival.  Your journey will');
          writeln(' take you through 25 very dangerous chambers, each riddled with diabolical');
          writeln(' traps and hideous creatures.   Hidden in the deepest chamber lies a hidden');
@@ -242,19 +240,19 @@ procedure Title;
          cur(3);
          ClearKeys;
          gotoxy(32,2);col(14,7);writeln('THE INSTRUCTIONS');
-         gotoxy(32,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(32,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
          col(15,7);
          writeln('   Kingdom of Kroz will present you with many challenges. You will venture deep');
          writeln(' underground and probably not make it out alive!');
          writeln;
-         writeln(' Hints:  ï¿½ Don''t forget to use the Home, End, PgUp, and PgDn keys to move your');
+         writeln(' Hints:  þ Don''t forget to use the Home, End, PgUp, and PgDn keys to move your');
          writeln('           on-screen character diagonally (along with the marked cursor keys).');
-         writeln('         ï¿½ Use your player to touch each new object to find out about it.  When');
+         writeln('         þ Use your player to touch each new object to find out about it.  When');
          writeln('           you first touch an object a message appears at the bottom of the');
          writeln('           screen that describes it.');
-         writeln('         ï¿½ Collect keys to unlock doors, which usually block the stairs.');
-         writeln('         ï¿½ The faster monsters are the most dangerous to touch--they will knock');
+         writeln('         þ Collect keys to unlock doors, which usually block the stairs.');
+         writeln('         þ The faster monsters are the most dangerous to touch--they will knock');
          writeln('           off three of your valuable gems.  The slowest creatures only take a');
          writeln('           single gem from you, and the medium speed monsters take two.');
          writeln;
@@ -270,7 +268,7 @@ procedure Title;
          cur(3);
          ClearKeys;
          gotoxy(32,2);col(14,7);writeln('THE INSTRUCTIONS');
-         gotoxy(32,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(32,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          col(15,7);
          writeln('   Here are some brief descriptions of the most common objects that you are');
          writeln(' likely to find in the Kingdom of Kroz:');
@@ -313,24 +311,24 @@ procedure Title;
          cur(3);
          ClearKeys;
          gotoxy(33,2);col(14,7);writeln('MISCELLANEOUS');
-         gotoxy(33,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(33,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
          col(15,7);
          writeln;
-         writeln('  ï¿½ You can now save three different levels during a single game.  When you');
+         writeln('  þ You can now save three different levels during a single game.  When you');
          writeln('    select the "save" command you will also be asked to enter a letter, either');
          writeln('    A, B or C.  If you just hit the space bar then A is the default selection.');
          writeln('    These letters do not refer to disk drives!  They actually refer to the file');
          writeln('    names used by the game.  The restore command lets use pick from A, B or C.');
          writeln;
-         writeln('  ï¿½ Sideways levels can be recognized by the pause message that appears at');
+         writeln('  þ Sideways levels can be recognized by the pause message that appears at');
          writeln('    the bottom of the screen, which states that it''s a "sideways" level.');
          writeln;
-         writeln('  ï¿½ If you are tired of seeing the descriptions at the bottom of the screen');
+         writeln('  þ If you are tired of seeing the descriptions at the bottom of the screen');
          writeln('    that appear whenever you touch a new object, you can disable most of the');
          writeln('    messages by pressing the minus (-) key.  The plus key (+) resets messages.');
          writeln;
-         writeln('  ï¿½ Kingdom of Kroz II is a completely updated and improved version over the');
+         writeln('  þ Kingdom of Kroz II is a completely updated and improved version over the');
          writeln('    original version of Kingdom of Kroz.  If you desire to play the original');
          writeln('    Kingdom of Kroz, please send $7.50.  Over 17 levels are different!');
          flash(27,25,'Press any key to continue.');
@@ -342,7 +340,7 @@ procedure Title;
          ClearKeys;
          cur(3);
          gotoxy(29,2);col(14,7);writeln('THE MARKETING OF KROZ');
-         gotoxy(29,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(29,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
          col(15,7);
          writeln('   Kingdom of Kroz II is a user-supported game.  This means that the creator of');
@@ -373,7 +371,7 @@ procedure Title;
          ClearKeys;
          cur(3);
          gotoxy(29,2);col(14,7);writeln('THE STORY BEHIND KROZ');
-         gotoxy(29,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(29,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
          col(15,7);
          writeln('   The original Kroz Trilogy (consisting of Caverns of Kroz, Dungeons of Kroz,');
@@ -401,7 +399,7 @@ procedure Title;
          cur(3);
          ClearKeys;
          gotoxy(29,2);col(14,7);writeln('THE STORY BEHIND KROZ');
-         gotoxy(29,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(29,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
          col(15,7);
          writeln('   Kroz is a hobby that''s gotten out of control!');
@@ -432,7 +430,7 @@ procedure Title;
          ClearKeys;
          cur(3);
          gotoxy(28,2);col(14,7);writeln('THE ORIGINAL KROZ GAMES');
-         gotoxy(28,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(28,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          writeln;
          col(15,7);
          writeln('   The Lost Adventures of Kroz is the latest addition to the Kroz family of');
@@ -440,14 +438,14 @@ procedure Title;
          writeln(' triligies:  The Kroz Trilogy and The Super Kroz Trilogy.');
          writeln('   The original Kroz Trilogy was such a surprising success that I decided to');
          writeln(' created a second "Super Kroz" trilogy.  The first three original Kroz');
-         writeln(' games are:   ï¿½ Kingdom of Kroz  ï¿½ Caverns of Kroz  ï¿½ Dungeons of Kroz.');
+         writeln(' games are:   þ Kingdom of Kroz  þ Caverns of Kroz  þ Dungeons of Kroz.');
          writeln(' All three are still available and are constantly being updated and improved.');
          writeln('   The original Kroz Trilogy games can be purchased for $7.50 each, or all 3');
          writeln(' for $20 (these prices include postage, disks, and handling).');
          writeln('   Only Kingdom of Kroz can be placed in a shareware library for distribution,');
          writeln(' and the other two can only be ordered from Apogee Software Productions.');
          writeln('   The Super Kroz Trilogy volumes are revamped and greatly improved.  They are');
-         writeln(' ï¿½ Return to Kroz  ï¿½ Temple of Kroz  ï¿½ The Final Crusade of Kroz.  The last');
+         writeln(' þ Return to Kroz  þ Temple of Kroz  þ The Final Crusade of Kroz.  The last');
          writeln(' three volumes were supposed to be the end of Kroz, but the mail kept coming');
          writeln(' and again I was impelled to create another Kroz adventure.');
          writeln('   All Kroz games work on all monitors, either graphics or monochrome systems.');
@@ -462,7 +460,7 @@ procedure Title;
          ClearKeys;
          cur(3);
          gotoxy(32,2);col(14,7);writeln('ABOUT THE AUTHOR');
-         gotoxy(32,3);          writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+         gotoxy(32,3);          writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
          col(15,7);
          writeln('   Scott Miller, the creator of all the Kroz games, along with Supernova, Trek');
          writeln(' Trivia and Beyond the Titanic (all shareware games) began programming in high');
