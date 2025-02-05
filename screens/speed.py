@@ -19,9 +19,9 @@ def choose_pc_speed():
     ROYAL_BLUE = (65, 105, 225)  # Royal blue
 
     # Font setup
-    title_font = pygame.font.Font("assets/PressStart2P.ttf", 16)  # Larger font for title
-    text_font = pygame.font.Font("assets/PressStart2P.ttf", 10)  # Default font for question
-    subtext_font = pygame.font.Font("assets/PressStart2P.ttf", 9)  # Smaller font for subtext
+    title_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 16)  # Larger font for title
+    text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)  # Default font for question
+    subtext_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 9)  # Smaller font for subtext
 
     # Text rendering
     title_text = title_font.render("KINGDOM OF KROZ II", True, ROYAL_BLUE)

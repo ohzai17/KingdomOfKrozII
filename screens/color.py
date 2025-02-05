@@ -14,8 +14,8 @@ def choose_color_mode():
     CURSOR_COLOR = WHITE
 
     # Font setup
-    title_font = pygame.font.Font("assets/PressStart2P.ttf", 16)  # Larger font for title
-    text_font = pygame.font.Font("assets/PressStart2P.ttf", 10)  # Default font
+    title_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 16)  # Larger font for title
+    text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)  # Default font
 
     # Text rendering
     title_text = title_font.render("KINGDOM OF KROZ II", True, ROYAL_BLUE)

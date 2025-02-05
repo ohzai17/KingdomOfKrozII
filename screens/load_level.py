@@ -14,8 +14,8 @@ def load():
     user_input = ""
 
     # Font setup
-    title_font = pygame.font.Font("assets/RobotoMono-Regular.ttf", 20)  # Larger font for title
-    text_font = pygame.font.Font("assets/RobotoMono-Regular.ttf", 16)  # Default font
+    title_font = pygame.font.Font("screens/assets/RobotoMono-Regular.ttf", 20)  # Larger font for title
+    text_font = pygame.font.Font("screens/assets/RobotoMono-Regular.ttf", 16)  # Default font
 
 
     # Paragraph 

@@ -14,7 +14,7 @@ def ending_creds():
     WHITE = (255, 255, 255)
 
     # Font setup
-    text_font = pygame.font.Font("assets/PressStart2P.ttf", 10)  # Default font
+    text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)  # Default font
 
     # font render
     title = text_font.render("KINGDOM OF KROZ II", True, GREY)

@@ -10,7 +10,7 @@ def title(color_mode):
     pygame.display.set_caption("Kingdom of Kroz II")
 
     # Load the Kroz logo with transparency
-    logo = pygame.image.load("assets/kroz_logo.png").convert_alpha()
+    logo = pygame.image.load("screens/assets/kroz_logo.png").convert_alpha()
 
     # Resize the logo before applying color change (to desired width and height)
     desired_width = 700  # Set your desired width here
@@ -60,9 +60,9 @@ def title(color_mode):
             return colorized_image
 
     # Load custom fonts
-    font_white = pygame.font.Font("assets/PressStart2P.ttf", 12)
-    font_yellow = pygame.font.Font("assets/PressStart2P.ttf", 10)
-    font_cyan = pygame.font.Font("assets/PressStart2P.ttf", 10)
+    font_white = pygame.font.Font("screens/assets/PressStart2P.ttf", 12)
+    font_yellow = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)
+    font_cyan = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)
 
     # Text to display
     text_white = "Apogee Software Presents"

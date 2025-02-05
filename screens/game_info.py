@@ -25,8 +25,8 @@ def info_screen1():
     rand_color = random.choice(colors)
 
     # Font setup
-    title_font = pygame.font.Font("assets/RobotoMono-Regular.ttf", 20)  # Larger font for title (Need to disable Italic)
-    text_font = pygame.font.Font("assets/PressStart2P.ttf", 10)  # Default font
+    title_font = pygame.font.Font("screens/assets/RobotoMono-Regular.ttf", 20)  # Larger font for title (Need to disable Italic)
+    text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)  # Default font
 
     # Text rendering
     title = title_font.render("KINGDOM OF KROZ II - HOW TO REGISTER", True, WHITE) # Antialias enable
