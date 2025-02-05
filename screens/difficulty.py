@@ -1,3 +1,7 @@
+# Missing features:
+# - orange blinking cursor
+# - color cycling for title
+
 import pygame
 
 def wrap_text(text, font, max_width):
