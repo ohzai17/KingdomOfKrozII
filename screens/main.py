@@ -4,6 +4,7 @@ import title
 import difficulty  # Import your information_screen function
 import game_info
 import ending_credits
+import load_level
 
 def main():
     colorFunc = color.choose_color_mode()
@@ -22,8 +23,19 @@ def main():
     
     infoFunc = game_info.info_screen1() # General info, displayes after choosing the difficulty
 
+    choice = load_level.load()
+    if choice == "b":
+        print("Start Game!!")
+    elif choice == "i":
+        print("Instructions")
+    elif choice == "m":
+        print("Marketing")
+    elif choice == "o":
+        print("Story")
+    elif choice == "a":
+        print("Author")
+
     endingFunc = ending_credits.ending_creds() # ENDING CREDITS, this function is placed here temporarily
     
 if __name__ == "__main__":
     main()
-

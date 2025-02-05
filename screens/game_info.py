@@ -1,4 +1,6 @@
 import pygame
+import random
+from gen_functions import *
 
 def info_screen1():
     # Initialize Pygame
@@ -9,12 +11,18 @@ def info_screen1():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Kingdom of Kroz II")
 
-    # Colors
-    OLD_BLUE = (44, 0, 180)
-    GREY = (200, 200, 200)
-    WHITE = (255, 255, 255)
-    YELLOW = (255, 255, 0)
-    RED = (250, 30, 30)
+    # Colors to cycle through
+    colors = [ RED,
+              GREEN,
+              BLUE,
+              YELLOW,
+              ORANGE,
+              PINK,
+              BROWN
+    ]
+
+    # Random color picker
+    rand_color = random.choice(colors)
 
     # Font setup
     title_font = pygame.font.Font("assets/RobotoMono-Regular.ttf", 20)  # Larger font for title (Need to disable Italic)
@@ -82,12 +90,12 @@ def info_screen1():
         
          # Draw a horizontal line under the title
         line_y = title_rect.bottom + 8  # 8 pixels below the title
-        pygame.draw.line(screen, GREY, (0, line_y), (WIDTH, line_y), 1) # Syntax: surface, color, start_pos, end_pos, width
+        pygame.draw.line(screen, GRAY, (0, line_y), (WIDTH, line_y), 1) # Syntax: surface, color, start_pos, end_pos, width
 
          # Draw paragraph 1
         y_offset = line_y + 10  # Start text below the line
         for line in paragraph_text1:
-            rendered_line = text_font.render(line, True, GREY)
+            rendered_line = text_font.render(line, True, GRAY)
             screen.blit(rendered_line, (2, y_offset))  # Start text at x=2
             y_offset += 20  # Move down for the next line
 
@@ -101,7 +109,7 @@ def info_screen1():
         # Draw paragraph 2
         y_offset = 380  # Start text below list of volumes
         for line in paragraph_text2:
-            rendered_line = text_font.render(line, True, GREY)
+            rendered_line = text_font.render(line, True, GRAY)
             screen.blit(rendered_line, (2, y_offset))  # Start text at x=2, y_offset
             y_offset += 20  # Move down for the next line
         
@@ -116,7 +124,7 @@ def info_screen1():
         single_line = text_font.render("Address is always valid!", True, WHITE) # Antialias enable
         screen.blit(single_line, (0, y_offset-20))  # Start text at x=0, y_offset
 
-        pygame.draw.rect(screen, RED, (0, 580, WIDTH, 200)) # Red rectangle on bottom of screen
+        pygame.draw.rect(screen, rand_color, (0, 580, WIDTH, 200)) # Red rectangle on bottom of screen
 
         # Flashing prompt logic
         if (pygame.time.get_ticks() // 500) % 2 == 0: # Alternate between even and odd every 0.5 seconds
