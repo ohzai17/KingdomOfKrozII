@@ -5,6 +5,7 @@ import difficulty  # Import your information_screen function
 import game_info
 import ending_credits
 import load_level
+import pgame
 
 def main():
     colorFunc = color.choose_color_mode()
