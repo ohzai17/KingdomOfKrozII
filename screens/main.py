@@ -26,7 +26,7 @@ def main():
 
     choice = load_level.load()
     if choice == "b":
-        print("Start Game!!")
+        pgame.game()
     elif choice == "i":
         print("Instructions")
     elif choice == "m":
