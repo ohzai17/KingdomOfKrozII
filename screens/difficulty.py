@@ -1,6 +1,7 @@
 # Missing features:
 # - orange blinking cursor
 # - color cycling for title
+# - blue highlight on N, E, A
 
 import pygame
 
