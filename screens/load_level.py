@@ -1,22 +1,42 @@
 import pygame
+import color
 from gen_functions import *
 
-def load():
+def load(color):
     # Initialize Pygame
     pygame.init()
 
     # Screen dimensions
     WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Kingdom of Kroz II")
 
+    if color == "M": # change to grayscale
+        RED = (128, 128, 128)
+        GREEN = (128, 128, 128)
+        BLUE = (128, 128, 128)
+        YELLOW = (255, 255, 255)
+        CYAN = (128, 128, 128)
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+        BROWN = (128, 128, 128)
+        
+    else:
+        RED = (144, 13, 13)
+        GREEN = (0, 255, 0)
+        BLUE = (0, 0, 255)
+        YELLOW = (255, 255, 0)
+        CYAN = (0, 255, 255)
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+        BROWN = (139, 69, 19) 
+    
     # Store user input
-    user_input = ""
+    user_input2 = ""
 
     # Font setup
     title_font = pygame.font.Font("screens/assets/RobotoMono-Regular.ttf", 20)  # Larger font for title
     text_font = pygame.font.Font("screens/assets/RobotoMono-Regular.ttf", 16)  # Default font
-
 
     # Paragraph 
     para1 = ["THIS GAME MAY BE DISTRIBUTED BY SHAREWARE OR PUBLIC DOMAIN LIBRARIES,",
@@ -32,7 +52,6 @@ def load():
         "Original Kroz Games",
         "About the Author"
     ]
-
 
     # Font render
     title = title_font.render("KINGDOM OF KROZ II", True, WHITE)
@@ -60,11 +79,6 @@ def load():
     cursor_visible = True
     cursor_timer = pygame.USEREVENT + 1
     pygame.time.set_timer(cursor_timer, 150)  # Toggle every 150ms
-
-    # Get position of blinking cursor (over "B")
-    s_surface = text_font.render("B", True, BLACK)  
-    s_rect = s_surface.get_rect(topleft=(selector_x + selector.get_width() + 8, selector_y))
-
 
     # Main loop
     running = True
@@ -118,17 +132,24 @@ def load():
         # Draw blinking "B"
         screen.blit(blinking_b, (selector_x + selector.get_width() + 8, selector_y))
 
-
-        pygame.display.update()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            if event.type == pygame.VIDEORESIZE: 
+                WIDTH, HEIGHT = event.size
+                screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+                title = scale_title(title, WIDTH, HEIGHT)
+                subtext1 = scale_text(subtext1, WIDTH, HEIGHT)
+
             elif event.type == cursor_timer:
                 cursor_visible = not cursor_visible  # Toggle cursor visibility
             elif event.type == pygame.KEYDOWN:
                 if event.key in key_map:
-                    user_input = key_map[event.key]  # Set user input based on the key pressed
+                    user_input2 = key_map[event.key]  # Set user input based on the key pressed
                     running = False  # Exit loop after valid input
+
+        pygame.display.update()
+
     pygame.quit()
-    return user_input # Return the user input
+    return user_input2 # Return the user input

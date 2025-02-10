@@ -29,7 +29,7 @@ interface
 
 uses Turbo3, CRT, DOS;
 
-const
+const // This '#' follow by a number(decimal) represents the ASCII equivalent of that number.
 
      {0}  Null      = 0;
 {X}  {4}  Block     = #178;  
@@ -68,7 +68,7 @@ const
 {)}  {37} Trap3     = #0;   
 {M}  {38} MBlock    = #178; 
 {(}  {39} Trap4     = #0;  
-{P}  {40} Player    = #2;  
+{P}  {40} Player    = #2; // SMILEY FACE 
 {&}  {41} ShowGems  = #0;
 {!}  {42} Tablet    = #254;
 {O}  {43} ZBlock    = #178;
@@ -86,43 +86,43 @@ const
 {7}  {55} CWall1    = #0;
 {8}  {56} CWall2    = #0;
 {9}  {57} CWall3    = #0;
-{ñ}  {58} OSpell1   = #127; {ALT-241}
-{ò}  {59} OSpell2   = #127; {ALT-242}
-{ó}  {60} OSpell3   = #127; {ALT-243}
-{ô}  {61} CSpell1   = #0;   {ALT-244}
-{õ}  {62} CSpell2   = #0;   {ALT-245}
-{ö}  {63} CSpell3   = #0;   {ALT-246}
+{ï¿½}  {58} OSpell1   = #127; {ALT-241}
+{ï¿½}  {59} OSpell2   = #127; {ALT-242}
+{ï¿½}  {60} OSpell3   = #127; {ALT-243}
+{ï¿½}  {61} CSpell1   = #0;   {ALT-244}
+{ï¿½}  {62} CSpell2   = #0;   {ALT-245}
+{ï¿½}  {63} CSpell3   = #0;   {ALT-246}
 {Y}  {64} GBlock    = #178;
 {0}  {65} Rock      = #79;
 {~}  {66} EWall     = #88;
 { }  {67} Trap5     = #0;   {represented by a $}
-{‘}  {68} TBlock    = #0;   {ALT-145}
-{’}  {69} TRock     = #0;   {ALT-146}
-{“}  {70} TGem      = #0;   {ALT-147}
-{”}  {71} TBlind    = #0;   {ALT-148}
-{•}  {72} TWhip     = #0;   {ALT-149}
-{–}  {73} TGold     = #0;   {ALT-150}
-{—}  {74} TTree     = #0;   {ALT-151}
-{³}  {75} Rope      = #179; {ALT-179}
-{¹}  {76} DropRope  = #25;  {ALT-185}
-{º}  {77}{DropRope}         {ALT-186}
-{»}  {78}{DropRope}         {ALT-187}
-{¼}  {79}{DropRope}         {ALT-188}
-{½}  {80}{DropRope}         {ALT-189}
-{ƒ}  {81} Amulet    = #12;  {ALT-131}
-{¯}  {82} ShootRight= #26;  {ALT-175}
-{®}  {83} ShootLeft = #27;  {ALT-174}
+{ï¿½}  {68} TBlock    = #0;   {ALT-145}
+{ï¿½}  {69} TRock     = #0;   {ALT-146}
+{ï¿½}  {70} TGem      = #0;   {ALT-147}
+{ï¿½}  {71} TBlind    = #0;   {ALT-148}
+{ï¿½}  {72} TWhip     = #0;   {ALT-149}
+{ï¿½}  {73} TGold     = #0;   {ALT-150}
+{ï¿½}  {74} TTree     = #0;   {ALT-151}
+{ï¿½}  {75} Rope      = #179; {ALT-179}
+{ï¿½}  {76} DropRope  = #25;  {ALT-185}
+{ï¿½}  {77}{DropRope}         {ALT-186}
+{ï¿½}  {78}{DropRope}         {ALT-187}
+{ï¿½}  {79}{DropRope}         {ALT-188}
+{ï¿½}  {80}{DropRope}         {ALT-189}
+{ï¿½}  {81} Amulet    = #12;  {ALT-131}
+{ï¿½}  {82} ShootRight= #26;  {ALT-175}
+{ï¿½}  {83} ShootLeft = #27;  {ALT-174}
 
-{à}  {224}Trap6     = #0;   {ALT-224}
-{á}  {225}Trap7     = #0;   {ALT-225}
-{â}  {226}Trap8     = #0;   {ALT-226}
-{ã}  {227}Trap9     = #0;   {ALT-227}
-{ä}  {228}Trap10    = #0;   {ALT-228}
-{å}  {229}Trap11    = #0;   {ALT-229}
-{æ}  {230}Trap12    = #0;   {ALT-230}
-{ç}  {231}Trap13    = #0;   {ALT-231}
+{ï¿½}  {224}Trap6     = #0;   {ALT-224}
+{ï¿½}  {225}Trap7     = #0;   {ALT-225}
+{ï¿½}  {226}Trap8     = #0;   {ALT-226}
+{ï¿½}  {227}Trap9     = #0;   {ALT-227}
+{ï¿½}  {228}Trap10    = #0;   {ALT-228}
+{ï¿½}  {229}Trap11    = #0;   {ALT-229}
+{ï¿½}  {230}Trap12    = #0;   {ALT-230}
+{ï¿½}  {231}Trap13    = #0;   {ALT-231}
 
-{ü}  {252}Message   = #5;   {ALT-252}
+{ï¿½}  {252}Message   = #5;   {ALT-252}
 
 
       TotObjects    = 83;
@@ -131,8 +131,8 @@ const
       XTop          = 65;
       YBot          = 2;
       YTop          = 24;
-      YSize         = 23;
-      XSize         = 64;
+      YSize         = 23; // Level Height
+      XSize         = 64; // Level Width
       TMax          = 9;
       GMove         = false;
       PMove         = true;
@@ -207,7 +207,7 @@ var
 
 
 var   DF       : array [1..Bottom] of Field;
-      PF       : array [1..66,1..25] of byte;
+      PF       : array [1..66,1..25] of byte; // 2d array likely used for maps
       FP       : array [1..YSize] of StrXSize;
       BX, BY   : array [1..1300] of byte;
       SX, SY,
@@ -479,11 +479,11 @@ procedure Sign_Off;
   writeln;
   writeln('Other great games available from Scott Miller:');
   writeln;col(15,15);
-  writeln('þ Six more Kroz games!  KINGDOM OF KROZ I, CAVERNS OF KROZ, DUNGEONS OF KROZ,');
+  writeln('ï¿½ Six more Kroz games!  KINGDOM OF KROZ I, CAVERNS OF KROZ, DUNGEONS OF KROZ,');
   writeln('     RETURN TO KROZ, TEMPLE OF KROZ and THE FINAL CRUSADE OF KROZ.');
   writeln('     Each volume is just $7.50, or order all six for $35!');
   writeln;col(15,15);
-  writeln('þ THE LOST ADVENTURES OF KROZ - All-new seventh Kroz game with 75 of the best');
+  writeln('ï¿½ THE LOST ADVENTURES OF KROZ - All-new seventh Kroz game with 75 of the best');
   write  ('     levels yet!  Built-in contest!  New features galore.  ($20)');
   cur(2);col(7,7);
   ClearKeys;
@@ -494,9 +494,9 @@ procedure Shareware(Wait: boolean);
  begin
   bak(1,0);bor(1);clrscr;cur(3);col(15,15);
   gotoxy(22,1);
-  writeln('KINGDOM OF KROZ II Ä HOW TO REGISTER');
+  writeln('KINGDOM OF KROZ II ï¿½ HOW TO REGISTER');
   gotoxy(1,2);
-  for x:=1 to 80 do write('Ä');
+  for x:=1 to 80 do write('ï¿½');
   gotoxy(1,3);
   col(7,7);
   writeln('  This is a shareware game, meaning it''s user-supported.  If you enjoy this');
@@ -505,12 +505,12 @@ procedure Shareware(Wait: boolean);
   writeln('  This registration fee will qualify you to order any of the other Kroz');
   writeln('volumes available:');
   writeln;col(15,7);
-  writeln('  þ Caverns of Kroz   - the first discovery of Kroz');
-  writeln('  þ Dungeons of Kroz  - the dark side of Kroz, fast-paced action');
-  writeln('  þ Kingdom of Kroz I - the national contest winner ("Best Game" in 1988)');
-  writeln('  þ Return to Kroz    - the discovery of entirely new underground chambers');
-  writeln('  þ Temple of Kroz    - the bizarre side of Kroz, nothing is what it seems');
-  writeln('  þ The Final Crusade of Kroz - the surprising finish?');
+  writeln('  ï¿½ Caverns of Kroz   - the first discovery of Kroz');
+  writeln('  ï¿½ Dungeons of Kroz  - the dark side of Kroz, fast-paced action');
+  writeln('  ï¿½ Kingdom of Kroz I - the national contest winner ("Best Game" in 1988)');
+  writeln('  ï¿½ Return to Kroz    - the discovery of entirely new underground chambers');
+  writeln('  ï¿½ Temple of Kroz    - the bizarre side of Kroz, nothing is what it seems');
+  writeln('  ï¿½ The Final Crusade of Kroz - the surprising finish?');
   writeln;col(7,7);
   writeln('Each game is priced $7.50 each, any three for $20, or all six for only $35.');
   writeln('You''ll also get a secret code that makes this game easier to complete,');
@@ -758,89 +758,89 @@ procedure Define_Levels;
 DF[3]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 ' 80       50     1                      30                                                                           '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                                                                                    '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '  9                  ';
 
 DF[5]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '100          30  1        9     2                                                                                    '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                                                                        900         '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '  5                  ';
   
 DF[7]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '         976 20  3  2     9            320     9             20                 9                                    '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                       3  2  2  2  2                                                '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                 9   ';
 
 DF[9]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 ' 50          90  2  2                         25     1200 50                   55                                    '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '        1                 1  1  1  1                                                '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                     ';
 
 DF[11]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '100              2       45                                               8   100  3                                 '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                                                                           100600   '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                     ';
 
 DF[13]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '350          20  2     9 40                                                    20  1                       3         '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '     1                                                                              '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 ' 30                  ';
 
 DF[15]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '                 4                                             300            500 20                                 '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                          2  2  2  2                                                '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                     ';
 
 DF[17]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '                 1                                                                                     15            '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                 1                                                                  '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                     ';
 
 DF[19]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '600          20  1     5 30     5                                              20  5                           700   '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                                                                                    '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                     ';
 
 DF[21]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 ' 40              3                            30                               80                    2               '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                          1  1  1  1                                       800      '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 '                     ';
 
 DF[23]:=
 {  1  2  3  X  W  L  C  S  +  I  T  K  D  #  F  .  R  Q  /  \  B  V  =  A  U  Z  *  E  ;  :  `  -  @  %  ]  G  (  M  )}
 '                 1                                                                                         3         '+
-{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ñ  ò  ó  ô  õ  ö  Y  0  ~  $}
+{  P  &  !  O  H  ?  >  N  <  [  |  "  4  5  6  7  8  9  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  Y  0  ~  $}
 '                          1  1  1  1                                                '+
-{  ‘  ’  “  ”  •  –  —}
+{  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½  ï¿½}
 ' 70 50  9 25  9 18   ';
 
  end; { Define_Levels }
@@ -865,7 +865,13 @@ procedure Convert_Format;
    for XLoop:=1 to XSize do
     begin
     tempstr := copy(FP[YLoop], XLoop, 1);
-    case char(tempstr[1]) of
+
+    // Basic syntax. Whatever is inside of the '' is assigned(:=) the ASCII  character...
+    // after the = signed. 
+    // PF is a 2 dimensional loop that places the character in the screen.
+    
+    case char(tempstr[1]) of // Switch-statement
+    // Takes the first character of tempstr var and converts it into a char if not already
      ' ':PF[XLoop+1,YLoop+1]:=Null;
      '1':begin
           SNum:=SNum+1;SX[SNum]:=XLoop+1;SY[SNum]:=YLoop+1;
@@ -936,46 +942,46 @@ procedure Convert_Format;
      '7':PF[XLoop+1,YLoop+1]:=55;
      '8':PF[XLoop+1,YLoop+1]:=56;
      '9':PF[XLoop+1,YLoop+1]:=57;
-     'ñ':PF[XLoop+1,YLoop+1]:=58;
-     'ò':PF[XLoop+1,YLoop+1]:=59;
-     'ó':PF[XLoop+1,YLoop+1]:=60;
-     'ô':PF[XLoop+1,YLoop+1]:=61;
-     'õ':PF[XLoop+1,YLoop+1]:=62;
-     'ö':PF[XLoop+1,YLoop+1]:=63;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=58;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=59;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=60;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=61;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=62;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=63;
      'Y':PF[XLoop+1,YLoop+1]:=64;
      '0':PF[XLoop+1,YLoop+1]:=65;
      '~':PF[XLoop+1,YLoop+1]:=66;
      '$':PF[XLoop+1,YLoop+1]:=67;
-     '‘':PF[XLoop+1,YLoop+1]:=68;
-     '’':PF[XLoop+1,YLoop+1]:=69;
-     '“':PF[XLoop+1,YLoop+1]:=70;
-     '”':PF[XLoop+1,YLoop+1]:=71;
-     '•':PF[XLoop+1,YLoop+1]:=72;
-     '–':PF[XLoop+1,YLoop+1]:=73;
-     '—':PF[XLoop+1,YLoop+1]:=74;
-     '³':PF[XLoop+1,YLoop+1]:=75;
-     '¹':PF[XLoop+1,YLoop+1]:=76;
-     'º':PF[XLoop+1,YLoop+1]:=77;
-     '»':PF[XLoop+1,YLoop+1]:=78;
-     '¼':PF[XLoop+1,YLoop+1]:=79;
-     '½':PF[XLoop+1,YLoop+1]:=80;
-     'ƒ':PF[XLoop+1,YLoop+1]:=81;
-     '´':PF[XLoop+1,YLoop+1]:=180;
-     'µ':PF[XLoop+1,YLoop+1]:=181;
-     '¶':PF[XLoop+1,YLoop+1]:=182;
-     '·':PF[XLoop+1,YLoop+1]:=183;
-     '¸':PF[XLoop+1,YLoop+1]:=184;
-     'à':PF[XLoop+1,YLoop+1]:=224;
-     'á':PF[XLoop+1,YLoop+1]:=225;
-     'â':PF[XLoop+1,YLoop+1]:=226;
-     'ã':PF[XLoop+1,YLoop+1]:=227;
-     'ä':PF[XLoop+1,YLoop+1]:=228;
-     'å':PF[XLoop+1,YLoop+1]:=229;
-     'æ':PF[XLoop+1,YLoop+1]:=230;
-     'ç':PF[XLoop+1,YLoop+1]:=231;
-     '¯':PF[XLoop+1,YLoop+1]:=82;
-     '®':PF[XLoop+1,YLoop+1]:=83;
-     'ü':PF[XLoop+1,YLoop+1]:=252
+     'ï¿½':PF[XLoop+1,YLoop+1]:=68;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=69;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=70;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=71;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=72;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=73;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=74;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=75;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=76;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=77;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=78;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=79;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=80;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=81;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=180;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=181;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=182;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=183;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=184;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=224;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=225;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=226;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=227;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=228;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=229;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=230;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=231;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=82;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=83;
+     'ï¿½':PF[XLoop+1,YLoop+1]:=252
      else
       begin
        tempstr := copy(FP[YLoop], XLoop, 1);
@@ -1145,7 +1151,7 @@ procedure End_Routine;
   gotoxy(25,2);
   writeln('BACK AT YOUR HUT');
   gotoxy(25,3);
-  writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
+  writeln('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
   writeln;
   col(15,7);
   { 15 writeln's available for text }

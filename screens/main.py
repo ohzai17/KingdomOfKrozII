@@ -22,9 +22,9 @@ def main():
     if player_level is None:
         return  # Exit if user quits
     
-    infoFunc = game_info.info_screen1() # General info, displayes after choosing the difficulty
+    infoFunc = game_info.info_screen1(color) # General info, displayes after choosing the difficulty
 
-    choice = load_level.load()
+    choice = load_level.load(color)
     if choice == "b":
         pgame.game()
     elif choice == "i":

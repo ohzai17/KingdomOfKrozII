@@ -2,7 +2,7 @@ import pygame
 import random
 from gen_functions import *
 
-def info_screen1():
+def info_screen1(color):
     # Initialize Pygame
     pygame.init()
 
@@ -11,13 +11,32 @@ def info_screen1():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Kingdom of Kroz II")
 
+    if color == "M": # change to grayscale
+        RED = (128, 128, 128)
+        GREEN = (128, 128, 128)
+        BLUE = (128, 128, 128)
+        YELLOW = (255, 255, 255)
+        WHITE = (255, 255, 255)
+        WHITE2 = (0, 0, 0)
+        BROWN = (128, 128, 128)
+        OLD_BLUE = (0, 0, 0)
+        
+    else:
+        RED = (144, 13, 13)
+        GREEN = (0, 255, 0)
+        BLUE = (0, 0, 255)
+        YELLOW = (255, 255, 0)
+        WHITE = (255, 255, 255)
+        WHITE2 = (255, 255, 255)
+        BROWN = (139, 69, 19) 
+        OLD_BLUE = (44, 0, 180)
+    
     # Colors to cycle through
     colors = [ RED,
               GREEN,
               BLUE,
               YELLOW,
               ORANGE,
-              PINK,
               BROWN
     ]
 
@@ -38,7 +57,7 @@ def info_screen1():
         "check in the amount of $7.50 to Apogee Software.",
         "  This registration fee will qualify you to order any of the other Kroz",
         "volumes available:"
-    ]
+   ]
 
     # Kroz volumes list
     kroz_volumes = [
@@ -76,7 +95,7 @@ def info_screen1():
     ]
 
     # Flashing prompt render
-    prompt_text = text_font.render("Press any key to continue", True, WHITE)
+    prompt_text = text_font.render("Press any key to continue", True, WHITE2)
 
     # Get title rectangle and center it
     title_rect = title.get_rect(center=(WIDTH // 2, 15))

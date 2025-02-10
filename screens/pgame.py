@@ -21,7 +21,7 @@ def game():
     player_speed = 50
 
     # Load player image
-    player_image = pygame.image.load('screens/player.png')
+    player_image = pygame.image.load('screens/assets/player.png')
     player_image = pygame.transform.scale(player_image, (player_size, player_size))
 
     # Enemy settings
