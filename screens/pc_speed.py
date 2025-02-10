@@ -3,18 +3,15 @@ from functions import *
 
 # From KINGDOM4.INC (line 87)
 
-def choose_pc_speed(color_mode): 
-    pygame.init()
+def choose_pc_speed(screen, color_mode): 
 
-    # Screen setup
-    WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Kingdom of Kroz II")
+    # Use the dimensions of the passed screen
+    WIDTH, HEIGHT = screen.get_size()
 
     # Fonts
-    title_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 16)
-    heading_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 10)
-    subtext_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 9)
+    title_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 16)
+    heading_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
+    subtext_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 9)
 
     title_color = BLACK if color_mode == "M" else BLUE
 
@@ -76,5 +73,4 @@ def choose_pc_speed(color_mode):
                         case pygame.K_f:
                             user_input = "F"
                             running = False
-    pygame.quit()
     return user_input

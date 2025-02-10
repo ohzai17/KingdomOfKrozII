@@ -3,23 +3,20 @@ from functions import *
 
 # From KINGDOM3.INC (line 86)
 
-def choose_difficulty(color_mode): 
-    pygame.init()
+def choose_difficulty(screen, color_mode): 
     
-    # Screen setup
-    WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Kingdom of Kroz II")
+    # Use the dimensions of the passed screen
+    WIDTH, HEIGHT = screen.get_size()
 
     # Player icon setup
-    player_icon = pygame.image.load("assets/player_icon.png")
+    player_icon = pygame.image.load("screens/assets/player_icon.png")
     player_icon = pygame.transform.scale(player_icon, (20, 20))
 
     # Fonts
-    title_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 16)
-    heading_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 10)
-    subtext_font  = pygame.font.Font("assets/PressStart2P - Regular.ttf", 10)
-    footer_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 10)
+    title_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 16)
+    heading_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
+    subtext_font  = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
+    footer_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
 
     player_icon = apply_grayscale(player_icon) if color_mode == "M" else player_icon
 
@@ -174,5 +171,4 @@ def choose_difficulty(color_mode):
                     else:
                         pygame.quit()
                         return None
-    pygame.quit()
     return user_input

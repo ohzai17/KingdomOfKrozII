@@ -3,17 +3,14 @@ from functions import *
 
 # From KINGDOM4.INC (line 66)
 
-def choose_color_mode():
-    pygame.init()
+def choose_color_mode(screen):
     
-    # Screen setup
-    WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Kingdom of Kroz II")
+    # Use the dimensions of the passed screen
+    WIDTH, HEIGHT = screen.get_size()
 
     # Fonts
-    title_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 16)
-    heading_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 10)
+    title_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 16)
+    heading_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
 
     # Text rendering 
     title_text = title_font.render("KINGDOM OF KROZ II", True, BLUE)
@@ -64,5 +61,4 @@ def choose_color_mode():
                         case pygame.K_m:
                             user_input = "M"
                             running = False
-    pygame.quit()
     return user_input

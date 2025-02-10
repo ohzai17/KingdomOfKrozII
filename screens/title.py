@@ -3,24 +3,21 @@ from functions import *
 
 # From KINGDOM3.INC (line 64)
 
-def title(color_mode): 
-    pygame.init()
+def title(screen, color_mode): 
 
-    # Screen setup
-    WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Kingdom of Kroz II")
+    # Use the dimensions of the passed screen
+    WIDTH, HEIGHT = screen.get_size()
 
     # Logo setup
-    logo = pygame.image.load("assets/kroz_logo.png").convert_alpha()
+    logo = pygame.image.load("screens/assets/kroz_logo.png").convert_alpha()
     logo_width = 700
     aspect_ratio = logo.get_height() / logo.get_width()
     height = int(logo_width * aspect_ratio)
     logo = pygame.transform.scale(logo, (logo_width, height)) # Algorithm to keep aspect ratio
 
     # Fonts
-    title_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 12)
-    text_font = pygame.font.Font("assets/PressStart2P - Regular.ttf", 10)
+    title_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 12)
+    text_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
 
     if color_mode == "M":
         subtext_color = WHITE
@@ -72,5 +69,4 @@ def title(color_mode):
                     running = False
                 case pygame.KEYDOWN:
                     running = False
-
-    pygame.quit()
+                    
