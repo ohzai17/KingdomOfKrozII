@@ -15,7 +15,7 @@ def info_screen1(screen, color):
         WHITE2 = (0, 0, 0)
         BROWN = (128, 128, 128)
         OLD_BLUE = (0, 0, 0)
-        ORANGE = (128, 128, 128)  # Substitute gray for orange in monochrome
+        ORANGE = (128, 128, 128)
         GRAY = (169, 169, 169)
     else:
         RED = (144, 13, 13)
