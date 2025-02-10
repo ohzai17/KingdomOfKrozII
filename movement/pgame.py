@@ -20,16 +20,20 @@ player_x, player_y = WIDTH // 2, HEIGHT // 2
 player_speed = 50
 
 # Load player image
-player_image = pygame.image.load('KingdomOfKrozII/movement/player.png')
+player_image = pygame.image.load('movement/player.png')
 player_image = pygame.transform.scale(player_image, (player_size, player_size))
 
 # Enemy settings
 enemy_size = 20
-enemy_speed = 2
+enemy_speed = 1
+
+# load enemy image
+enemy_image = pygame.image.load('levels/tiles/enemy1.png')
+enemy_image = pygame.transform.scale(enemy_image, (enemy_size, enemy_size))
 
 # Create a list of enemies
 enemies = []
-for _ in range(1):  # Spawn 5 enemies
+for _ in range(12):  # Spawn 5 enemies
     enemy_x = random.randint(0, WIDTH)
     enemy_y = random.randint(0, HEIGHT)
     enemies.append([enemy_x, enemy_y])
@@ -80,7 +84,7 @@ while running:
         enemy_y += dy * enemy_speed
 
         # Draw enemy
-        pygame.draw.rect(screen, RED, (enemy_x, enemy_y, enemy_size, enemy_size))
+        screen.blit(enemy_image, (enemy_x, enemy_y))
 
         # Update enemy position in the list
         enemy[0], enemy[1] = enemy_x, enemy_y
