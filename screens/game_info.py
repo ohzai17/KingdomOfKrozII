@@ -1,6 +1,6 @@
 import pygame
 import random
-from gen_functions import *
+from functions import *
 
 def info_screen1(screen, color):
     # Use the provided screen

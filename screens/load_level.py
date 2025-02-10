@@ -1,6 +1,6 @@
 import pygame
-import color
-from gen_functions import *
+import color_mode
+from functions import *
 
 def load(screen, color):
     # Use the existing main window
