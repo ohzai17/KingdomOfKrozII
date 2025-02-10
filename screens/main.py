@@ -30,6 +30,7 @@ def main():
 
     # Step 4: Choose Difficulty
     difficulty_level = difficulty.choose_difficulty(screen, color)  
+    print(difficulty_level)
     if difficulty_level is None:
         return  
 
