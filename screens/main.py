@@ -15,16 +15,20 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Kingdom of Kroz II")
 
+    # Step 1: Choose Color Mode
     color = color_mode.choose_color_mode(screen)
     if color is None:
         return  
 
+    # Step 2: Choose PC Speed
     speed = pc_speed.choose_pc_speed(screen, color)
     if speed is None:
         return  
 
+    # Step 3: Display Title
     title.title(screen, color)  
 
+    # Step 4: Choose Difficulty
     difficulty_level = difficulty.choose_difficulty(screen, color)  
     if difficulty_level is None:
         return  
