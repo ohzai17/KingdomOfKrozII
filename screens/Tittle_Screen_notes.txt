@@ -30,11 +30,18 @@ it is always paired with the "end" keyword.
 
 11) clrscr: Clears the screen to a blank canvas afte a certain event.
 
-12) repeat and untilL: Essentially a 'do{} while()' loop. This is what makes the big "KROZ" word change colors
+12) Cur(User-define Function): Cursor style is chosen based on the value of the Num parameter (1, 2, or 3) and the Color variable
 
-************ Side note: How functions are created in Pascal ************
+13) repeat and untilL: Essentially a 'do{} while()' loop. This is what makes the big "KROZ" word change colors
+
+************ Side notes: How functions are created in Pascal ************
 - To create a function in Pascal, use the syntax: function FunctionName(Parameter1: Type1; Parameter2: Type2; ...): ReturnType; followed by a begin block containing the function logic, and ending with end;
 ReturnType; followed by a begin block containing the function logic, and ending with end;
+
+- Turbo pascal is NOT case-sensitive...
+for example; procedures are defined with first letter as uppercased then they are called with all lower case.
+
+- Col function in Pascal only takes values 0-15, those were the only available colors at the time
 
 INPUTS:
 - When incorrect mouse/keyboard inputs are giving the game will produce a disturbing sound
