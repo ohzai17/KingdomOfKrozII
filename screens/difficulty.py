@@ -43,9 +43,11 @@ def information_screen(screen, color_mode):
         INSTRUCTIONS_COLOR = (0, 255, 0)
 
     # Font setup
-    title_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 12)
-    text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 12)
-    info_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)
+    tf = WIDTH // 67
+    inf = WIDTH // 80
+    title_font = pygame.font.Font("screens/assets/PressStart2P.ttf", tf)
+    text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", tf)
+    info_font = pygame.font.Font("screens/assets/PressStart2P.ttf", inf)
     
     subheading1 = text_font.render("An Apogee Software Production", True, (255, 255, 255))
     subheading2 = text_font.render("Created by Scott Miller", True, (255, 255, 255))
