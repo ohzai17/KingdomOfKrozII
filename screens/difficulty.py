@@ -1,8 +1,3 @@
-# Missing features:
-# - orange blinking cursor
-# - color cycling for title
-# - blue highlight on N, E, A
-
 import pygame
 
 def wrap_text(text, font, max_width):
@@ -25,12 +20,9 @@ def wrap_text(text, font, max_width):
     
     return lines
 
-def information_screen(color_mode):
-    pygame.init()
-    
-    WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Kingdom of Kroz II")
+def information_screen(screen, color_mode):
+    # Use the provided screen (do not call pygame.init() or create a new window)
+    WIDTH, HEIGHT = screen.get_size()
 
     # Colors based on color mode
     if color_mode == "M":
@@ -38,19 +30,19 @@ def information_screen(color_mode):
         RECT_COLOR = (169, 169, 169)  # Gray rectangle
         TITLE_FLASH_COLOR = (0, 0, 0)  # Flashing title text in black
         TEXT_COLOR = (169, 169, 169)  # General text in gray
-        LEVEL_PROMPT_COLOR = (169, 169, 169)  # "Are you a novice..." in gray
-        DIFFICULTY_FLASH_COLOR = (169, 169, 169)  # Flashing difficulty in white
-        INSTRUCTIONS_COLOR = (169, 169, 169)  # Instructions in gray
+        LEVEL_PROMPT_COLOR = (169, 169, 169)
+        DIFFICULTY_FLASH_COLOR = (169, 169, 169)
+        INSTRUCTIONS_COLOR = (169, 169, 169)
     else:
         BG_COLOR = (8, 4, 180)  # Background remains blue
         RECT_COLOR = (188, 4, 4)  # Red rectangle
         TITLE_FLASH_COLOR = (255, 255, 255)  # Flashing title in cycling colors
         TEXT_COLOR = (0, 255, 255)  # Cyan text
-        LEVEL_PROMPT_COLOR = (255, 255, 0)  # "Are you a novice..." in gray
-        DIFFICULTY_FLASH_COLOR = (255, 255, 0)  # Flashing difficulty in white
-        INSTRUCTIONS_COLOR = (0, 255, 0)  # Instructions in gray
+        LEVEL_PROMPT_COLOR = (255, 255, 0)
+        DIFFICULTY_FLASH_COLOR = (255, 255, 0)
+        INSTRUCTIONS_COLOR = (0, 255, 0)
 
-
+    # Font setup
     title_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 12)
     text_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 12)
     info_font = pygame.font.Font("screens/assets/PressStart2P.ttf", 10)
@@ -58,7 +50,12 @@ def information_screen(color_mode):
     subheading1 = text_font.render("An Apogee Software Production", True, (255, 255, 255))
     subheading2 = text_font.render("Created by Scott Miller", True, (255, 255, 255))
     
-    description_text = "Kingdom of Kroz is a game of adventure, exploration and survival. You are a fearless archaeologist in search of the Magical Amulet, hidden somewhere deep in the vast and dangerous underground kingdom. You enter the kingdom through a secret tunnel and ignite your brass lantern. Your only protection is a worn leather whip and your ingenuity. Sweat beading on your forehead, you embark on a journey that may be your last..."
+    description_text = ("Kingdom of Kroz is a game of adventure, exploration and survival. "
+                        "You are a fearless archaeologist in search of the Magical Amulet, hidden "
+                        "somewhere deep in the vast and dangerous underground kingdom. You enter the "
+                        "kingdom through a secret tunnel and ignite your brass lantern. Your only protection "
+                        "is a worn leather whip and your ingenuity. Sweat beading on your forehead, you embark "
+                        "on a journey that may be your last...")
     instructions_lines = [
         "Use the cursor keys to move yourself through the kingdom.",
         "Use your whip (press W) to destroy all nearby creatures.",
@@ -71,6 +68,7 @@ def information_screen(color_mode):
     max_width = WIDTH - 40
     description_lines = wrap_text(description_text, info_font, max_width)
     
+    # Set up timers for blinking cursor and flashing text
     cursor_timer = pygame.USEREVENT + 1
     pygame.time.set_timer(cursor_timer, 150)
     cursor_visible = True
@@ -84,6 +82,7 @@ def information_screen(color_mode):
     running = True
     player_input = ''
     difficulty_text = ""
+    clock = pygame.time.Clock()
     
     while running:
         screen.fill(BG_COLOR)
@@ -119,8 +118,7 @@ def information_screen(color_mode):
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                return None
+                return None  # Let main handle quitting
             elif event.type == cursor_timer:
                 cursor_visible = not cursor_visible
             elif event.type == flash_timer:
@@ -139,6 +137,7 @@ def information_screen(color_mode):
                         difficulty_text = "ADVANCED"
                 else:
                     running = False
+        clock.tick(60)
     
-    pygame.quit()
+    # Do not call pygame.quit() here; main will handle quitting.
     return player_input

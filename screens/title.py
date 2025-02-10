@@ -1,23 +1,16 @@
 import pygame
 
-def title(color_mode):
-    # Initialize Pygame
-    pygame.init()
-
-    # Screen dimensions
-    WIDTH, HEIGHT = 800, 600
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Kingdom of Kroz II")
+def title(screen, color_mode):
+    # Use the provided main window
+    WIDTH, HEIGHT = screen.get_size()
 
     # Load the Kroz logo with transparency
     logo = pygame.image.load("screens/assets/kroz_logo.png").convert_alpha()
 
-    # Resize the logo before applying color change (to desired width and height)
-    desired_width = 700  # Set your desired width here
+    # Resize the logo to desired dimensions (maintaining aspect ratio)
+    desired_width = 700
     aspect_ratio = logo.get_height() / logo.get_width()
     desired_height = int(desired_width * aspect_ratio)
-
-    # Resize the logo to keep the aspect ratio
     logo = pygame.transform.scale(logo, (desired_width, desired_height))
 
     # Colors to cycle through (only used in color mode)
@@ -34,7 +27,7 @@ def title(color_mode):
 
     time_elapsed = 0
 
-    # Function to apply a static bright grayscale filter to the image
+    # Function to apply a bright grayscale filter
     def apply_grayscale(image):
         grayscale_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
         for x in range(image.get_width()):
@@ -45,7 +38,7 @@ def title(color_mode):
                 grayscale_image.set_at((x, y), (gray, gray, gray, a))
         return grayscale_image
 
-    # Function to change the color of the image by cycling through the colors
+    # Function to change the color of the image by cycling through colors
     def change_color(image, time):
         if color_mode == "M":
             return apply_grayscale(image)
@@ -71,7 +64,7 @@ def title(color_mode):
     text_yellow_3 = "User-Supported Software -- $7.50 Registration Fee Required"
     text_cyan = "Press any key to continue."
 
-    # Adjust text color based on mode
+    # Adjust text colors based on mode
     if color_mode == "M":
         yellow_color = (255, 255, 255)
         cyan_color = (255, 255, 255)
@@ -79,21 +72,20 @@ def title(color_mode):
         yellow_color = (255, 255, 0)
         cyan_color = (0, 255, 255)
 
-    # Render the text surfaces
+    # Render text surfaces
     text_white_surface = font_white.render(text_white, True, (255, 255, 255))
     text_yellow_1_surface = font_yellow.render(text_yellow_1, True, yellow_color)
     text_yellow_2_surface = font_yellow.render(text_yellow_2, True, yellow_color)
     text_yellow_3_surface = font_yellow.render(text_yellow_3, True, yellow_color)
     text_cyan_surface = font_cyan.render(text_cyan, True, cyan_color)
 
-    # Main loop
     running = True
     while running:
         screen.fill((0, 0, 0))
         time_elapsed += 1
         colorized_logo = change_color(logo, time_elapsed)
 
-        # Get logo position
+        # Get logo position and draw it
         logo_rect = colorized_logo.get_rect(center=(WIDTH // 2, HEIGHT // 3 + 40))
         screen.blit(colorized_logo, logo_rect)
 
@@ -111,11 +103,9 @@ def title(color_mode):
 
         pygame.display.flip()
 
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
                 running = False
-
-    pygame.quit()
+    # Do not call pygame.quit() here; the main program will handle quitting.

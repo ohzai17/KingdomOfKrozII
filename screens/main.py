@@ -1,32 +1,48 @@
+import pygame
 import color
 import speed
 import title
-import difficulty  # Import your information_screen function
+import difficulty
 import game_info
 import ending_credits
 import load_level
-import pgame
 
 def main():
-    colorFunc = color.choose_color_mode()
-    if color is None:
-        return  # Exit if user quits
+    pygame.init()
 
-    speedFunc = speed.choose_pc_speed()
-    if speed is None:
-        return  # Exit if user quits
+    # Create a single window that will be shared across modules
+    WIDTH, HEIGHT = 800, 600
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("Kingdom of Kroz II")
 
-    title.title(color)  # Pass color mode to the title screen
+    # Step 1: Choose Color Mode (using the single window)
+    color_choice = color.choose_color_mode(screen)
+    if color_choice is None:
+        pygame.quit()
+        return
 
-    player_level = difficulty.information_screen(color)  # Call the function and store the result
+    # Step 2: Choose PC Speed
+    speed_choice = speed.choose_pc_speed(screen)
+    if speed_choice is None:
+        pygame.quit()
+        return
+
+    # Step 3: Display Title
+    title.title(screen, color_choice)
+
+    # Step 4: Choose Difficulty
+    player_level = difficulty.information_screen(screen, color_choice)
     if player_level is None:
-        return  # Exit if user quits
-    
-    infoFunc = game_info.info_screen1(color) # General info, displayes after choosing the difficulty
+        pygame.quit()
+        return
 
-    choice = load_level.load(color)
+    # Step 5: Display Game Info
+    game_info.info_screen1(screen, color_choice)
+
+    # Step 6: Load Level
+    choice = load_level.load(screen, color_choice)
     if choice == "b":
-        pgame.game()
+        print("Start Game!!")
     elif choice == "i":
         print("Instructions")
     elif choice == "m":
@@ -36,7 +52,10 @@ def main():
     elif choice == "a":
         print("Author")
 
-    endingFunc = ending_credits.ending_creds() # ENDING CREDITS, this function is placed here temporarily
-    
+    # Step 7: Show Ending Credits
+    ending_credits.ending_creds(screen)
+
+    pygame.quit()
+
 if __name__ == "__main__":
     main()
