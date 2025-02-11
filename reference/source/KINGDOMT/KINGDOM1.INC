@@ -29,7 +29,9 @@ interface
 
 uses Turbo3, CRT, DOS;
 
-const // This '#' follow by a number(decimal) represents the ASCII equivalent of that number.
+const // Declaring constants
+
+// This '#' follow by a number(decimal) represents the ASCII equivalent of that number.
 
      {0}  Null      = 0;
 {X}  {4}  Block     = #178;  
@@ -449,7 +451,7 @@ procedure Static;
     1:begin nosound;delay(random(30)); end;
    end; nosound;
  end; { Static }
-
+ 
 procedure Col(Num1,Num2:byte);
  begin if Color then textcolor(Num1) else textcolor(Num2) end;
 

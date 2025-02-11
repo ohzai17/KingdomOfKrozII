@@ -45,3 +45,13 @@ for example; procedures are defined with first letter as uppercased then they ar
 
 INPUTS:
 - When incorrect mouse/keyboard inputs are giving the game will produce a disturbing sound
+
+************ Every title/menu screen from Kingdom of Kroz II. Pascal/Python name ************
+1. Sign_Off / ending_credits (k1.INC)
+2. Shareware / game_info (k1.INC)
+3. Title / title (k3.INC)
+4. Title / difficulty (k3.INC) *Still in Title function* 
+5. if startgame == true display load_level (k3.INC) *not a function in Pascal code, displays load_level after game_info*
+6. load_level takes up half the code in K3 because it contains the other screens within
+
+These are all the title screens

@@ -120,7 +120,7 @@ def info_screen1(screen, color):
         
         pygame.draw.rect(screen, rand_color, (0, 580, WIDTH, 200))
 
-        if (pygame.time.get_ticks() // 500) % 2 == 0:
+        if (pygame.time.get_ticks() // 20) % 2 == 0:
             screen.blit(prompt_text, (WIDTH // 2 - 120, HEIGHT - 15))
 
         pygame.display.flip()
@@ -132,5 +132,5 @@ def info_screen1(screen, color):
                 running = False
 
         clock.tick(60)
-    
+
     # Do not call pygame.quit() here; main will handle quitting.
