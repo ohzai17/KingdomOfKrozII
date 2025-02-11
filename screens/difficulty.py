@@ -169,6 +169,5 @@ def choose_difficulty(screen, color_mode):
                                 difficulty_text = "SECRET MODE"
                                 difficulty = 9
                     else:
-                        pygame.quit()
-                        return None
+                        return difficulty
     return user_input
