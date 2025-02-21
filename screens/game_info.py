@@ -1,6 +1,6 @@
 import pygame
 import random
-from functions import *
+from game_functions import *
 
 def info_screen1(screen, color):
     # Use the provided screen
@@ -34,10 +34,12 @@ def info_screen1(screen, color):
     rand_color = random.choice(colors)
 
     # Font setup
-    title_font = pygame.font.Font("screens/assets/RobotoMono-Regular.ttf", 20)
-    text_font = pygame.font.Font("screens/assets/PressStart2P-Regular.ttf", 10)
+    pygame.font.init()
+    title_font = pygame.font.Font("assets/RobotoMono-Regular.ttf", 20)
+    text_font = pygame.font.Font("assets/PressStart2P-Regular.ttf", 10)
 
     title = title_font.render("KINGDOM OF KROZ II - HOW TO REGISTER", True, WHITE)
+    prompt_text = text_font.render("Press any key to continue", True, WHITE2)
    
     paragraph_text1 = [
         "  This is not a shareware game, but it is user-supported. If you enjoy this",
@@ -78,7 +80,6 @@ def info_screen1(screen, color):
         "Garland, TX 75045   (USA)"
     ]
 
-    prompt_text = text_font.render("Press any key to continue", True, WHITE2)
     title_rect = title.get_rect(center=(WIDTH // 2, 15))
 
     running = True
@@ -120,8 +121,7 @@ def info_screen1(screen, color):
         
         pygame.draw.rect(screen, rand_color, (0, 580, WIDTH, 200))
 
-        if (pygame.time.get_ticks() // 20) % 2 == 0:
-            screen.blit(prompt_text, (WIDTH // 2 - 120, HEIGHT - 15))
+        flash(screen, prompt_text, WIDTH, HEIGHT)
 
         pygame.display.flip()
 
@@ -132,4 +132,5 @@ def info_screen1(screen, color):
                 running = False
 
         clock.tick(60)
-    # Do not call pygame.quit() here; main will handle quitting.
+
+    
