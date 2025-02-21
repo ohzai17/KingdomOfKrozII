@@ -9,8 +9,8 @@ def choose_color_mode(screen):
     WIDTH, HEIGHT = screen.get_size()
 
     # Fonts
-    title_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 16)
-    heading_font = pygame.font.Font("screens/assets/PressStart2P - Regular.ttf", 10)
+    title_font = pygame.font.Font("Arch Spike/screens/assets/PressStart2P - Regular.ttf", 16)
+    heading_font = pygame.font.Font("Arch Spike/screens/assets/screens/assets/PressStart2P - Regular.ttf", 10)
 
     # Text rendering 
     title_text = title_font.render("KINGDOM OF KROZ II", True, BLUE)
