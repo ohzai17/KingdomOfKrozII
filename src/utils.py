@@ -89,10 +89,21 @@ def change_title_color(time, color_user_input):
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
 
-# Loading extra icons that are not in levels.gameplay
+# Load Tiles, loading extra icons that are not in levels.gameplay
+enemy3   = pygame.image.load("/KingdomOfKrozII/assets/enemy3.png")
+keys     = pygame.image.load("/KingdomOfKrozII/assets/keys.png")
+power    = pygame.image.load("/KingdomOfKrozII/assets/power.png")
+clues    = pygame.image.load("/KingdomOfKrozII/assets/clues.png")
+surprise = pygame.image.load("/KingdomOfKrozII/assets/surprise.png")
+# Scale tiles
+enemy3   = pygame.transform.scale(enemy3, (15, 15))
+keys     = pygame.transform.scale(keys, (15, 15))
+power    = pygame.transform.scale(power, (15, 15))
+clues    = pygame.transform.scale(clues, (15, 15))
+surprise = pygame.transform.scale(surprise, (15, 15))
 
 def display_icons(screen):
-    icons = [player, enemy1, enemy2, wall, gem, whip, teleport, chest, wall, wall, wall, wall, stairs]
+    icons = [player, enemy1, enemy2, enemy3, gem, whip, teleport, chest, keys, power, clues, surprise, stairs]
     blit_y = 163
     for i, icon in enumerate(icons):
         icon = pygame.transform.scale(icon, (15, 15))
