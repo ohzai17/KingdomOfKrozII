@@ -1,15 +1,17 @@
 import pygame
+from levels.gameplay import *
 
 # Colors used in the game
-
 BLACK = (0, 0, 0)
 BLUE = (8,4,180)
 DARK_BLUE = (3, 3, 178)
+OLD_BLUE = (44, 0, 180)
 GREEN = (0, 128, 0)
 AQUA = (0, 242, 250)
 RED = (255, 0, 0)
 PURPLE = (128, 0, 128)
 ORANGE = (255, 66, 77)
+BROWN  = (139, 69, 19)
 YELLOW = (254, 254, 6)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
@@ -20,14 +22,18 @@ LIGHT_RED = (255, 182, 193)
 LIGHT_PURPLE = (221, 160, 221)
 LIGHT_YELLOW = (255, 255, 224)
 
+clock = pygame.time.Clock() # Used in flash, returns the number of milliseconds since pygame.init()
+
+square_size = 8 # Used for square bullets
+
 logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, LIGHT_BLUE, LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
-
+rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 def load_font(size):
-    return pygame.font.Font("assets/PressStart2P - Regular.ttf", size)
+    return pygame.font.Font("/KingdomOfKrozII/assets/PressStart2P - Regular.ttf", size)
 
 def load_fonts(sizes):
-    return [pygame.font.Font("assets/PressStart2P - Regular.ttf", size) for size in sizes]
+    return [pygame.font.Font("/KingdomOfKrozII/assets/PressStart2P - Regular.ttf", size) for size in sizes]
 
 def render_text(font, text, color):
     return font.render(text, True, color)
@@ -82,3 +88,16 @@ def change_title_color(time, color_user_input):
     else:
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
+
+# Loading extra icons that are not in levels.gameplay
+
+def display_icons(screen):
+    icons = [player, enemy1, enemy2, wall, gem, whip, teleport, chest, wall, wall, wall, wall, stairs]
+    blit_y = 163
+    for i, icon in enumerate(icons):
+        icon = pygame.transform.scale(icon, (15, 15))
+        screen.blit(icon, (40, blit_y + (i * 23)))
+
+def flash(screen, text, WIDTH, HEIGHT):
+    if (pygame.time.get_ticks() // 80) % 2 == 0:
+        screen.blit(text, (WIDTH // 2 - 120, HEIGHT - 15))

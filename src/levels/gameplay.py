@@ -1,37 +1,37 @@
 import pygame
 import random
 
+# Define tile dimensions
+TILE_WIDTH = 13
+TILE_HEIGHT = 13
+
+# Load tiles
+block    = pygame.image.load("/KingdomOfKrozII/assets/block.png")
+chest    = pygame.image.load("/KingdomOfKrozII/assets/chest.png")
+enemy1   = pygame.image.load("/KingdomOfKrozII/assets/enemy1.png")
+enemy2   = pygame.image.load("/KingdomOfKrozII/assets/enemy2.png")
+gem      = pygame.image.load("/KingdomOfKrozII/assets/gem.png")
+player   = pygame.image.load("/KingdomOfKrozII/assets/player.png")
+stairs   = pygame.image.load("/KingdomOfKrozII/assets/stairs.png")
+teleport = pygame.image.load("/KingdomOfKrozII/assets/teleport.png")
+trap     = pygame.image.load("/KingdomOfKrozII/assets/trap.png")
+wall     = pygame.image.load("/KingdomOfKrozII/assets/wall.png")
+whip     = pygame.image.load("/KingdomOfKrozII/assets/whip.png")
+
+# Scale tiles
+block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
+chest    = pygame.transform.scale(chest,    (TILE_WIDTH, TILE_HEIGHT))
+enemy1   = pygame.transform.scale(enemy1,   (TILE_WIDTH, TILE_HEIGHT))
+enemy2   = pygame.transform.scale(enemy2,   (TILE_WIDTH, TILE_HEIGHT))
+gem      = pygame.transform.scale(gem,      (TILE_WIDTH, TILE_HEIGHT))
+player   = pygame.transform.scale(player,   (TILE_WIDTH, TILE_HEIGHT))
+stairs   = pygame.transform.scale(stairs,   (TILE_WIDTH, TILE_HEIGHT))
+teleport = pygame.transform.scale(teleport, (TILE_WIDTH, TILE_HEIGHT))
+trap     = pygame.transform.scale(trap,     (TILE_WIDTH, TILE_HEIGHT))
+wall     = pygame.transform.scale(wall,     (TILE_WIDTH, TILE_HEIGHT))
+whip     = pygame.transform.scale(whip,     (TILE_WIDTH, TILE_HEIGHT))
+
 def level (screen):
-
-    # Define tile dimensions
-    TILE_WIDTH = 13
-    TILE_HEIGHT = 13
-
-    # Load tiles
-    block    = pygame.image.load("assets/block.png")
-    chest    = pygame.image.load("assets/chest.png")
-    enemy1   = pygame.image.load("assets/enemy1.png")
-    enemy2   = pygame.image.load("assets/enemy2.png")
-    gem      = pygame.image.load("assets/gem.png")
-    player   = pygame.image.load("assets/player.png")
-    stairs   = pygame.image.load("assets/stairs.png")
-    teleport = pygame.image.load("assets/teleport.png")
-    trap     = pygame.image.load("assets/trap.png")
-    wall     = pygame.image.load("assets/wall.png")
-    whip     = pygame.image.load("assets/whip.png")
-
-    # Scale tiles
-    block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
-    chest    = pygame.transform.scale(chest,    (TILE_WIDTH, TILE_HEIGHT))
-    enemy1   = pygame.transform.scale(enemy1,   (TILE_WIDTH, TILE_HEIGHT))
-    enemy2   = pygame.transform.scale(enemy2,   (TILE_WIDTH, TILE_HEIGHT))
-    gem      = pygame.transform.scale(gem,      (TILE_WIDTH, TILE_HEIGHT))
-    player   = pygame.transform.scale(player,   (TILE_WIDTH, TILE_HEIGHT))
-    stairs   = pygame.transform.scale(stairs,   (TILE_WIDTH, TILE_HEIGHT))
-    teleport = pygame.transform.scale(teleport, (TILE_WIDTH, TILE_HEIGHT))
-    trap     = pygame.transform.scale(trap,     (TILE_WIDTH, TILE_HEIGHT))
-    wall     = pygame.transform.scale(wall,     (TILE_WIDTH, TILE_HEIGHT))
-    whip     = pygame.transform.scale(whip,     (TILE_WIDTH, TILE_HEIGHT))
 
     # Level map as a list of strings
     level_map = [
