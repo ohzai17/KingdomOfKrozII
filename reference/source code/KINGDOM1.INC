@@ -468,7 +468,7 @@ procedure Bor(Num:byte);
     end;
  end;
 
-procedure Sign_Off;
+procedure Sign_Off; 
  begin
   Shareware(false);
   ClearKeys;

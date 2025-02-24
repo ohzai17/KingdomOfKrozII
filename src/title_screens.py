@@ -423,8 +423,8 @@ def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
 
 ############################################################################################################################################################################################################################
 
-# START of info_screen1
-def info_screen1(screen, color_user_input):
+# START of Shareware (info_screen)
+def Shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
 
     WIDTH, HEIGHT = screen.get_size()
 
@@ -432,7 +432,7 @@ def info_screen1(screen, color_user_input):
         YELLOW = (255, 255, 255)
         WHITE = (255, 255, 255)
         WHITE2 = (0, 0, 0)
-        OLD_BLUE = (0, 0, 0)
+        OLD_BLUE = BLACK
     else:
         YELLOW = (255, 255, 0)
         WHITE = (255, 255, 255)
@@ -541,10 +541,10 @@ def info_screen1(screen, color_user_input):
             elif event.type == pygame.KEYDOWN:
                 running = False
         clock.tick(60)
-# END of info_screen1 
+# END of Shareware (info_screen)
 
 # START of instruction1
-def instruction1(screen, color_user_input):
+def instruction1(screen, color_user_input): #
 
     WIDTH, HEIGHT = screen.get_size()
 
@@ -618,7 +618,7 @@ def instruction1(screen, color_user_input):
 # END of instruction1       
 
 # START of instruction2
-def instruction2(screen, color_user_input):
+def instruction2(screen, color_user_input): #
     
     WIDTH, HEIGHT = screen.get_size()
 
@@ -736,7 +736,7 @@ def instruction2(screen, color_user_input):
 # END of instruction2
 
 # START of instruction3
-def instruction3(screen, color_user_input):
+def instruction3(screen, color_user_input): #
 
     WIDTH, HEIGHT = screen.get_size()
 
@@ -830,7 +830,7 @@ def instruction3(screen, color_user_input):
 # END of instruction3  
 
 # START of instruction4
-def instruction4(screen, color_user_input):
+def instruction4(screen, color_user_input): #
 
     WIDTH, HEIGHT = screen.get_size()
 
@@ -931,7 +931,7 @@ def instruction4(screen, color_user_input):
 # END of instruction4 
 
 # START of load
-def load(screen, color_user_input):
+def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes other screens
 
     WIDTH, HEIGHT = screen.get_size()
 
@@ -1058,7 +1058,7 @@ def load(screen, color_user_input):
 # END of load 
 
 # START of ending_creds
-def ending_creds(screen):
+def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
     # Use the provided screen
     WIDTH, HEIGHT = screen.get_size()
 
@@ -1142,17 +1142,17 @@ def run_all_title_screens(screen):
     speed_user_input = speed(screen, color_user_input)
     title(screen, color_user_input)
     difficulty(screen, color_user_input)
-    info_screen1(screen, color_user_input)
+    Shareware(screen, color_user_input)
     user_choice = load(screen, color_user_input)
     
     # This runs and proccess the loading screen along with screens in load()
-    run = True
-    while run: 
-        match(user_choice):
+    startGame = True
+    while startGame: 
+        match(user_choice): #
             case "b":
                 print(f"Choice: {user_choice}")
                 level(screen)
-                run = False
+                startGame = False
             case "i":
                 print(f"Choice: {user_choice}")
                 instruction1(screen, color_user_input)

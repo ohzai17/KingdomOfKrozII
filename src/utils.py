@@ -30,10 +30,10 @@ logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED,
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, LIGHT_BLUE, LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 def load_font(size):
-    return pygame.font.Font("/KingdomOfKrozII/assets/PressStart2P - Regular.ttf", size)
+    return pygame.font.Font("assets/PressStart2P - Regular.ttf", size)
 
 def load_fonts(sizes):
-    return [pygame.font.Font("/KingdomOfKrozII/assets/PressStart2P - Regular.ttf", size) for size in sizes]
+    return [pygame.font.Font("assets/PressStart2P - Regular.ttf", size) for size in sizes]
 
 def render_text(font, text, color):
     return font.render(text, True, color)
