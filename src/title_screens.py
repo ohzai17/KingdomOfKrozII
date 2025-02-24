@@ -152,7 +152,7 @@ def title(screen, color_user_input): # From KINGDOM3.INC (line 64)
     WIDTH, HEIGHT = screen.get_size()
 
     # Logo setup
-    logo = pygame.image.load("/KingdomOfKrozII/assets/kroz_logo.png").convert_alpha()
+    logo = pygame.image.load("src/assets/kroz_logo.png").convert_alpha()
     logo_width = WIDTH // 1.1 
     aspect_ratio = logo.get_height() / logo.get_width()
     logo_height = int(logo_width * aspect_ratio)
@@ -233,7 +233,7 @@ def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
     title_font, heading_font, subtext_font, footer_font = load_fonts([WIDTH // 50, WIDTH // 80, WIDTH // 80, WIDTH // 80])
 
     # Player icon setup
-    player_icon = pygame.image.load("/KingdomOfKrozII/assets/player_icon.png").convert_alpha()
+    player_icon = pygame.image.load("src/assets/player_icon.png").convert_alpha()
     player_icon_size = WIDTH // 40  # Scale the player icon size according to the screen width
     player_icon = pygame.transform.scale(player_icon, (player_icon_size, player_icon_size))
 
