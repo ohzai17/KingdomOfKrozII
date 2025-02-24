@@ -13,17 +13,17 @@ TILE_WIDTH = 14
 TILE_HEIGHT = 14
 
 # Load tiles
-block    = pygame.image.load("/KingdomOfKrozII/assets/block.png")
-chest    = pygame.image.load("/KingdomOfKrozII/assets/chest.png")
-enemy1   = pygame.image.load("/KingdomOfKrozII/assets/enemy1.png")
-enemy2   = pygame.image.load("/KingdomOfKrozII/assets/enemy2.png")
-gem      = pygame.image.load("/KingdomOfKrozII/assets/gem.png")
-player   = pygame.image.load("/KingdomOfKrozII/assets/player.png")
-stairs   = pygame.image.load("/KingdomOfKrozII/assets/stairs.png")
-teleport = pygame.image.load("/KingdomOfKrozII/assets/teleport.png")
-trap     = pygame.image.load("/KingdomOfKrozII/assets/trap.png")
-wall     = pygame.image.load("/KingdomOfKrozII/assets/wall.png")
-whip     = pygame.image.load("/KingdomOfKrozII/assets/whip.png")
+block    = pygame.image.load("src/assets/block.png")
+chest    = pygame.image.load("src/assets/chest.png")
+enemy1   = pygame.image.load("src/assets/enemy1.png")
+enemy2   = pygame.image.load("src/assets/enemy2.png")
+gem      = pygame.image.load("src/assets/gem.png")
+player   = pygame.image.load("src/assets/player.png")
+stairs   = pygame.image.load("src/assets/stairs.png")
+teleport = pygame.image.load("src/assets/teleport.png")
+trap     = pygame.image.load("src/assets/trap.png")
+wall     = pygame.image.load("src/assets/wall.png")
+whip     = pygame.image.load("src/assets/whip.png")
 
 # Scale tiles
 block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
