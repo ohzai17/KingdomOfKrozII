@@ -1,3 +1,4 @@
+import levels.gameplay
 import random
 from utils import *
 
@@ -1150,6 +1151,7 @@ def run_all_title_screens(screen):
         match(user_choice):
             case "b":
                 print(f"Choice: {user_choice}")
+                level(screen)
                 run = False
             case "i":
                 print(f"Choice: {user_choice}")
