@@ -1,5 +1,4 @@
 import pygame
-import random
 
 pygame.init()
 
@@ -146,8 +145,8 @@ def level(screen):
         player_y = player_row * TILE_HEIGHT
         screen.blit(player, (player_x, player_y))
         
-        # Move enemies every other frame
-        if frame_counter % 2 == 0:
+        # Move enemies every fourth frame
+        if frame_counter % 4 == 0:
             for enemy in enemies:
                 move_towards_player(enemy)
         
@@ -184,4 +183,5 @@ def level(screen):
         clock.tick(18)
         frame_counter += 1  # Increment the frame counter
 
-    pygame.quit()
+level(screen)
+pygame.quit()
