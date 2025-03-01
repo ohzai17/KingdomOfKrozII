@@ -1,5 +1,5 @@
 import pygame
-import random  # Add the random module
+import random
 
 pygame.init()
 
@@ -24,7 +24,6 @@ teleport = pygame.image.load("src/assets/teleport.png")
 trap     = pygame.image.load("src/assets/trap.png")
 wall     = pygame.image.load("src/assets/wall.png")
 whip     = pygame.image.load("src/assets/whip.png")
-
 # Scale tiles
 block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
 chest    = pygame.transform.scale(chest,    (TILE_WIDTH, TILE_HEIGHT))
@@ -72,8 +71,8 @@ def level(screen):
         "#": wall,
         "C": chest,
         "W": whip,
-        "1": enemy1,
-        "2": enemy2,
+        "1": enemy1,  # Slow enemy
+        "2": enemy2,  # Medium/Fast enemy
         "+": gem,
         "T": teleport,
         ".": trap,
@@ -102,65 +101,81 @@ def level(screen):
         if found_player:
             break
 
-    # Extract enemy positions
+    # Extract enemy positions with types and timers - exactly matching KROZ format
     enemies = []
-    enemy_chars = {"1", "2"}
     for r, row in enumerate(grid):
         for c, char in enumerate(row):
-            if char in enemy_chars:
-                enemies.append({"row": r, "col": c, "type": char})
+            if char == "1":  # Slow enemy (matching Slow in KROZ)
+                enemies.append({
+                    "row": r, 
+                    "col": c, 
+                    "type": char,
+                    "timer": 0,
+                    "move_rate": 5  # T[1] in KINGDOM.PAS
+                })
+            elif char == "2":  # Medium/Fast enemy (matching Medium/Fast in KROZ)
+                enemies.append({
+                    "row": r, 
+                    "col": c, 
+                    "type": char, 
+                    "timer": 0,
+                    "move_rate": 3  # T[2]/T[3] in KINGDOM.PAS
+                })
 
     def is_valid_move(row, col):
         return (0 <= row < len(grid) and 
                 0 <= col < len(grid[row]) and 
                 grid[row][col] not in collidable_tiles)
 
-    def bresenham_line(x0, y0, x1, y1):
-        """Bresenham's Line Algorithm to determine the line of sight"""
-        points = []
-        dx = abs(x1 - x0)
-        dy = abs(y1 - y0)
-        sx = 1 if x0 < x1 else -1
-        sy = 1 if y0 < y1 else -1
-        err = dx - dy
-
-        while True:
-            points.append((x0, y0))
-            if x0 == x1 and y0 == y1:
-                break
-            e2 = err * 2
-            if e2 > -dy:
-                err -= dy
-                x0 += sx
-            if e2 < dx:
-                err += dx
-                y0 += sy
-
-        return points
-
-    def can_see_player(enemy):
-        """Check if the enemy can see the player"""
-        line_of_sight = bresenham_line(enemy["col"], enemy["row"], player_col, player_row)
-        for (col, row) in line_of_sight:
-            if grid[row][col] in collidable_tiles:
-                return False
-        return True
-
-    def move_towards_player(enemy):
-        if can_see_player(enemy):  # Only move if the enemy can see the player
-            if player_row < enemy["row"] and is_valid_move(enemy["row"] - 1, enemy["col"]):
-                enemy["row"] -= 1
-            elif player_row > enemy["row"] and is_valid_move(enemy["row"] + 1, enemy["col"]):
-                enemy["row"] += 1
-            elif player_col < enemy["col"] and is_valid_move(enemy["row"], enemy["col"] - 1):
-                enemy["col"] -= 1
-            elif player_col > enemy["col"] and is_valid_move(enemy["row"], enemy["col"] + 1):
-                enemy["col"] += 1
+    def move_enemy(enemy):
+        """Move enemy toward player exactly like in KINGDOM.PAS"""
+        # Reset the current grid position
+        current_row, current_col = enemy["row"], enemy["col"]
+        grid[current_row][current_col] = " "  # Clear current position
+        
+        # Determine direction toward player (X movement takes priority like in KROZ)
+        x_dir, y_dir = 0, 0
+        
+        # Determine direction directly toward player
+        if player_col < current_col:
+            x_dir = -1
+        elif player_col > current_col:
+            x_dir = 1
+            
+        if player_row < current_row:
+            y_dir = -1
+        elif player_row > current_row:
+            y_dir = 1
+        
+        # Try X movement first (as in original KROZ)
+        if x_dir != 0:
+            new_row, new_col = current_row, current_col + x_dir
+            if is_valid_move(new_row, new_col):
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy["type"]
+                return
+        
+        # If X movement not possible or not needed, try Y movement
+        if y_dir != 0:
+            new_row, new_col = current_row + y_dir, current_col
+            if is_valid_move(new_row, new_col):
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy["type"]
+                return
+        
+        # If no move was possible, stay in place
+        grid[current_row][current_col] = enemy["type"]
 
     # Main loop
     running = True
     clock = pygame.time.Clock()
-    frame_counter = 0  # Add a frame counter
+    frame_counter = 0
+    slow_time_active = False
+    slow_time_counter = 0
+    speed_time_active = False  
+    speed_time_counter = 0
+    freeze_active = False
+    freeze_counter = 0
 
     while running:
         screen.fill((0, 0, 0))
@@ -186,45 +201,93 @@ def level(screen):
                 running = False
             elif event.type == pygame.KEYDOWN:
                 new_row, new_col = player_row, player_col
-                # TODO fix diagonal movement
                 keys = pygame.key.get_pressed()
-                if keys[pygame.K_UP]:
-                    new_row -= 1
-                if keys[pygame.K_DOWN]:
-                    new_row += 1
-                if keys[pygame.K_LEFT]:
+                
+                # Support both diagonal and cardinal movements like in KROZ
+                if keys[pygame.K_UP] and not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
+                    new_row -= 1  # North
+                elif keys[pygame.K_DOWN] and not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
+                    new_row += 1  # South
+                elif keys[pygame.K_LEFT] and not keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
+                    new_col -= 1  # West
+                elif keys[pygame.K_RIGHT] and not keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
+                    new_col += 1  # East
+                elif keys[pygame.K_UP] and keys[pygame.K_LEFT]:
+                    new_row -= 1  # Northwest
                     new_col -= 1
-                if keys[pygame.K_RIGHT]:
+                elif keys[pygame.K_UP] and keys[pygame.K_RIGHT]:
+                    new_row -= 1  # Northeast
+                    new_col += 1
+                elif keys[pygame.K_DOWN] and keys[pygame.K_LEFT]:
+                    new_row += 1  # Southwest
+                    new_col -= 1
+                elif keys[pygame.K_DOWN] and keys[pygame.K_RIGHT]:
+                    new_row += 1  # Southeast
                     new_col += 1
                 
                 # Ensure the new position is within bounds
                 if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[new_row]):
                     # Only move if the destination tile is not collidable
                     if grid[new_row][new_col] not in collidable_tiles:
+                        # Clear the player's current position in the grid
+                        grid[player_row][player_col] = " "
                         player_row, player_col = new_row, new_col
-                        player_moved = True  # Set the flag if the player has moved
+                        grid[player_row][player_col] = "P"
+                        player_moved = True
 
-        # Give each enemy a chance to move
-        for enemy in enemies:
-            if not player_moved and frame_counter % 2 == 0:  # Move every other frame if player didn't move
-                move_probability = 0.15
-            elif player_moved and frame_counter % 8 == 0:  # Move every 4th frame if player moved
-                move_probability = 0.01
+        # Handle enemy movement exactly as in KINGDOM.PAS
+        if frame_counter % 4 == 0:  # Basic timing factor
+            # Update spell counters
+            if slow_time_counter > 0:
+                slow_time_counter -= 1
+                slow_time_active = True
             else:
-                move_probability = 0  # No movement otherwise
-
-            if random.random() < move_probability:
-                move_towards_player(enemy)
+                slow_time_active = False
+            
+            if speed_time_counter > 0:
+                speed_time_counter -= 1
+                speed_time_active = True
+            else:
+                speed_time_active = False
+                
+            if freeze_counter > 0:
+                freeze_counter -= 1
+                freeze_active = True
+            else:
+                freeze_active = False
+                
+            # Process enemy movement if not frozen
+            if not freeze_active:
+                for enemy in enemies:
+                    # Adjust movement rate based on active spells (just like in KROZ)
+                    if speed_time_active:
+                        actual_move_rate = max(1, enemy["move_rate"] // 2)
+                    elif slow_time_active:
+                        actual_move_rate = enemy["move_rate"] * 2
+                    else:
+                        actual_move_rate = enemy["move_rate"]
+                    
+                    # Update timer
+                    enemy["timer"] += 1
+                    if enemy["timer"] >= actual_move_rate:
+                        enemy["timer"] = 0
+                        
+                        # In original KROZ, enemies sometimes move even if player moved
+                        # This simulates the random movement checks in the original game
+                        if not player_moved or random.random() < 0.25:
+                            move_enemy(enemy)
         
         # Draw enemies
-        for enemy in enemies:
-            enemy_x = enemy["col"] * TILE_WIDTH
-            enemy_y = enemy["row"] * TILE_HEIGHT
-            screen.blit(tile_mapping[enemy["type"]], (enemy_x, enemy_y))
+        for row_index, row in enumerate(grid):
+            for col_index, char in enumerate(row):
+                if char in ["1", "2"]:  # Draw any enemies in the grid
+                    x = col_index * TILE_WIDTH
+                    y = row_index * TILE_HEIGHT
+                    screen.blit(tile_mapping[char], (x, y))
         
         pygame.display.flip()
-        clock.tick(18)
-        frame_counter += 1  # Increment the frame counter
+        clock.tick(18.2)  # Match KROZ framerate (18.2Hz)
+        frame_counter += 1
 
 level(screen)
 pygame.quit()
