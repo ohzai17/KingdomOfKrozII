@@ -1,4 +1,5 @@
 import pygame
+import random  # Add the random module
 
 pygame.init()
 
@@ -114,15 +115,47 @@ def level(screen):
                 0 <= col < len(grid[row]) and 
                 grid[row][col] not in collidable_tiles)
 
+    def bresenham_line(x0, y0, x1, y1):
+        """Bresenham's Line Algorithm to determine the line of sight"""
+        points = []
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx - dy
+
+        while True:
+            points.append((x0, y0))
+            if x0 == x1 and y0 == y1:
+                break
+            e2 = err * 2
+            if e2 > -dy:
+                err -= dy
+                x0 += sx
+            if e2 < dx:
+                err += dx
+                y0 += sy
+
+        return points
+
+    def can_see_player(enemy):
+        """Check if the enemy can see the player"""
+        line_of_sight = bresenham_line(enemy["col"], enemy["row"], player_col, player_row)
+        for (col, row) in line_of_sight:
+            if grid[row][col] in collidable_tiles:
+                return False
+        return True
+
     def move_towards_player(enemy):
-        if player_row < enemy["row"] and is_valid_move(enemy["row"] - 1, enemy["col"]):
-            enemy["row"] -= 1
-        elif player_row > enemy["row"] and is_valid_move(enemy["row"] + 1, enemy["col"]):
-            enemy["row"] += 1
-        elif player_col < enemy["col"] and is_valid_move(enemy["row"], enemy["col"] - 1):
-            enemy["col"] -= 1
-        elif player_col > enemy["col"] and is_valid_move(enemy["row"], enemy["col"] + 1):
-            enemy["col"] += 1
+        if can_see_player(enemy):  # Only move if the enemy can see the player
+            if player_row < enemy["row"] and is_valid_move(enemy["row"] - 1, enemy["col"]):
+                enemy["row"] -= 1
+            elif player_row > enemy["row"] and is_valid_move(enemy["row"] + 1, enemy["col"]):
+                enemy["row"] += 1
+            elif player_col < enemy["col"] and is_valid_move(enemy["row"], enemy["col"] - 1):
+                enemy["col"] -= 1
+            elif player_col > enemy["col"] and is_valid_move(enemy["row"], enemy["col"] + 1):
+                enemy["col"] += 1
 
     # Main loop
     running = True
@@ -145,17 +178,8 @@ def level(screen):
         player_y = player_row * TILE_HEIGHT
         screen.blit(player, (player_x, player_y))
         
-        # Move enemies every fourth frame
-        if frame_counter % 4 == 0:
-            for enemy in enemies:
-                move_towards_player(enemy)
-        
-        # Draw enemies
-        for enemy in enemies:
-            enemy_x = enemy["col"] * TILE_WIDTH
-            enemy_y = enemy["row"] * TILE_HEIGHT
-            screen.blit(tile_mapping[enemy["type"]], (enemy_x, enemy_y))
-        
+        player_moved = False  # Flag to check if the player has moved
+
         # Event handling for quitting and movement
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -178,7 +202,26 @@ def level(screen):
                     # Only move if the destination tile is not collidable
                     if grid[new_row][new_col] not in collidable_tiles:
                         player_row, player_col = new_row, new_col
+                        player_moved = True  # Set the flag if the player has moved
 
+        # Give each enemy a chance to move
+        for enemy in enemies:
+            if not player_moved and frame_counter % 2 == 0:  # Move every other frame if player didn't move
+                move_probability = 0.15
+            elif player_moved and frame_counter % 8 == 0:  # Move every 4th frame if player moved
+                move_probability = 0.01
+            else:
+                move_probability = 0  # No movement otherwise
+
+            if random.random() < move_probability:
+                move_towards_player(enemy)
+        
+        # Draw enemies
+        for enemy in enemies:
+            enemy_x = enemy["col"] * TILE_WIDTH
+            enemy_y = enemy["row"] * TILE_HEIGHT
+            screen.blit(tile_mapping[enemy["type"]], (enemy_x, enemy_y))
+        
         pygame.display.flip()
         clock.tick(18)
         frame_counter += 1  # Increment the frame counter
