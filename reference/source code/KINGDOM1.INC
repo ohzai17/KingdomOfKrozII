@@ -88,43 +88,43 @@ const // Declaring constants
 {7}  {55} CWall1    = #0;
 {8}  {56} CWall2    = #0;
 {9}  {57} CWall3    = #0;
-{�}  {58} OSpell1   = #127; {ALT-241}
-{�}  {59} OSpell2   = #127; {ALT-242}
-{�}  {60} OSpell3   = #127; {ALT-243}
-{�}  {61} CSpell1   = #0;   {ALT-244}
-{�}  {62} CSpell2   = #0;   {ALT-245}
-{�}  {63} CSpell3   = #0;   {ALT-246}
+{±}  {58} OSpell1   = #127; {ALT-241} //  Plus/Minus symbol
+{≥}  {59} OSpell2   = #127; {ALT-242} //  Greater than or equal to
+{≤}  {60} OSpell3   = #127; {ALT-243} //  Less than or equal to
+{⌠}  {61} CSpell1   = #0;   {ALT-244} //  Integral top
+{⌡}  {62} CSpell2   = #0;   {ALT-245} //  Integral bottom
+{÷}  {63} CSpell3   = #0;   {ALT-246} //  Division sign
 {Y}  {64} GBlock    = #178;
 {0}  {65} Rock      = #79;
 {~}  {66} EWall     = #88;
 { }  {67} Trap5     = #0;   {represented by a $}
-{�}  {68} TBlock    = #0;   {ALT-145}
-{�}  {69} TRock     = #0;   {ALT-146}
-{�}  {70} TGem      = #0;   {ALT-147}
-{�}  {71} TBlind    = #0;   {ALT-148}
-{�}  {72} TWhip     = #0;   {ALT-149}
-{�}  {73} TGold     = #0;   {ALT-150}
-{�}  {74} TTree     = #0;   {ALT-151}
-{�}  {75} Rope      = #179; {ALT-179}
-{�}  {76} DropRope  = #25;  {ALT-185}
-{�}  {77}{DropRope}         {ALT-186}
-{�}  {78}{DropRope}         {ALT-187}
-{�}  {79}{DropRope}         {ALT-188}
-{�}  {80}{DropRope}         {ALT-189}
-{�}  {81} Amulet    = #12;  {ALT-131}
-{�}  {82} ShootRight= #26;  {ALT-175}
-{�}  {83} ShootLeft = #27;  {ALT-174}
+{æ}  {68} TBlock    = #0;   {ALT-145} //  AE lowercase symbol
+{Æ}  {69} TRock     = #0;   {ALT-146} //  AE uppercase symbol
+{ô}  {70} TGem      = #0;   {ALT-147} //  o with carrot
+{ö}  {71} TBlind    = #0;   {ALT-148} //  o with two dots
+{ò}  {72} TWhip     = #0;   {ALT-149} //  o with down accent
+{û}  {73} TGold     = #0;   {ALT-150} //  u with carrot
+{ù}  {74} TTree     = #0;   {ALT-151} //  u with down accent
+{J}  {75} Rope      = #179; {ALT-179} //  vert line replaced with J
+{┤}  {76} DropRope  = #25;  {ALT-185} //  vert line with perpendicular left
+{│}  {77}{DropRope}         {ALT-186} //  vert line thicker
+{┐}  {78}{DropRope}         {ALT-187} //  left to bottom right angle
+{┘}  {79}{DropRope}         {ALT-188} //  left to top right angle
+{╜}  {80}{DropRope}         {ALT-189} //  left to top right angle 2
+{â}  {81} Amulet    = #12;  {ALT-131} //  a with carrot
+{»}  {82} ShootRight= #26;  {ALT-175} //  >>
+{«}  {83} ShootLeft = #27;  {ALT-174} //  <<
 
-{�}  {224}Trap6     = #0;   {ALT-224}
-{�}  {225}Trap7     = #0;   {ALT-225}
-{�}  {226}Trap8     = #0;   {ALT-226}
-{�}  {227}Trap9     = #0;   {ALT-227}
-{�}  {228}Trap10    = #0;   {ALT-228}
-{�}  {229}Trap11    = #0;   {ALT-229}
-{�}  {230}Trap12    = #0;   {ALT-230}
-{�}  {231}Trap13    = #0;   {ALT-231}
+{α}  {224}Trap6     = #0;   {ALT-224} //  alpha (greek)
+{β}  {225}Trap7     = #0;   {ALT-225} //  beta (greek)
+{┌}  {226}Trap8     = #0;   {ALT-226} //  upside down L
+{π}  {227}Trap9     = #0;   {ALT-227} //  pi
+{∑}  {228}Trap10    = #0;   {ALT-228} //  sigma uppercase
+{σ}  {229}Trap11    = #0;   {ALT-229} //  sigma lowercase
+{μ}  {230}Trap12    = #0;   {ALT-230} //  mu (greek)
+{τ}  {231}Trap13    = #0;   {ALT-231} //  tau (greek)
 
-{�}  {252}Message   = #5;   {ALT-252}
+{ⁿ}  {252}Message   = #5;   {ALT-252} //  superscript n
 
 
       TotObjects    = 83;

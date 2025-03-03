@@ -91,26 +91,12 @@ def change_title_color(time, color_user_input):
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
 
-# Load Tiles, loading extra icons that are not in levels.gameplay
-enemy3   = pygame.image.load("src/assets/enemy3.png")
-keys     = pygame.image.load("src/assets/keys.png")
-power    = pygame.image.load("src/assets/power.png")
-clues    = pygame.image.load("src/assets/clues.png")
-surprise = pygame.image.load("src/assets/surprise.png")
-
-# Scale tiles
-enemy3   = pygame.transform.scale(enemy3, (15, 15))
-keys     = pygame.transform.scale(keys, (15, 15))
-power    = pygame.transform.scale(power, (15, 15))
-clues    = pygame.transform.scale(clues, (15, 15))
-surprise = pygame.transform.scale(surprise, (15, 15))
-
-def display_icons(screen):
+""" def display_icons(screen):
     icons = [player, enemy1, enemy2, enemy3, gem, whip, teleport, chest, keys, power, clues, surprise, stairs]
     blit_y = 163
     for i, icon in enumerate(icons):
         icon = pygame.transform.scale(icon, (15, 15))
-        screen.blit(icon, (40, blit_y + (i * 23)))
+        screen.blit(icon, (40, blit_y + (i * 23))) """
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:

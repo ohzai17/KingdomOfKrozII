@@ -1,4 +1,4 @@
-import levels.gameplay
+import gameplay
 import random
 from utils import *
 
