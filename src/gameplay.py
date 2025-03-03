@@ -488,7 +488,7 @@ def level(screen):
     current_level_index = 0
     grid = [list(row) for row in level_maps[current_level_index]]
 
-    collidable_tiles = {"X", "#", ";", "/", "J", "R", "4", "5", "6", "7", "8", "9"}
+    collidable_tiles = {"X", "#", ";", "/", "J", "R", "4", "5", "6", "8", "9"}
 
     dynamic_tiles = {"P", "1", "2", "3"}
 
@@ -578,7 +578,7 @@ def level(screen):
                 if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[new_row]):
                     # Only move if the destination tile is not collidable
                     if grid[new_row][new_col] not in collidable_tiles:
-                        player_row, new_row
+                        player_row = new_row
                         player_col = new_col
                 
                 # Press TAB to switch to the next level
