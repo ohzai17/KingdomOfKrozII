@@ -1,5 +1,5 @@
 from title_screens import *
-from levels.gameplay import *
+from gameplay import *
 
 if __name__ == "__main__":
     pygame.init()
