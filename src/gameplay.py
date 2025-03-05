@@ -2,17 +2,15 @@ import pygame
 import os
 import random
 import sys
+from utils import *
 from track_item import init_screen  # Import the track_item module
 
-pygame.init()
 
-TILE_WIDTH, TILE_HEIGHT = 13, 13
-# Increase screen height to accommodate the tracking UI
-SCREEN_WIDTH, SCREEN_HEIGHT = 832, 624 # 64 x 48 tiles
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Level 1")
+def levels(screen):
 
-def level(screen):
+    WIDTH, HEIGHT = screen.get_size()
+    
+    screen.fill(BLACK)
 
     sprites = ["block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "stairs", "teleport", 
                "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river", 
@@ -33,6 +31,8 @@ def level(screen):
         "enemy1": "enemy1a",
         "enemy2": "enemy2a"
     }
+    
+    TILE_WIDTH, TILE_HEIGHT = 13, 13
 
     for sprite in sprites:
         filename = special_cases.get(sprite, sprite) + ".png"
@@ -709,7 +709,7 @@ def level(screen):
         
         # Update the item tracking UI with current values
         values = [score, level_num, gems, whips, teleports, keys]
-        init_screen(screen, SCREEN_WIDTH, SCREEN_HEIGHT, values)
+        init_screen(screen, WIDTH, HEIGHT, values)
         
         # Update game state
         tick_counter += 1
@@ -729,6 +729,5 @@ def level(screen):
         
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-
-level(screen)
+        
 pygame.quit()

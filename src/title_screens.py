@@ -1,5 +1,5 @@
-import gameplay
 import random
+from gameplay import levels
 from utils import *
 
 ############################################################################################################################################################################################################################
@@ -813,7 +813,7 @@ def instruction3(screen, color_user_input): #
             blit_y += 23
 
         # Display all the image icons
-        display_icons(screen)
+        #display_icons(screen)
 
         # Flashing text
         flash(screen, prompt_text, WIDTH, HEIGHT)
@@ -1151,7 +1151,7 @@ def run_all_title_screens(screen):
         match(user_choice): #
             case "b":
                 print(f"Choice: {user_choice}")
-                level(screen)
+                levels(screen)
                 startGame = False
             case "i":
                 print(f"Choice: {user_choice}")
