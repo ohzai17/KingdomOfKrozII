@@ -1,10 +1,15 @@
 import pygame
 import os
 import random
+import sys
+from track_item import init_screen  # Import the track_item module
+
 pygame.init()
 
 TILE_WIDTH, TILE_HEIGHT = 13, 13
-screen = pygame.display.set_mode((832, 624))
+# Increase screen height to accommodate the tracking UI
+SCREEN_WIDTH, SCREEN_HEIGHT = 832, 624 # 64 x 48 tiles
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Level 1")
 
 def level(screen):
@@ -217,12 +222,12 @@ def level(screen):
         "@##;-;##..-##RRRRR##7#### #11111111111## ###2##2##-/////1/////J/",
         "@2#;;-##..#D##RRRRR##7##T #11111111111## #2##2##2##--///////J///",
         "@##;;;##..#D###RRRRR##7####11111111111## ##2##2##2###---///////1",
-        "@2#-;;##..#KK###RRRRR##7###11111111111## ###)##)##)#####--////J/",
-        "@##-;;##..#KK##RRRRRRR#7###11111B11111----)))))))))))#####---///",
-        "@2#;;;##22####RRRR#RRR##7##11111111111##############)########--/",
-        "@##;;-##22###RRRR###RRR##7#11111111111#?#ò#---#*YYYY-63333####D#",
-        "@2#;-;##22##RRRR##L##RRR#7#11111111111#O#T#-#-#*YYYY-63333---#D#",
-        "@##;;;##22#RRRR##DD##RRR#7#11111111111#O#-4-#-#*YYYY-63333-#-4-#",
+        "@2#-;;##..#KK###RRRRR##7###11111B11111----)))))))))))#####---///",
+        "@##-;;##..#KK##RRRRRRR#7###11111111111##############)########--/",
+        "@2#;;;##22####RRRR#RRR##7##11111111111#?#ò#---#*YYYY-63333####D#",
+        "@##;;-##22###RRRR###RRR##7#11111111111#O#T#-#-#*YYYY-63333---#D#",
+        "@2#;-;##22##RRRR##L##RRR#7#11111111111#O#-4-#-#*YYYY-63333-#-4-#",
+        "@##;;;##22#RRRR##DD##RRR#7#11111111111#O#-#-#-#*YYYY-63333-#-#-#",
         "@2#;-;##-##RRRR#DDD#RRR##7###########-#O#-#-#-#*YYYY-63333-#-#-#",
         "@##;;-##C#RRRR##DDD##RRR##7###+++++##-#O#-#-#-#*YYYY-63333-#-#-#",
         "@2#;;;##H##RRRR#DDDD##RRR##7##+++++##-#O#-#-#-#*YYYY-63333-#-#-#",
@@ -302,9 +307,8 @@ def level(screen):
         "0--00-00000000000000000---000000000001110-000-0==T-===-===-==-==",
         "00000-00000000000000000---000000000001110-00000=======-=========",
         "--000----------------- ---0WWWWWWWWK01110-000-000000000000000000",
-        "00000-00000000000000000---000-00000001110-000K--<000OO000OOOOO≤*",
-        "--000-000000~~~0000000#---#00-00000000000-000000000000OOOO000000",
-        "00C000000********3000##VVV##0-------------00000000boulderville├0", # INVESTIGATE ├ symbol
+        "00000-000000~~~0000000#---#00-00000001110-000K--<000OO000OOOOO≤*",
+        "--000-000000********3000##VVV##0-------------00000000boulderville├0", # INVESTIGATE ├ symbol
     ]
     level14_map = [
         "###<@@@@@@@@@@@@@@@@@@@@@@@@@#one#@@@@@@@@@@@@@@@@@@@@@@@@@FK###",
@@ -510,6 +514,14 @@ def level(screen):
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})  # Fixed: added colon after "col"
 
+    # Initialize tracking variables
+    score = 0
+    level_num = 1
+    gems = 0
+    whips = 0
+    teleports = 0
+    keys = 0
+
     # Core functions
     def has_line_of_sight(from_row, from_col, to_row, to_col):
         """Check if there's a direct line of sight between two positions"""
@@ -604,7 +616,7 @@ def level(screen):
 
     def player_input():
         """Handle player movement with key press tracking"""
-        nonlocal player_row, player_col
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys
         
         # Get current key states
         current_keys = pygame.key.get_pressed()
@@ -637,12 +649,32 @@ def level(screen):
                 keys_pressed[key] = False
         
         # Move player if valid
-        if moved and (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]) and
-                     grid[new_row][new_col] not in collidable_tiles):
-            grid[player_row][player_col] = " "
-            player_row, player_col = new_row, new_col
-            grid[player_row][player_col] = "P"
-            return True
+        if moved and (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
+            # Check for item collection
+            if grid[new_row][new_col] not in collidable_tiles:
+                # Collect items
+                if grid[new_row][new_col] == "+":  # Gem
+                    gems += 1
+                    score += 100
+                elif grid[new_row][new_col] == "W":  # Whip
+                    whips += 1
+                    score += 50
+                elif grid[new_row][new_col] == "T":  # Teleport
+                    teleports += 1
+                    score += 75
+                elif grid[new_row][new_col] == "K":  # Key
+                    keys += 1
+                    score += 125
+                elif grid[new_row][new_col] == "L":  # Stairs to next level
+                    level_num += 1
+                    score += 1000
+                    # Could add level change logic here
+                
+                # Move player
+                grid[player_row][player_col] = " "
+                player_row, player_col = new_row, new_col
+                grid[player_row][new_col] = "P"
+                return True
             
         return False
 
@@ -674,6 +706,10 @@ def level(screen):
             for col_index, char in enumerate(row):
                 if char in tile_mapping:
                     screen.blit(tile_mapping[char], (col_index * TILE_WIDTH, row_index * TILE_HEIGHT))
+        
+        # Update the item tracking UI with current values
+        values = [score, level_num, gems, whips, teleports, keys]
+        init_screen(screen, SCREEN_WIDTH, SCREEN_HEIGHT, values)
         
         # Update game state
         tick_counter += 1
