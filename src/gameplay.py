@@ -1,13 +1,13 @@
 import pygame
 import os
 import random
-pygame.init()
+from utils import *
 
-TILE_WIDTH, TILE_HEIGHT = 13, 13
-screen = pygame.display.set_mode((832, 624))
-pygame.display.set_caption("Level 1")
+def levels(screen):
 
-def level(screen):
+    WIDTH, HEIGHT = screen.get_size()
+
+    screen.fill(BLACK)
 
     sprites = ["block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "stairs", "teleport", 
                "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river", 
@@ -28,6 +28,8 @@ def level(screen):
         "enemy1": "enemy1a",
         "enemy2": "enemy2a"
     }
+
+    TILE_WIDTH, TILE_HEIGHT = 13, 13
 
     for sprite in sprites:
         filename = special_cases.get(sprite, sprite) + ".png"
@@ -693,6 +695,3 @@ def level(screen):
         
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-
-level(screen)
-pygame.quit()
