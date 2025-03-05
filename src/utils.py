@@ -1,7 +1,10 @@
 import pygame
 import random
+import os
+import sys
 
-# from levels.gameplay import *
+screen = pygame.display.set_mode((832, 624))
+pygame.display.set_caption("Kingdom of Kroz II")
 
 # Colors used in the game
 BLACK = (0, 0, 0)
@@ -24,6 +27,11 @@ LIGHT_RED = (255, 182, 193)
 LIGHT_PURPLE = (221, 160, 221)
 LIGHT_YELLOW = (255, 255, 224)
 
+TILE_WIDTH = 14
+TILE_HEIGHT = 14
+
+WIDTH, HEIGHT = screen.get_size()
+
 clock = pygame.time.Clock() # Used in flash, returns the number of milliseconds since pygame.init()
 
 square_size = 8 # Used for square bullets
@@ -31,11 +39,17 @@ square_size = 8 # Used for square bullets
 logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, LIGHT_BLUE, LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
+
+# Define the base directory
+base_dir = os.path.dirname(os.path.abspath(__file__))
+assets_dir = os.path.join(base_dir, "assets")
+font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
+
 def load_font(size):
-    return pygame.font.Font("src/assets/PressStart2P - Regular.ttf", size)
+    return pygame.font.Font(font_path, size)
 
 def load_fonts(sizes):
-    return [pygame.font.Font("src/assets/PressStart2P - Regular.ttf", size) for size in sizes]
+    return [pygame.font.Font(font_path, size) for size in sizes]
 
 def render_text(font, text, color):
     return font.render(text, True, color)
@@ -91,12 +105,52 @@ def change_title_color(time, color_user_input):
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
 
-""" def display_icons(screen):
+# Load Tiles, loading extra icons that are not in levels.gameplay
+enemy3 = pygame.image.load(os.path.join(assets_dir, "enemy3.png"))
+keys = pygame.image.load(os.path.join(assets_dir, "keys.png"))
+power = pygame.image.load(os.path.join(assets_dir, "power.png"))
+clues = pygame.image.load(os.path.join(assets_dir, "clues.png"))
+surprise = pygame.image.load(os.path.join(assets_dir, "surprise.png"))
+
+# Scale tiles
+enemy3 = pygame.transform.scale(enemy3, (15, 15))
+keys = pygame.transform.scale(keys, (15, 15))
+power = pygame.transform.scale(power, (15, 15))
+clues = pygame.transform.scale(clues, (15, 15))
+surprise = pygame.transform.scale(surprise, (15, 15))
+
+# Load tiles
+block = pygame.image.load(os.path.join(assets_dir, "block.png"))
+chest = pygame.image.load(os.path.join(assets_dir, "chest.png"))
+enemy1 = pygame.image.load(os.path.join(assets_dir, "enemy1.png"))
+enemy2 = pygame.image.load(os.path.join(assets_dir, "enemy2.png"))
+gem = pygame.image.load(os.path.join(assets_dir, "gem.png"))
+player = pygame.image.load(os.path.join(assets_dir, "player.png"))
+stairs = pygame.image.load(os.path.join(assets_dir, "stairs.png"))
+teleport = pygame.image.load(os.path.join(assets_dir, "teleport.png"))
+trap = pygame.image.load(os.path.join(assets_dir, "trap.png"))
+wall = pygame.image.load(os.path.join(assets_dir, "wall.png"))
+whip = pygame.image.load(os.path.join(assets_dir, "whip.png"))
+
+# Scale tiles
+block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
+chest    = pygame.transform.scale(chest,    (TILE_WIDTH, TILE_HEIGHT))
+enemy1   = pygame.transform.scale(enemy1,   (TILE_WIDTH, TILE_HEIGHT))
+enemy2   = pygame.transform.scale(enemy2,   (TILE_WIDTH, TILE_HEIGHT))
+gem      = pygame.transform.scale(gem,      (TILE_WIDTH, TILE_HEIGHT))
+player   = pygame.transform.scale(player,   (TILE_WIDTH, TILE_HEIGHT))
+stairs   = pygame.transform.scale(stairs,   (TILE_WIDTH, TILE_HEIGHT))
+teleport = pygame.transform.scale(teleport, (TILE_WIDTH, TILE_HEIGHT))
+trap     = pygame.transform.scale(trap,     (TILE_WIDTH, TILE_HEIGHT))
+wall     = pygame.transform.scale(wall,     (TILE_WIDTH, TILE_HEIGHT))
+whip     = pygame.transform.scale(whip,     (TILE_WIDTH, TILE_HEIGHT))
+
+def display_icons(screen):
     icons = [player, enemy1, enemy2, enemy3, gem, whip, teleport, chest, keys, power, clues, surprise, stairs]
     blit_y = 163
     for i, icon in enumerate(icons):
         icon = pygame.transform.scale(icon, (15, 15))
-        screen.blit(icon, (40, blit_y + (i * 23))) """
+        screen.blit(icon, (40, blit_y + (i * 23)))
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
