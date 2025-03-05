@@ -1,14 +1,6 @@
 import pygame
 import os
 import random
-<<<<<<< HEAD
-from utils import *
-
-def levels(screen):
-
-    WIDTH, HEIGHT = screen.get_size()
-
-=======
 import sys
 from utils import *
 from track_item import init_screen  # Import the track_item module
@@ -18,7 +10,6 @@ def levels(screen):
 
     WIDTH, HEIGHT = screen.get_size()
     
->>>>>>> 7f58708c9396da6c6bf6f99561c19e1c3479cf35
     screen.fill(BLACK)
 
     sprites = ["block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "stairs", "teleport", 
@@ -739,10 +730,6 @@ def levels(screen):
                     del medium_enemies[i]
         
         pygame.display.flip()
-<<<<<<< HEAD
-        clock.tick(GAME_TICK_RATE)
-=======
         clock.tick(GAME_TICK_RATE)
         
 pygame.quit()
->>>>>>> 7f58708c9396da6c6bf6f99561c19e1c3479cf35
