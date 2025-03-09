@@ -592,25 +592,30 @@ def levels(screen):
         
         # Handle movement and collisions
         if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
-            # Breaking X blocks
-            if grid[new_row][new_col] == "X":
-                grid[new_row][new_col] = " "  # Break the block
-                return True  # Enemy dies when breaking block
+            # Check what's in the target position
+            target = grid[new_row][new_col]
+            
+            # Hit player - enemy dies
+            if target == "P":
+                grid[row][col] = enemy_type  # Restore enemy position
+                return True
                 
-            # Empty space - move there
-            elif grid[new_row][new_col] == " ":
+            # Hit solid wall or other enemy - stay in place
+            elif target in collidable_tiles or target in dynamic_tiles:
+                grid[row][col] = enemy_type
+                
+            # Hit any item or empty space - destroy and move
+            else:
+                # If it's a collectable item, destroy it (including X blocks)
+                if target in ["+", "W", "T", "K", "L", "C", "X"]:
+                    print(f"Enemy destroyed {target} at {new_row},{new_col}")
+                
+                # Move enemy to new position
                 enemy["row"], enemy["col"] = new_row, new_col
                 grid[new_row][new_col] = enemy_type
-                
-            # Hit player
-            elif grid[new_row][new_col] == "P":
-                return True  # Enemy dies
-                
-            # Blocked - try to find another way
-            else:
-                grid[row][col] = enemy_type  # Stay in place
         else:
-            grid[row][col] = enemy_type  # Stay in place
+            # Out of bounds
+            grid[row][col] = enemy_type
             
         return False
 
