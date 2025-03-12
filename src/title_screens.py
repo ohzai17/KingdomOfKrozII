@@ -1,6 +1,7 @@
 import random
 from gameplay import levels
 from utils import *
+from sound import play_sound
 
 ############################################################################################################################################################################################################################
 
@@ -57,8 +58,10 @@ def color(screen): # From KINGDOM4.INC (line 66)
                     match event.key:
                         case pygame.K_m:
                             color_user_input = "M"
+                            play_sound(500, 30)
                             running = False
                         case _:
+                            play_sound(500, 30)                            
                             running = False
                     print("Color:" , color_user_input)
     return color_user_input
@@ -138,8 +141,10 @@ def speed(screen, color_user_input): # From KINGDOM4.INC (line 87)
                     match event.key:
                         case pygame.K_f:
                             speed_user_input = "F"
+                            play_sound(300, 30)                            
                             running = False
                         case _:
+                            play_sound(300, 30)                                                        
                             running = False
                     print("Speed:" , speed_user_input)
     return speed_user_input
@@ -221,6 +226,7 @@ def title(screen, color_user_input): # From KINGDOM3.INC (line 64)
                 case pygame.QUIT:
                     running = False
                 case pygame.KEYDOWN:
+                    play_sound(220, 100)
                     running = False
                     
 ############################################################################################################################################################################################################################
@@ -1058,7 +1064,7 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
 # END of load 
 
 # START of ending_creds
-def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
+def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
     # Use the provided screen
     WIDTH, HEIGHT = screen.get_size()
 
@@ -1137,7 +1143,7 @@ def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
                 running = False
 # END of ending_creds
 
-def run_all_title_screens(screen):
+def run_all_screens(screen):
     color_user_input = color(screen)
     speed_user_input = speed(screen, color_user_input)
     title(screen, color_user_input)
