@@ -18,6 +18,7 @@ def play_sound(frequency, duration, amplitude=4096):
 
 # Play square wave sound for user selection
 #play_sound(300, 30)
-# play_sound(220, 100)
+#play_sound(220, 100)
+#play_sound(220, 100)
 
 pygame.quit()

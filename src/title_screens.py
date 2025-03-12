@@ -429,8 +429,8 @@ def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
 
 ############################################################################################################################################################################################################################
 
-# START of Shareware (info_screen)
-def Shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
+# START of shareware (info_screen)
+def shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
 
     WIDTH, HEIGHT = screen.get_size()
 
@@ -547,7 +547,7 @@ def Shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
             elif event.type == pygame.KEYDOWN:
                 running = False
         clock.tick(60)
-# END of Shareware (info_screen)
+# END of shareware (info_screen)
 
 # START of instruction1
 def instruction1(screen, color_user_input): #
@@ -1081,7 +1081,7 @@ def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
         "   Each volume is just $7.50, or order all six for $35",]
     
     paragraphs2 = ["SUPERNOVA - Explore a galaxy and save a planet from an exploding star!",
-        "   An epic adventure rated by Shareware Magazine as one of the best games",
+        "   An epic adventure rated by shareware Magazine as one of the best games",
         "   ever! Highly advanced game has graphics, sound effects galore, clue",
         "   command, and dozens of unique features. ($10)",
         "",
@@ -1148,7 +1148,7 @@ def run_all_screens(screen):
     speed_user_input = speed(screen, color_user_input)
     title(screen, color_user_input)
     difficulty(screen, color_user_input)
-    Shareware(screen, color_user_input)
+    shareware(screen, color_user_input)
     user_choice = load(screen, color_user_input)
     
     # This runs and proccess the loading screen along with screens in load()
@@ -1156,22 +1156,22 @@ def run_all_screens(screen):
     while startGame: 
         match(user_choice): #
             case "b":
-                print(f"Choice: {user_choice}")
+                print(f"Choice: B")
                 levels(screen)
                 startGame = False
             case "i":
-                print(f"Choice: {user_choice}")
+                print(f"Choice: I")
                 instruction1(screen, color_user_input)
                 instruction2(screen, color_user_input)
                 instruction3(screen, color_user_input)
                 instruction4(screen, color_user_input)
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
             case "m":
-                print(f"Choice: {user_choice}")
+                print(f"Choice: M")
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
             case "s":
-                print(f"Choice: {user_choice}")
+                print(f"Choice: S")
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
             case "a":
-                print(f"Choice: {user_choice}")
+                print(f"Choice: A")
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
