@@ -936,6 +936,830 @@ def instruction4(screen, color_user_input): #
                 running = False
 # END of instruction4 
 
+############################################################################################################################################################################################################################
+
+def marketing(screen, color_user_input): # From KINGDOM3.INC (line 348)
+
+    if color_user_input == "M":  # change to grayscale
+        BACKGROUND = BLACK
+        TITLE_COLOR = WHITE
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+    else:
+        TITLE_COLOR = YELLOW
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+        BACKGROUND = BLUE
+
+    title_font, body_font = load_fonts([WIDTH // 60, WIDTH // 80])
+    
+    # Font render
+    title = title_font.render("THE MARKETING OF KROZ", True, TITLE_COLOR)
+    prompt_text = body_font.render("Press any key to continue", True, FOOTER_COLOR)
+
+    title_rect = title.get_rect(center=(WIDTH // 2, 30))
+
+    body_text_1 = render_text(body_font, "   Kingdom of Kroz II is a user-supported game.  This means that the creator of", WHITE)
+    body_text_2 = render_text(body_font, " this program relies on the appreciation of honest players to pay the game's", WHITE)
+    body_text_3 = render_text(body_font, " registration fee--$7.50.", WHITE)
+    body_text_4 = render_text(body_font, "   Payment of this fee entitles you to all the free help and hints you might", WHITE)
+    body_text_5 = render_text(body_font, " need to enjoy the game.  All letters from registered users are answered", WHITE)
+    body_text_6 = render_text(body_font, " within two days.  (Try to get this kind of support from commercial games!)", WHITE)
+    body_text_7 = render_text(body_font, "   Also, players can order the other Kroz sequels ONLY if this registration", WHITE)
+    body_text_8 = render_text(body_font, " fee is paid.  ($7.50 each or $20 for The Lost Adventures of Kroz.)", WHITE)
+    body_text_9 = render_text(body_font, "   Everyone who orders (or registers) any of the other six Kroz games will also", WHITE)
+    body_text_10 = render_text(body_font, ' get a "Hints, Tricks and Scoring Secrets" guide, and "The Domain of Kroz" map.', WHITE)
+    body_text_11 = render_text(body_font, "   A single Kroz game takes several months to create, up to 200 hours per game!", WHITE)
+    body_text_12 = render_text(body_font, " I can't afford to devote this much time without receiving something in return.", WHITE)
+    body_text_13 = render_text(body_font, " That is why I ask for this small fee, which is only necessary if you enjoy", WHITE)
+    body_text_14 = render_text(body_font, " this game.  In other words, try before you buy.", WHITE)
+    body_text_15 = render_text(body_font, "   Even if you buy this game from a public domain or shareware library, I don't", WHITE)
+    body_text_16 = render_text(body_font, ' receive any of that money.  You\'re simply paying for "storage, distribution,', WHITE)
+    body_text_17 = render_text(body_font, ' disk, and handling."', WHITE)
+    body_text_18 = render_text(body_font, "   Note:  The current Apogee Software address will ALWAYS BE VALID.  Foreign", WHITE)
+    body_text_19 = render_text(body_font, " orders are always welcome, please send U.S. funds/money orders only.", WHITE)
+    body_text_20 = render_text(body_font, "Press any key to continue.", WHITE)
+
+
+    body_text_1_x = center_text_x(WIDTH, body_text_1.get_width())
+    body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 2)
+
+    body_text_2_x = center_text_x(WIDTH, body_text_2.get_width())
+    body_text_2_y = position_subtext_y(body_text_1_y, body_font.get_height(), 1)
+
+    body_text_3_x = center_text_x(WIDTH, body_text_3.get_width())
+    body_text_3_y = position_subtext_y(body_text_2_y, body_font.get_height(), 1)
+
+    body_text_4_x = center_text_x(WIDTH, body_text_4.get_width())
+    body_text_4_y = position_subtext_y(body_text_3_y, body_font.get_height(), 1)
+
+    body_text_5_x = center_text_x(WIDTH, body_text_5.get_width())
+    body_text_5_y = position_subtext_y(body_text_4_y, body_font.get_height(), 1)
+
+    body_text_6_x = center_text_x(WIDTH, body_text_6.get_width())
+    body_text_6_y = position_subtext_y(body_text_5_y, body_font.get_height(), 1)
+
+    body_text_7_x = center_text_x(WIDTH, body_text_7.get_width())
+    body_text_7_y = position_subtext_y(body_text_6_y, body_font.get_height(), 1)
+
+    body_text_8_x = center_text_x(WIDTH, body_text_8.get_width())
+    body_text_8_y = position_subtext_y(body_text_7_y, body_font.get_height(), 1)
+
+    body_text_9_x = center_text_x(WIDTH, body_text_9.get_width())
+    body_text_9_y = position_subtext_y(body_text_8_y, body_font.get_height(), 1)
+
+    body_text_10_x = center_text_x(WIDTH, body_text_10.get_width())
+    body_text_10_y = position_subtext_y(body_text_9_y, body_font.get_height(), 1)
+
+    body_text_11_x = center_text_x(WIDTH, body_text_11.get_width())
+    body_text_11_y = position_subtext_y(body_text_10_y, body_font.get_height(), 1)
+
+    body_text_12_x = center_text_x(WIDTH, body_text_12.get_width())
+    body_text_12_y = position_subtext_y(body_text_11_y, body_font.get_height(), 1)
+
+    body_text_13_x = center_text_x(WIDTH, body_text_13.get_width())
+    body_text_13_y = position_subtext_y(body_text_12_y, body_font.get_height(), 1)
+
+    body_text_14_x = center_text_x(WIDTH, body_text_14.get_width())
+    body_text_14_y = position_subtext_y(body_text_13_y, body_font.get_height(), 1)
+
+    body_text_15_x = center_text_x(WIDTH, body_text_15.get_width())
+    body_text_15_y = position_subtext_y(body_text_14_y, body_font.get_height(), 1)
+
+    body_text_16_x = center_text_x(WIDTH, body_text_16.get_width())
+    body_text_16_y = position_subtext_y(body_text_15_y, body_font.get_height(), 1)
+
+    body_text_17_x = center_text_x(WIDTH, body_text_17.get_width())
+    body_text_17_y = position_subtext_y(body_text_16_y, body_font.get_height(), 1)
+
+    body_text_18_x = center_text_x(WIDTH, body_text_18.get_width())
+    body_text_18_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_19_x = center_text_x(WIDTH, body_text_19.get_width())
+    body_text_19_y = position_subtext_y(body_text_18_y, body_font.get_height(), 1)
+
+    body_text_20_x = center_text_x(WIDTH, body_text_20.get_width())
+    body_text_20_y = position_subtext_y(body_text_19_y, body_font.get_height(), 1)
+
+
+    running = True
+    while running:
+        screen.fill(BACKGROUND)
+        
+        screen.blit(title, title_rect)  # Title
+
+        line_y = title_rect.bottom + 15 # Line
+        pygame.draw.line(screen, TITLE_COLOR, (title_rect.left, line_y),(title_rect.right, line_y), 1)        
+
+        screen.blit(body_text_1, (body_text_1_x, body_text_1_y))
+        screen.blit(body_text_2, (body_text_2_x, body_text_2_y))
+        screen.blit(body_text_3, (body_text_3_x, body_text_3_y))
+        screen.blit(body_text_4, (body_text_4_x, body_text_4_y))
+        screen.blit(body_text_5, (body_text_5_x, body_text_5_y))
+        screen.blit(body_text_6, (body_text_6_x, body_text_6_y))
+        screen.blit(body_text_7, (body_text_7_x, body_text_7_y))
+        screen.blit(body_text_8, (body_text_8_x, body_text_8_y))
+        screen.blit(body_text_9, (body_text_9_x, body_text_9_y))
+        screen.blit(body_text_10, (body_text_10_x, body_text_10_y))
+        screen.blit(body_text_11, (body_text_11_x, body_text_11_y))
+        screen.blit(body_text_12, (body_text_12_x, body_text_12_y))
+        screen.blit(body_text_13, (body_text_13_x, body_text_13_y))
+        screen.blit(body_text_14, (body_text_14_x, body_text_14_y))
+        screen.blit(body_text_15, (body_text_15_x, body_text_15_y))
+        screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
+        screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
+        screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+        screen.blit(body_text_20, (body_text_20_x, body_text_20_y))
+
+        flash(screen, prompt_text, WIDTH, HEIGHT)
+
+        pygame.display.update()  # Refresh the screen
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                running = False
+
+############################################################################################################################################################################################################################
+
+def story_1(screen, color_user_input): # From KINGDOM4.INC (line 379)
+
+    if color_user_input == "M":  # change to grayscale
+        BACKGROUND = BLACK
+        TITLE_COLOR = WHITE
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+    else:
+        TITLE_COLOR = YELLOW
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+        BACKGROUND = BLUE
+
+    title_font, body_font = load_fonts([WIDTH // 60, WIDTH // 80])
+    
+    # Font render
+    title = title_font.render("THE STORY BEHIND KROZ", True, TITLE_COLOR)
+    prompt_text = body_font.render("Press any key to continue", True, FOOTER_COLOR)
+
+    title_rect = title.get_rect(center=(WIDTH // 2, 30))
+
+    body_text_1 = render_text(body_font, "   The original Kroz Trilogy (consisting of Caverns of Kroz, Dungeons of Kroz,", WHITE)
+    body_text_2 = render_text(body_font, " and Kingdom of Kroz) was developed after I spent many hours playing another", WHITE)
+    body_text_3 = render_text(body_font, " explore-the-levels type game titled Rogue.  I never could finish Rogue,", WHITE)
+    body_text_4 = render_text(body_font, " though, because the game relied too much on luck and random occurrences.", WHITE)
+    body_text_5 = render_text(body_font, "   The name 'Kroz' is actually Zork (an Infocom text adventure) spelled in", WHITE)
+    body_text_6 = render_text(body_font, " reverse.  Many players still inquire about this bit of trivia.  The game was", WHITE)
+    body_text_7 = render_text(body_font, " first designed without predefined level layouts, meaning every level was a", WHITE)
+    body_text_8 = render_text(body_font, " random placement of creatures and play field objects.  New objects, like", WHITE)
+    body_text_9 = render_text(body_font, " spells, lava, doors, etc., were added quickly as the first Kroz game took", WHITE)
+    body_text_10 = render_text(body_font, " shape, including the ability to have predefined level floor plans.", WHITE)
+    body_text_11 = render_text(body_font, "   My main objective was to create a game that wasn't all fast paced action,", WHITE)
+    body_text_12 = render_text(body_font, " but also included strategy and puzzle solving.  Kingdom of Kroz was entered", WHITE)
+    body_text_13 = render_text(body_font, " in a national programming contest in 1988 and took top honors in the game", WHITE)
+    body_text_14 = render_text(body_font, " category, and number two overall (beaten by a spreadsheet program.)", WHITE)
+    body_text_15 = render_text(body_font, "   The latest Kroz games have been greatly re-designed and re-programmed, but", WHITE)
+    body_text_16 = render_text(body_font, " the familiar appearance has been mostly maintained.  You will discover new", WHITE)
+    body_text_17 = render_text(body_font, " dangers, creatures and objects in your adventures below.", WHITE)
+    body_text_18 = render_text(body_font, "   Thanks to all the players of Kroz who contributed dozens of suggestions,", WHITE)
+    body_text_19 = render_text(body_font, " ideas and improvements that were incorporated in later versions of Kroz.", WHITE)
+    body_text_20 = render_text(body_font, "Press any key to continue.", WHITE)
+
+
+    body_text_1_x = center_text_x(WIDTH, body_text_1.get_width())
+    body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 2)
+
+    body_text_2_x = center_text_x(WIDTH, body_text_2.get_width())
+    body_text_2_y = position_subtext_y(body_text_1_y, body_font.get_height(), 1)
+
+    body_text_3_x = center_text_x(WIDTH, body_text_3.get_width())
+    body_text_3_y = position_subtext_y(body_text_2_y, body_font.get_height(), 1)
+
+    body_text_4_x = center_text_x(WIDTH, body_text_4.get_width())
+    body_text_4_y = position_subtext_y(body_text_3_y, body_font.get_height(), 1)
+
+    body_text_5_x = center_text_x(WIDTH, body_text_5.get_width())
+    body_text_5_y = position_subtext_y(body_text_4_y, body_font.get_height(), 1)
+
+    body_text_6_x = center_text_x(WIDTH, body_text_6.get_width())
+    body_text_6_y = position_subtext_y(body_text_5_y, body_font.get_height(), 1)
+
+    body_text_7_x = center_text_x(WIDTH, body_text_7.get_width())
+    body_text_7_y = position_subtext_y(body_text_6_y, body_font.get_height(), 1)
+
+    body_text_8_x = center_text_x(WIDTH, body_text_8.get_width())
+    body_text_8_y = position_subtext_y(body_text_7_y, body_font.get_height(), 1)
+
+    body_text_9_x = center_text_x(WIDTH, body_text_9.get_width())
+    body_text_9_y = position_subtext_y(body_text_8_y, body_font.get_height(), 1)
+
+    body_text_10_x = center_text_x(WIDTH, body_text_10.get_width())
+    body_text_10_y = position_subtext_y(body_text_9_y, body_font.get_height(), 1)
+
+    body_text_11_x = center_text_x(WIDTH, body_text_11.get_width())
+    body_text_11_y = position_subtext_y(body_text_10_y, body_font.get_height(), 1)
+
+    body_text_12_x = center_text_x(WIDTH, body_text_12.get_width())
+    body_text_12_y = position_subtext_y(body_text_11_y, body_font.get_height(), 1)
+
+    body_text_13_x = center_text_x(WIDTH, body_text_13.get_width())
+    body_text_13_y = position_subtext_y(body_text_12_y, body_font.get_height(), 1)
+
+    body_text_14_x = center_text_x(WIDTH, body_text_14.get_width())
+    body_text_14_y = position_subtext_y(body_text_13_y, body_font.get_height(), 1)
+
+    body_text_15_x = center_text_x(WIDTH, body_text_15.get_width())
+    body_text_15_y = position_subtext_y(body_text_14_y, body_font.get_height(), 1)
+
+    body_text_16_x = center_text_x(WIDTH, body_text_16.get_width())
+    body_text_16_y = position_subtext_y(body_text_15_y, body_font.get_height(), 1)
+
+    body_text_17_x = center_text_x(WIDTH, body_text_17.get_width())
+    body_text_17_y = position_subtext_y(body_text_16_y, body_font.get_height(), 1)
+
+    body_text_18_x = center_text_x(WIDTH, body_text_18.get_width())
+    body_text_18_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_19_x = center_text_x(WIDTH, body_text_19.get_width())
+    body_text_19_y = position_subtext_y(body_text_18_y, body_font.get_height(), 1)
+
+    body_text_20_x = center_text_x(WIDTH, body_text_20.get_width())
+    body_text_20_y = position_subtext_y(body_text_19_y, body_font.get_height(), 1)
+
+
+    running = True
+    while running:
+        screen.fill(BACKGROUND)
+        
+        screen.blit(title, title_rect)  # Title
+
+        line_y = title_rect.bottom + 15 # Line
+        pygame.draw.line(screen, TITLE_COLOR, (title_rect.left, line_y),(title_rect.right, line_y), 1)        
+
+        screen.blit(body_text_1, (body_text_1_x, body_text_1_y))
+        screen.blit(body_text_2, (body_text_2_x, body_text_2_y))
+        screen.blit(body_text_3, (body_text_3_x, body_text_3_y))
+        screen.blit(body_text_4, (body_text_4_x, body_text_4_y))
+        screen.blit(body_text_5, (body_text_5_x, body_text_5_y))
+        screen.blit(body_text_6, (body_text_6_x, body_text_6_y))
+        screen.blit(body_text_7, (body_text_7_x, body_text_7_y))
+        screen.blit(body_text_8, (body_text_8_x, body_text_8_y))
+        screen.blit(body_text_9, (body_text_9_x, body_text_9_y))
+        screen.blit(body_text_10, (body_text_10_x, body_text_10_y))
+        screen.blit(body_text_11, (body_text_11_x, body_text_11_y))
+        screen.blit(body_text_12, (body_text_12_x, body_text_12_y))
+        screen.blit(body_text_13, (body_text_13_x, body_text_13_y))
+        screen.blit(body_text_14, (body_text_14_x, body_text_14_y))
+        screen.blit(body_text_15, (body_text_15_x, body_text_15_y))
+        screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
+        screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
+        screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+        screen.blit(body_text_20, (body_text_20_x, body_text_20_y))
+
+        flash(screen, prompt_text, WIDTH, HEIGHT)
+
+        pygame.display.update()  # Refresh the screen
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                running = False
+
+def story_2(screen, color_user_input): # From KINGDOM4.INC (line 379)
+
+    if color_user_input == "M":  # change to grayscale
+        BACKGROUND = BLACK
+        TITLE_COLOR = WHITE
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+    else:
+        TITLE_COLOR = YELLOW
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+        BACKGROUND = BLUE
+
+    title_font, body_font = load_fonts([WIDTH // 60, WIDTH // 80])
+    
+    # Font render
+    title = title_font.render("THE STORY BEHIND KROZ", True, TITLE_COLOR)
+    prompt_text = body_font.render("Press any key to continue", True, FOOTER_COLOR)
+
+    title_rect = title.get_rect(center=(WIDTH // 2, 30))
+
+    body_text_1 = render_text(body_font, "   Kroz is a hobby that's gotten out of control!", WHITE)
+    body_text_2 = render_text(body_font, "   Kroz is truly a phenomenon in the user-supported software market.  The", WHITE)
+    body_text_3 = render_text(body_font, " overwhelming success of the original Kroz games was completely unexpected.", WHITE)
+    body_text_4 = render_text(body_font, " Most (probably 99%) of all 'shareware' games are not profitable for their", WHITE)
+    body_text_5 = render_text(body_font, " creator.  This is a well-known fact among the community of shareware game", WHITE)
+    body_text_6 = render_text(body_font, " authors, and one that I've verified by speaking to many other games de-", WHITE)
+    body_text_7 = render_text(body_font, " signers.  Most people simply don't register games.", WHITE)
+    body_text_8 = render_text(body_font, "   Through my research the Kroz games are the only user-supported games that", WHITE)
+    body_text_9 = render_text(body_font, " generate a substantial amount of registrations and orders for its creator,", WHITE)
+    body_text_10 = render_text(body_font, " namely, Scott Miller (me).  I don't know what cord I've struck with players,", WHITE)
+    body_text_11 = render_text(body_font, " but everyday I receive fascinating and appreciative letters from players", WHITE)
+    body_text_12 = render_text(body_font, " telling me how much they enjoy the Kroz games.", WHITE)
+    body_text_13 = render_text(body_font, "   Thanks to Kroz I now know what a mutual fund is, but on the downside my", WHITE)
+    body_text_14 = render_text(body_font, " taxes require a book two inches thick to figure out.", WHITE)
+    body_text_15 = render_text(body_font, "   Will Kroz ever end?  I thought that THE FINAL CRUSADE would be the closing", WHITE)
+    body_text_16 = render_text(body_font, " chapter--but a flood of letters demanding more proved that I'm a pushover.", WHITE)
+    body_text_17 = render_text(body_font, " I guess as long as the letters keep coming, I'll continue to make Kroz games.", WHITE)
+    body_text_18 = render_text(body_font, " After all, Kroz is like my second home now, one that I like to visit often...", WHITE)
+    body_text_19 = render_text(body_font, "                                                        -- Scott Miller", WHITE)
+
+
+    body_text_1_x = center_text_x(WIDTH, body_text_1.get_width())
+    body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 2)
+
+    body_text_2_x = center_text_x(WIDTH, body_text_2.get_width())
+    body_text_2_y = position_subtext_y(body_text_1_y, body_font.get_height(), 1)
+
+    body_text_3_x = center_text_x(WIDTH, body_text_3.get_width())
+    body_text_3_y = position_subtext_y(body_text_2_y, body_font.get_height(), 1)
+
+    body_text_4_x = center_text_x(WIDTH, body_text_4.get_width())
+    body_text_4_y = position_subtext_y(body_text_3_y, body_font.get_height(), 1)
+
+    body_text_5_x = center_text_x(WIDTH, body_text_5.get_width())
+    body_text_5_y = position_subtext_y(body_text_4_y, body_font.get_height(), 1)
+
+    body_text_6_x = center_text_x(WIDTH, body_text_6.get_width())
+    body_text_6_y = position_subtext_y(body_text_5_y, body_font.get_height(), 1)
+
+    body_text_7_x = center_text_x(WIDTH, body_text_7.get_width())
+    body_text_7_y = position_subtext_y(body_text_6_y, body_font.get_height(), 1)
+
+    body_text_8_x = center_text_x(WIDTH, body_text_8.get_width())
+    body_text_8_y = position_subtext_y(body_text_7_y, body_font.get_height(), 1)
+
+    body_text_9_x = center_text_x(WIDTH, body_text_9.get_width())
+    body_text_9_y = position_subtext_y(body_text_8_y, body_font.get_height(), 1)
+
+    body_text_10_x = center_text_x(WIDTH, body_text_10.get_width())
+    body_text_10_y = position_subtext_y(body_text_9_y, body_font.get_height(), 1)
+
+    body_text_11_x = center_text_x(WIDTH, body_text_11.get_width())
+    body_text_11_y = position_subtext_y(body_text_10_y, body_font.get_height(), 1)
+
+    body_text_12_x = center_text_x(WIDTH, body_text_12.get_width())
+    body_text_12_y = position_subtext_y(body_text_11_y, body_font.get_height(), 1)
+
+    body_text_13_x = center_text_x(WIDTH, body_text_13.get_width())
+    body_text_13_y = position_subtext_y(body_text_12_y, body_font.get_height(), 1)
+
+    body_text_14_x = center_text_x(WIDTH, body_text_14.get_width())
+    body_text_14_y = position_subtext_y(body_text_13_y, body_font.get_height(), 1)
+
+    body_text_15_x = center_text_x(WIDTH, body_text_15.get_width())
+    body_text_15_y = position_subtext_y(body_text_14_y, body_font.get_height(), 1)
+
+    body_text_16_x = center_text_x(WIDTH, body_text_16.get_width())
+    body_text_16_y = position_subtext_y(body_text_15_y, body_font.get_height(), 1)
+
+    body_text_17_x = center_text_x(WIDTH, body_text_17.get_width())
+    body_text_17_y = position_subtext_y(body_text_16_y, body_font.get_height(), 1)
+
+    body_text_18_x = center_text_x(WIDTH, body_text_18.get_width())
+    body_text_18_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_19_x = center_text_x(WIDTH, body_text_19.get_width())
+    body_text_19_y = position_subtext_y(body_text_18_y, body_font.get_height(), 1)
+
+    running = True
+    while running:
+        screen.fill(BACKGROUND)
+        
+        screen.blit(title, title_rect)  # Title
+
+        line_y = title_rect.bottom + 15 # Line
+        pygame.draw.line(screen, TITLE_COLOR, (title_rect.left, line_y),(title_rect.right, line_y), 1)        
+
+        screen.blit(body_text_1, (body_text_1_x, body_text_1_y))
+        screen.blit(body_text_2, (body_text_2_x, body_text_2_y))
+        screen.blit(body_text_3, (body_text_3_x, body_text_3_y))
+        screen.blit(body_text_4, (body_text_4_x, body_text_4_y))
+        screen.blit(body_text_5, (body_text_5_x, body_text_5_y))
+        screen.blit(body_text_6, (body_text_6_x, body_text_6_y))
+        screen.blit(body_text_7, (body_text_7_x, body_text_7_y))
+        screen.blit(body_text_8, (body_text_8_x, body_text_8_y))
+        screen.blit(body_text_9, (body_text_9_x, body_text_9_y))
+        screen.blit(body_text_10, (body_text_10_x, body_text_10_y))
+        screen.blit(body_text_11, (body_text_11_x, body_text_11_y))
+        screen.blit(body_text_12, (body_text_12_x, body_text_12_y))
+        screen.blit(body_text_13, (body_text_13_x, body_text_13_y))
+        screen.blit(body_text_14, (body_text_14_x, body_text_14_y))
+        screen.blit(body_text_15, (body_text_15_x, body_text_15_y))
+        screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
+        screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
+        screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+
+        flash(screen, prompt_text, WIDTH, HEIGHT)
+
+        pygame.display.update()  # Refresh the screen
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                running = False
+
+############################################################################################################################################################################################################################
+
+def original(screen, color_user_input): # From KINGDOM4.INC (line 438)
+
+    if color_user_input == "M":  # change to grayscale
+        BACKGROUND = BLACK
+        TITLE_COLOR = WHITE
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+    else:
+        TITLE_COLOR = YELLOW
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+        BACKGROUND = BLUE
+
+    title_font, body_font = load_fonts([WIDTH // 60, WIDTH // 80])
+    
+    # Font render
+    title = title_font.render("THE ORIGINAL KROZ GAMES", True, TITLE_COLOR)
+    prompt_text = body_font.render("Press any key to continue", True, FOOTER_COLOR)
+
+    title_rect = title.get_rect(center=(WIDTH // 2, 30))
+
+    body_text_1 = render_text(body_font, "   The Lost Adventures of Kroz is the latest addition to the Kroz family of", WHITE)
+    body_text_2 = render_text(body_font, " games.  Before this game there are six more Kroz volumes, separated into two", WHITE)
+    body_text_3 = render_text(body_font, " trilogies:  The Kroz Trilogy and The Super Kroz Trilogy.", WHITE)
+    body_text_4 = render_text(body_font, "   The original Kroz Trilogy was such a surprising success that I decided to", WHITE)
+    body_text_5 = render_text(body_font, " created a second 'Super Kroz' trilogy.  The first three original Kroz", WHITE)
+    body_text_6 = render_text(body_font, " games are:     Kingdom of Kroz     Caverns of Kroz     Dungeons of Kroz.", WHITE)  # Replace � with spaces
+    body_text_7 = render_text(body_font, " All three are still available and are constantly being updated and improved.", WHITE)
+    body_text_8 = render_text(body_font, "   The original Kroz Trilogy games can be purchased for $7.50 each, or all 3", WHITE)
+    body_text_9 = render_text(body_font, " for $20 (these prices include postage, disks, and handling).", WHITE)
+    body_text_10 = render_text(body_font, "   Only Kingdom of Kroz can be placed in a shareware library for distribution,", WHITE)
+    body_text_11 = render_text(body_font, " and the other two can only be ordered from Apogee Software Productions.", WHITE)
+    body_text_12 = render_text(body_font, "   The Super Kroz Trilogy volumes are revamped and greatly improved.  They are", WHITE)
+    body_text_13 = render_text(body_font, "     Return to Kroz     Temple of Kroz     The Final Crusade of Kroz.  The last", WHITE)  # Replace � with spaces
+    body_text_14 = render_text(body_font, " three volumes were supposed to be the end of Kroz, but the mail kept coming", WHITE)
+    body_text_15 = render_text(body_font, " and again I was impelled to create another Kroz adventure.", WHITE)
+    body_text_16 = render_text(body_font, "   All Kroz games work on all monitors, either graphics or monochrome systems.", WHITE)
+    body_text_17 = render_text(body_font, " Plus, they only rely on keyboard control, and have slow-down routines that", WHITE)
+    body_text_18 = render_text(body_font, " permit them to function correctly on any speed IBM PC compatible computer.", WHITE)
+    body_text_19 = render_text(body_font, "Press any key to continue.", WHITE)
+
+    body_text_1_x = center_text_x(WIDTH, body_text_1.get_width())
+    body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 2)
+
+    body_text_2_x = center_text_x(WIDTH, body_text_2.get_width())
+    body_text_2_y = position_subtext_y(body_text_1_y, body_font.get_height(), 1)
+
+    body_text_3_x = center_text_x(WIDTH, body_text_3.get_width())
+    body_text_3_y = position_subtext_y(body_text_2_y, body_font.get_height(), 1)
+
+    body_text_4_x = center_text_x(WIDTH, body_text_4.get_width())
+    body_text_4_y = position_subtext_y(body_text_3_y, body_font.get_height(), 1)
+
+    body_text_5_x = center_text_x(WIDTH, body_text_5.get_width())
+    body_text_5_y = position_subtext_y(body_text_4_y, body_font.get_height(), 1)
+
+    body_text_6_x = center_text_x(WIDTH, body_text_6.get_width())
+    body_text_6_y = position_subtext_y(body_text_5_y, body_font.get_height(), 1)
+
+    body_text_7_x = center_text_x(WIDTH, body_text_7.get_width())
+    body_text_7_y = position_subtext_y(body_text_6_y, body_font.get_height(), 1)
+
+    body_text_8_x = center_text_x(WIDTH, body_text_8.get_width())
+    body_text_8_y = position_subtext_y(body_text_7_y, body_font.get_height(), 1)
+
+    body_text_9_x = center_text_x(WIDTH, body_text_9.get_width())
+    body_text_9_y = position_subtext_y(body_text_8_y, body_font.get_height(), 1)
+
+    body_text_10_x = center_text_x(WIDTH, body_text_10.get_width())
+    body_text_10_y = position_subtext_y(body_text_9_y, body_font.get_height(), 1)
+
+    body_text_11_x = center_text_x(WIDTH, body_text_11.get_width())
+    body_text_11_y = position_subtext_y(body_text_10_y, body_font.get_height(), 1)
+
+    body_text_12_x = center_text_x(WIDTH, body_text_12.get_width())
+    body_text_12_y = position_subtext_y(body_text_11_y, body_font.get_height(), 1)
+
+    body_text_13_x = center_text_x(WIDTH, body_text_13.get_width())
+    body_text_13_y = position_subtext_y(body_text_12_y, body_font.get_height(), 1)
+
+    body_text_14_x = center_text_x(WIDTH, body_text_14.get_width())
+    body_text_14_y = position_subtext_y(body_text_13_y, body_font.get_height(), 1)
+
+    body_text_15_x = center_text_x(WIDTH, body_text_15.get_width())
+    body_text_15_y = position_subtext_y(body_text_14_y, body_font.get_height(), 1)
+
+    body_text_16_x = center_text_x(WIDTH, body_text_16.get_width())
+    body_text_16_y = position_subtext_y(body_text_15_y, body_font.get_height(), 1)
+
+    body_text_17_x = center_text_x(WIDTH, body_text_17.get_width())
+    body_text_17_y = position_subtext_y(body_text_16_y, body_font.get_height(), 1)
+
+    body_text_18_x = center_text_x(WIDTH, body_text_18.get_width())
+    body_text_18_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_19_x = center_text_x(WIDTH, body_text_19.get_width())
+    body_text_19_y = position_subtext_y(body_text_18_y, body_font.get_height(), 1)
+
+    running = True
+    while running:
+        screen.fill(BACKGROUND)
+        
+        screen.blit(title, title_rect)  # Title
+
+        line_y = title_rect.bottom + 15 # Line
+        pygame.draw.line(screen, TITLE_COLOR, (title_rect.left, line_y),(title_rect.right, line_y), 1)        
+
+        screen.blit(body_text_1, (body_text_1_x, body_text_1_y))
+        screen.blit(body_text_2, (body_text_2_x, body_text_2_y))
+        screen.blit(body_text_3, (body_text_3_x, body_text_3_y))
+        screen.blit(body_text_4, (body_text_4_x, body_text_4_y))
+        screen.blit(body_text_5, (body_text_5_x, body_text_5_y))
+        screen.blit(body_text_6, (body_text_6_x, body_text_6_y))
+        screen.blit(body_text_7, (body_text_7_x, body_text_7_y))
+        screen.blit(body_text_8, (body_text_8_x, body_text_8_y))
+        screen.blit(body_text_9, (body_text_9_x, body_text_9_y))
+        screen.blit(body_text_10, (body_text_10_x, body_text_10_y))
+        screen.blit(body_text_11, (body_text_11_x, body_text_11_y))
+        screen.blit(body_text_12, (body_text_12_x, body_text_12_y))
+        screen.blit(body_text_13, (body_text_13_x, body_text_13_y))
+        screen.blit(body_text_14, (body_text_14_x, body_text_14_y))
+        screen.blit(body_text_15, (body_text_15_x, body_text_15_y))
+        screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
+        screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
+        screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+
+        # Draw squares where the � characters were
+        square_size = 10
+        square_color = WHITE
+        pygame.draw.rect(screen, square_color, (body_text_6_x + 20, body_text_6_y + 5, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_6_x + 180, body_text_6_y + 5, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_6_x + 340, body_text_6_y + 5, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_13_x + 20, body_text_13_y + 5, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_13_x + 180, body_text_13_y + 5, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_13_x + 340, body_text_13_y + 5, square_size, square_size))
+
+        flash(screen, prompt_text, WIDTH, HEIGHT)
+
+        pygame.display.update()  # Refresh the screen
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                running = False
+############################################################################################################################################################################################################################
+
+def about(screen, color_user_input): # From KINGDOM4.INC (line 467)
+
+    if color_user_input == "M":  # change to grayscale
+        BACKGROUND = BLACK
+        TITLE_COLOR = WHITE
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+    else:
+        TITLE_COLOR = YELLOW
+        FOOTER = WHITE
+        FOOTER_COLOR = WHITE
+        BACKGROUND = BLUE
+
+    title_font, body_font = load_fonts([WIDTH // 60, WIDTH // 80])
+    
+    # Font render
+    title = title_font.render("ABOUT THE AUTHOR", True, YELLOW)
+    prompt_text = body_font.render("Press any key to continue", True, TITLE_COLOR)
+
+    title_rect = title.get_rect(center=(WIDTH // 2, 30))
+
+    body_text_1 = render_text(body_font, "   Scott Miller, the creator of all the Kroz games, along with Supernova, Trek", WHITE)
+    body_text_2 = render_text(body_font, " Trivia and Beyond the Titanic (all shareware games) began programming in high", WHITE)
+    body_text_3 = render_text(body_font, " school in 1975.  Since then he's created over 100 games and has had dozens", WHITE)
+    body_text_4 = render_text(body_font, " publishered by BIG BLUE DISK, I.B.Magazette and Keypunch Software.", WHITE)
+    body_text_5 = render_text(body_font, "", WHITE)
+    body_text_6 = render_text(body_font, "   For over three years he wrote two weekly computer columns for the Dallas", WHITE)
+    body_text_7 = render_text(body_font, " Morning News, one of the nation's largest newspapers.  He also co-authored", WHITE)
+    body_text_8 = render_text(body_font, ' a video game strategy book titled, "Shootout: Beating the Video Games."', WHITE)
+    body_text_9 = render_text(body_font, " Scott has written articles for COMPUTE!'s PC and PCjr Magazine and is a", WHITE)
+    body_text_10 = render_text(body_font, " software reviewer with COMPUTE! Publications.", WHITE)
+    body_text_11 = render_text(body_font, "", WHITE)
+    body_text_12 = render_text(body_font, "   Hobbies include softball, running, tennis, karate (1st degree black belt),", WHITE)
+    body_text_13 = render_text(body_font, " drumming, rock music, science fiction, and creating new computer games.", WHITE)
+    body_text_14 = render_text(body_font, " Favorite computer games are M.U.L.E., Jumpman, Planetfall, Enchanter, Zork,", WHITE)
+    body_text_15 = render_text(body_font, " Spelunker, and Archon.  All are games of strategy, with action secondary.", WHITE)
+    body_text_16 = render_text(body_font, "", WHITE)
+    body_text_17 = render_text(body_font, "   Scott creates all Apogee Software programs on an AST Premium 80386 (20 Mhz)", WHITE)
+    body_text_18 = render_text(body_font, " equipped with VGA graphics, a NEC MultiSync II and an HP LaserJet series II.", WHITE)
+    body_text_19 = render_text(body_font, " The cost to market each Kroz game to the many shareware libraries and BBS's", WHITE)
+    body_text_20 = render_text(body_font, " is over $2000 per game.  All of the appreciative letters make it worth it!", WHITE)
+    body_text_21 = render_text(body_font, "Press any key to continue.", WHITE)
+
+    body_text_1_x = center_text_x(WIDTH, body_text_1.get_width())
+    body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 2)
+
+    body_text_2_x = center_text_x(WIDTH, body_text_2.get_width())
+    body_text_2_y = position_subtext_y(body_text_1_y, body_font.get_height(), 1)
+
+    body_text_3_x = center_text_x(WIDTH, body_text_3.get_width())
+    body_text_3_y = position_subtext_y(body_text_2_y, body_font.get_height(), 1)
+
+    body_text_4_x = center_text_x(WIDTH, body_text_4.get_width())
+    body_text_4_y = position_subtext_y(body_text_3_y, body_font.get_height(), 1)
+
+    body_text_5_x = center_text_x(WIDTH, body_text_5.get_width())
+    body_text_5_y = position_subtext_y(body_text_4_y, body_font.get_height(), 1)
+
+    body_text_6_x = center_text_x(WIDTH, body_text_6.get_width())
+    body_text_6_y = position_subtext_y(body_text_5_y, body_font.get_height(), 1)
+
+    body_text_7_x = center_text_x(WIDTH, body_text_7.get_width())
+    body_text_7_y = position_subtext_y(body_text_6_y, body_font.get_height(), 1)
+
+    body_text_8_x = center_text_x(WIDTH, body_text_8.get_width())
+    body_text_8_y = position_subtext_y(body_text_7_y, body_font.get_height(), 1)
+
+    body_text_9_x = center_text_x(WIDTH, body_text_9.get_width())
+    body_text_9_y = position_subtext_y(body_text_8_y, body_font.get_height(), 1)
+
+    body_text_10_x = center_text_x(WIDTH, body_text_10.get_width())
+    body_text_10_y = position_subtext_y(body_text_9_y, body_font.get_height(), 1)
+
+    body_text_11_x = center_text_x(WIDTH, body_text_11.get_width())
+    body_text_11_y = position_subtext_y(body_text_10_y, body_font.get_height(), 1)
+
+    body_text_12_x = center_text_x(WIDTH, body_text_12.get_width())
+    body_text_12_y = position_subtext_y(body_text_11_y, body_font.get_height(), 1)
+
+    body_text_13_x = center_text_x(WIDTH, body_text_13.get_width())
+    body_text_13_y = position_subtext_y(body_text_12_y, body_font.get_height(), 1)
+
+    body_text_14_x = center_text_x(WIDTH, body_text_14.get_width())
+    body_text_14_y = position_subtext_y(body_text_13_y, body_font.get_height(), 1)
+
+    body_text_15_x = center_text_x(WIDTH, body_text_15.get_width())
+    body_text_15_y = position_subtext_y(body_text_14_y, body_font.get_height(), 1)
+
+    body_text_16_x = center_text_x(WIDTH, body_text_16.get_width())
+    body_text_16_y = position_subtext_y(body_text_15_y, body_font.get_height(), 1)
+
+    body_text_17_x = center_text_x(WIDTH, body_text_17.get_width())
+    body_text_17_y = position_subtext_y(body_text_16_y, body_font.get_height(), 1)
+
+    body_text_18_x = center_text_x(WIDTH, body_text_18.get_width())
+    body_text_18_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_19_x = center_text_x(WIDTH, body_text_19.get_width())
+    body_text_19_y = position_subtext_y(body_text_18_y, body_font.get_height(), 1)
+
+    body_text_20_x = center_text_x(WIDTH, body_text_20.get_width())
+    body_text_20_y = position_subtext_y(body_text_19_y, body_font.get_height(), 1)
+
+    body_text_21_x = center_text_x(WIDTH, body_text_21.get_width())
+    body_text_21_y = position_subtext_y(body_text_20_y, body_font.get_height(), 1)
+
+
+    running = True
+    while running:
+        screen.fill(BACKGROUND)
+        
+        screen.blit(title, title_rect)  # Title
+
+        line_y = title_rect.bottom + 15 # Line
+        pygame.draw.line(screen, TITLE_COLOR, (title_rect.left, line_y),(title_rect.right, line_y), 1)        
+
+        screen.blit(body_text_1, (body_text_1_x, body_text_1_y))
+        screen.blit(body_text_2, (body_text_2_x, body_text_2_y))
+        screen.blit(body_text_3, (body_text_3_x, body_text_3_y))
+        screen.blit(body_text_4, (body_text_4_x, body_text_4_y))
+        screen.blit(body_text_5, (body_text_5_x, body_text_5_y))
+        screen.blit(body_text_6, (body_text_6_x, body_text_6_y))
+        screen.blit(body_text_7, (body_text_7_x, body_text_7_y))
+        screen.blit(body_text_8, (body_text_8_x, body_text_8_y))
+        screen.blit(body_text_9, (body_text_9_x, body_text_9_y))
+        screen.blit(body_text_10, (body_text_10_x, body_text_10_y))
+        screen.blit(body_text_11, (body_text_11_x, body_text_11_y))
+        screen.blit(body_text_12, (body_text_12_x, body_text_12_y))
+        screen.blit(body_text_13, (body_text_13_x, body_text_13_y))
+        screen.blit(body_text_14, (body_text_14_x, body_text_14_y))
+        screen.blit(body_text_15, (body_text_15_x, body_text_15_y))
+        screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
+        screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
+        screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+        screen.blit(body_text_20, (body_text_20_x, body_text_20_y))
+        screen.blit(body_text_21, (body_text_21_x, body_text_21_y))
+
+        flash(screen, prompt_text, WIDTH, HEIGHT)
+
+        pygame.display.update()  # Refresh the screen
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                running = False
+                
+############################################################################################################################################################################################################################
+
+# END of load 
+
+# START of ending_creds
+def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
+    # Use the provided screen
+    WIDTH, HEIGHT = screen.get_size()
+
+    # Font setup
+    text_font = load_font(10)
+    
+    # Render text elements
+    title = text_font.render("KINGDOM OF KROZ II", True, GRAY)
+    subtitle = text_font.render("An Apogee Software Production", True, GRAY)
+    subtitle2 = text_font.render("Other great games available from Scott Miller:", True, GRAY)
+    
+    paragraphs1 = ["Six more Kroz games! KINGDOM OF KROZ I, CAVERNS OF KROZ, DUNGEONS OF KROZ,",
+        "   RETURN OF KROZ, TEMPLE OF KROZ and THE FINAL CRUSADE OF KROZ.",
+        "   Each volume is just $7.50, or order all six for $35",]
+    
+    paragraphs2 = ["SUPERNOVA - Explore a galaxy and save a planet from an exploding star!",
+        "   An epic adventure rated by shareware Magazine as one of the best games",
+        "   ever! Highly advanced game has graphics, sound effects galore, clue",
+        "   command, and dozens of unique features. ($10)",
+        "",
+        "BEYOND THE TITANIC - A fantastic adventure of exploration and survival.",
+        "   What really happened? Sound effects and 16 color screens. ($8)",
+        "",
+        "WORD WHIZ - New game that challenges your knowledge of the English",
+        "   language. Fun to play, yet very educational, too. ($5)"]
+    
+    paragraphs3 = ["THE LOST ADVENTURES OF KROZ - All-new seventh Kroz game with 75 of the best",
+        "   levels yet! Built-in contest! New features galore. ($20)"]
+    
+    # Square bullet logic
+    start_x, start_y = 30, 240
+    line_spacing = 25
+    bullet_size = 8
+    
+    text_rect = title.get_rect(center=(WIDTH // 2, 30))
+    
+    running = True
+    while running:
+        screen.fill((0, 0, 0))
+        screen.blit(title, text_rect)
+        screen.blit(subtitle, (250, 50))
+        screen.blit(subtitle2, (0, 110))
+        
+        # Paragraph 1
+        y_pos = 130
+        for text in paragraphs1:
+            y_pos += 20
+            if paragraphs1[0]:
+                pygame.draw.rect(screen, WHITE, (start_x, y_pos, bullet_size, bullet_size))
+            text_surface = text_font.render(text, False, WHITE)
+            screen.blit(text_surface, (start_x + 20, y_pos))
+        
+        # Paragraph 2
+        for i, text in enumerate(paragraphs2):
+            y_pos = start_y + i * line_spacing
+            if i == 1:
+                pygame.draw.rect(screen, GRAY, (start_x, y_pos, bullet_size, bullet_size))
+            text_surface = text_font.render(text, False, GRAY)
+            screen.blit(text_surface, (start_x + 20, y_pos))
+        
+        # Paragraph 3
+        y_pos = 500
+        for text in paragraphs3:
+            y_pos += 20
+            if paragraphs3[0]:
+                pygame.draw.rect(screen, WHITE, (start_x, y_pos, bullet_size, bullet_size))
+            text_surface = text_font.render(text, False, WHITE)
+            screen.blit(text_surface, (start_x + 20, y_pos))
+        
+        pygame.display.flip()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                running = False
+# END of ending_creds
+
+############################################################################################################################################################################################################################
+
 # START of load
 def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes other screens
 
@@ -1058,90 +1882,10 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
             elif event.type == pygame.KEYDOWN:
                 if event.key in key_map:
                     user_input2 = key_map[event.key]
-                    print(f"Key pressed: {user_input2}")
                     return user_input2
         pygame.display.update()
-# END of load 
-
-# START of ending_creds
-def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
-    # Use the provided screen
-    WIDTH, HEIGHT = screen.get_size()
-
-    # Font setup
-    text_font = load_font(10)
-    
-    # Render text elements
-    title = text_font.render("KINGDOM OF KROZ II", True, GRAY)
-    subtitle = text_font.render("An Apogee Software Production", True, GRAY)
-    subtitle2 = text_font.render("Other great games available from Scott Miller:", True, GRAY)
-    
-    paragraphs1 = ["Six more Kroz games! KINGDOM OF KROZ I, CAVERNS OF KROZ, DUNGEONS OF KROZ,",
-        "   RETURN OF KROZ, TEMPLE OF KROZ and THE FINAL CRUSADE OF KROZ.",
-        "   Each volume is just $7.50, or order all six for $35",]
-    
-    paragraphs2 = ["SUPERNOVA - Explore a galaxy and save a planet from an exploding star!",
-        "   An epic adventure rated by shareware Magazine as one of the best games",
-        "   ever! Highly advanced game has graphics, sound effects galore, clue",
-        "   command, and dozens of unique features. ($10)",
-        "",
-        "BEYOND THE TITANIC - A fantastic adventure of exploration and survival.",
-        "   What really happened? Sound effects and 16 color screens. ($8)",
-        "",
-        "WORD WHIZ - New game that challenges your knowledge of the English",
-        "   language. Fun to play, yet very educational, too. ($5)"]
-    
-    paragraphs3 = ["THE LOST ADVENTURES OF KROZ - All-new seventh Kroz game with 75 of the best",
-        "   levels yet! Built-in contest! New features galore. ($20)"]
-    
-    # Square bullet logic
-    start_x, start_y = 30, 240
-    line_spacing = 25
-    bullet_size = 8
-    
-    text_rect = title.get_rect(center=(WIDTH // 2, 30))
-    
-    running = True
-    while running:
-        screen.fill((0, 0, 0))
-        screen.blit(title, text_rect)
-        screen.blit(subtitle, (250, 50))
-        screen.blit(subtitle2, (0, 110))
         
-        # Paragraph 1
-        y_pos = 130
-        for text in paragraphs1:
-            y_pos += 20
-            if paragraphs1[0]:
-                pygame.draw.rect(screen, WHITE, (start_x, y_pos, bullet_size, bullet_size))
-            text_surface = text_font.render(text, False, WHITE)
-            screen.blit(text_surface, (start_x + 20, y_pos))
-        
-        # Paragraph 2
-        for i, text in enumerate(paragraphs2):
-            y_pos = start_y + i * line_spacing
-            if i == 1:
-                pygame.draw.rect(screen, GRAY, (start_x, y_pos, bullet_size, bullet_size))
-            text_surface = text_font.render(text, False, GRAY)
-            screen.blit(text_surface, (start_x + 20, y_pos))
-        
-        # Paragraph 3
-        y_pos = 500
-        for text in paragraphs3:
-            y_pos += 20
-            if paragraphs3[0]:
-                pygame.draw.rect(screen, WHITE, (start_x, y_pos, bullet_size, bullet_size))
-            text_surface = text_font.render(text, False, WHITE)
-            screen.blit(text_surface, (start_x + 20, y_pos))
-        
-        pygame.display.flip()
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                running = False
-# END of ending_creds
+############################################################################################################################################################################################################################        
 
 def run_all_screens(screen):
     color_user_input = color(screen)
@@ -1168,10 +1912,18 @@ def run_all_screens(screen):
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
             case "m":
                 print(f"Choice: M")
+                marketing(screen, color_user_input)
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
             case "s":
                 print(f"Choice: S")
+                story_1(screen, color_user_input)
+                story_2(screen, color_user_input)
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+            case "o":
+                print(f"Choice: O")
+                original(screen, color_user_input)
+                user_choice = load(screen, color_user_input)
             case "a":
                 print(f"Choice: A")
+                about(screen, color_user_input)
                 user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
