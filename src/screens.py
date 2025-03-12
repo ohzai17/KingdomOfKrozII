@@ -1783,7 +1783,7 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
         GREEN = (0, 128, 0)
 
     # Store user input
-    user_input2 = ""
+    load_selection = ""
 
     # Font setup
     title_font = load_font(13)  # Larger font for title
@@ -1819,6 +1819,7 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
         pygame.K_b: "b",
         pygame.K_i: "i",
         pygame.K_m: "m",
+        pygame.K_m: "s",
         pygame.K_o: "o",
         pygame.K_a: "a"
     }
@@ -1881,8 +1882,8 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
                 cursor_visible = not cursor_visible
             elif event.type == pygame.KEYDOWN:
                 if event.key in key_map:
-                    user_input2 = key_map[event.key]
-                    return user_input2
+                    load_selection = key_map[event.key]
+                    return load_selection
         pygame.display.update()
         
 ############################################################################################################################################################################################################################        

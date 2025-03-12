@@ -1,4 +1,4 @@
-from title_screens import *
+from screens import *
 
 if __name__ == "__main__":
 
