@@ -795,4 +795,3 @@ def levels(screen):
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
         
-pygame.quit()

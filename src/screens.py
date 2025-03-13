@@ -1,7 +1,5 @@
-import random
-from gameplay import levels
 from utils import *
-from sound import play_sound
+from gameplay import levels
 
 ############################################################################################################################################################################################################################
 
@@ -415,14 +413,22 @@ def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
                             case pygame.K_e:
                                 difficulty_user_input = 'E'
                                 blinking_difficulty_text = "EXPERIENCED"
+                                play_sound(300, 100)
+                                play_sound(700, 100)
                             case pygame.K_a:
                                 difficulty_user_input = 'A'
                                 blinking_difficulty_text = "ADVANCED"
+                                play_sound(300, 100)
+                                play_sound(700, 100)                                
                             case pygame.K_x:
                                 difficulty_user_input = 'X'
                                 blinking_difficulty_text = "SECRET MODE"
+                                play_sound(300, 100)
+                                play_sound(700, 100)                                
                             case _:
                                 blinking_difficulty_text = "NOVICE"
+                                play_sound(300, 100)
+                                play_sound(700, 100)                                
                         print("Difficulty:" , difficulty_user_input)
                     else:
                         return difficulty_user_input
@@ -1819,7 +1825,7 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
         pygame.K_b: "b",
         pygame.K_i: "i",
         pygame.K_m: "m",
-        pygame.K_m: "s",
+        pygame.K_s: "s",
         pygame.K_o: "o",
         pygame.K_a: "a"
     }
@@ -1899,9 +1905,10 @@ def run_all_screens(screen):
     # This runs and proccess the loading screen along with screens in load()
     startGame = True
     while startGame: 
-        match(user_choice): #
+        match(user_choice): 
             case "b":
                 print(f"Choice: B")
+                descent()                
                 levels(screen)
                 startGame = False
             case "i":
@@ -1914,12 +1921,12 @@ def run_all_screens(screen):
             case "m":
                 print(f"Choice: M")
                 marketing(screen, color_user_input)
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input) 
             case "s":
                 print(f"Choice: S")
                 story_1(screen, color_user_input)
                 story_2(screen, color_user_input)
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input) 
             case "o":
                 print(f"Choice: O")
                 original(screen, color_user_input)
@@ -1927,4 +1934,4 @@ def run_all_screens(screen):
             case "a":
                 print(f"Choice: A")
                 about(screen, color_user_input)
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input)
