@@ -1,9 +1,10 @@
 import pygame
 import os
 import random
+from pause_quit import *
 import sys
 from utils import *
-from track_item import init_screen  # Import the track_item module
+from track_item import *
 
 
 def levels(screen):
@@ -516,11 +517,11 @@ def levels(screen):
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})  # Fixed: added colon after "col"
 
-    # Initialize tracking variables
+    # Initialize tracking variables *Updated to match NOVICE mode*
     score = 0
     level_num = 1
-    gems = 0
-    whips = 0
+    gems = 20
+    whips = 10
     teleports = 0
     keys = 0
 
@@ -695,6 +696,11 @@ def levels(screen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p: # ASCII value 80 
+                    pause(screen, quitting=False)
+                elif event.key in (pygame.K_q, pygame.K_ESCAPE): # ASCII value # 81 & 27
+                    pause(screen, quitting=True)
             elif event.type == pygame.KEYUP:
                 if event.key in keys_pressed:
                     keys_pressed[event.key] = False
@@ -703,7 +709,7 @@ def levels(screen):
         player_input()
         
         # Draw the grid
-        screen.fill((0, 0, 0))
+        screen.fill(BLACK)
         for row_index, row in enumerate(grid):
             for col_index, char in enumerate(row):
                 if char in tile_mapping:
@@ -711,7 +717,7 @@ def levels(screen):
         
         # Update the item tracking UI with current values
         values = [score, level_num, gems, whips, teleports, keys]
-        init_screen(screen, WIDTH, HEIGHT, values)
+        Init_screen(screen, WIDTH, HEIGHT, values)
         
         # Update game state
         tick_counter += 1
@@ -731,5 +737,5 @@ def levels(screen):
         
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-        
+levels(screen)
 pygame.quit()

@@ -1,4 +1,5 @@
 import random
+import time
 from gameplay import levels
 from utils import *
 
@@ -1148,8 +1149,9 @@ def run_all_title_screens(screen):
     # This runs and proccess the loading screen along with screens in load()
     startGame = True
     while startGame: 
-        match(user_choice): #
+        match(user_choice):
             case "b":
+                time.sleep(2) 
                 print(f"Choice: {user_choice}")
                 levels(screen)
                 startGame = False
@@ -1159,13 +1161,13 @@ def run_all_title_screens(screen):
                 instruction2(screen, color_user_input)
                 instruction3(screen, color_user_input)
                 instruction4(screen, color_user_input)
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input) 
             case "m":
                 print(f"Choice: {user_choice}")
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input) 
             case "s":
                 print(f"Choice: {user_choice}")
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input) 
             case "a":
                 print(f"Choice: {user_choice}")
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input) 
