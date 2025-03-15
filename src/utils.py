@@ -2,6 +2,8 @@ import pygame
 import random
 import os
 import sys
+import time
+import numpy as np
 
 screen = pygame.display.set_mode((832, 624))
 pygame.display.set_caption("Kingdom of Kroz II")
@@ -48,6 +50,7 @@ flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
 assets_dir = os.path.join(base_dir, "assets")
+audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 
 pygame.font.init() # Initialize fonts
@@ -170,3 +173,29 @@ def flash_color(screen, message):
     text_surface = font.render(message, True, color)  # Render text with current color
     text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
     screen.blit(text_surface, text_rect)
+        
+def play_sound(frequency, duration, amplitude=4096):
+    sample_rate = 44100
+    n_samples = int(sample_rate * duration / 1000)
+    t = np.linspace(0, duration / 1000, n_samples, False)
+    wave = amplitude * np.sign(np.sin(2 * np.pi * frequency * t))
+    stereo_wave = np.column_stack((wave, wave))
+    sound = pygame.sndarray.make_sound(stereo_wave.astype(np.int16))
+    sound.play()
+    time.sleep(duration / 1000)
+    sound.stop()
+        
+def play_wav(file_name):
+    file_path = os.path.join(audio_dir, file_name)
+    sound = pygame.mixer.Sound(file_path)
+    sound.play()
+    while pygame.mixer.get_busy():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        pygame.time.delay(100)
+
+def descent():
+    play_wav('beginDescent.wav')
+        
