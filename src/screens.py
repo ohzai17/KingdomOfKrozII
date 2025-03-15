@@ -825,7 +825,7 @@ def instruction3(screen, color_user_input): #
             blit_y += 23
 
         # Display all the image icons
-        #display_icons(screen)
+        display_icons(screen)
 
         # Flashing text
         flash(screen, prompt_text, WIDTH, HEIGHT)
@@ -1724,7 +1724,7 @@ def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
     
     running = True
     while running:
-        screen.fill((0, 0, 0))
+        screen.fill(BLACK)
         screen.blit(title, text_rect)
         screen.blit(subtitle, (250, 50))
         screen.blit(subtitle2, (0, 110))
@@ -1767,18 +1767,17 @@ def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
 ############################################################################################################################################################################################################################
 
 # START of load
-def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes other screens
-
+def load(screen, color_user_input): # Init_screen From KINGDOM3.INC (lines 141-495)
     WIDTH, HEIGHT = screen.get_size()
 
     if color_user_input == "M":  # change to grayscale
-        RED = (128, 128, 128)
-        BLUE = (128, 128, 128)
-        YELLOW = (255, 255, 255)
-        CYAN = (128, 128, 128)
-        WHITE = (255, 255, 255)
-        BROWN = (128, 128, 128)
-        GREEN = (128, 128, 128)
+        RED = GRAY
+        BLUE = GRAY
+        YELLOW = WHITE
+        CYAN = GRAY
+        WHITE = WHITE
+        BROWN = GRAY
+        GREEN = GRAY
     else:
         RED = (144, 13, 13)
         BLUE = (0, 0, 255)
@@ -1827,7 +1826,8 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
         pygame.K_m: "m",
         pygame.K_s: "s",
         pygame.K_o: "o",
-        pygame.K_a: "a"
+        pygame.K_a: "a",
+        pygame.K_r: "r" # Enable mix up mode, extra perks
     }
 
     # Cursor properties
@@ -1838,7 +1838,7 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
     # Event Handling
     running = True
     while running:
-        screen.fill((0, 0, 0))
+        screen.fill(BLACK)
 
         # Title and subtext
         screen.blit(title_surface, title_rect)
@@ -1903,21 +1903,21 @@ def run_all_screens(screen):
     user_choice = load(screen, color_user_input)
     
     # This runs and proccess the loading screen along with screens in load()
-    startGame = True
-    while startGame: 
+    showMenu = True
+    while showMenu: 
         match(user_choice): 
             case "b":
                 print(f"Choice: B")
                 descent()                
                 levels(screen)
-                startGame = False
+                showMenu = False
             case "i":
                 print(f"Choice: I")
                 instruction1(screen, color_user_input)
                 instruction2(screen, color_user_input)
                 instruction3(screen, color_user_input)
                 instruction4(screen, color_user_input)
-                user_choice = load(screen, color_user_input) # return to load() until "b" is pressed
+                user_choice = load(screen, color_user_input)
             case "m":
                 print(f"Choice: M")
                 marketing(screen, color_user_input)
@@ -1935,3 +1935,8 @@ def run_all_screens(screen):
                 print(f"Choice: A")
                 about(screen, color_user_input)
                 user_choice = load(screen, color_user_input)
+            case "r":
+                print(f"Choice: R")
+                descent()                
+                levels(screen, mixUp=True)
+                showMenu = False
