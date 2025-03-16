@@ -159,6 +159,8 @@ def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
         screen.blit(text, (WIDTH // 2 - 120, HEIGHT - 15))
         
+############################################################################################################################################################################################################################        
+        
 def play_sound(frequency, duration, amplitude=4096):
     sample_rate = 44100
     n_samples = int(sample_rate * duration / 1000)
@@ -179,8 +181,17 @@ def play_wav(file_name):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        pygame.time.delay(100)
+        pygame.time.delay(100)              
 
 def descent():
-    play_wav('beginDescent.wav')
-        
+    play_wav('beginDescent.wav') 
+    
+def footStep():
+    sound_file = random.choice(['footStep_1.wav', 'footStep_2.wav'])
+    play_wav(sound_file)
+    
+def enemyCollision():
+    play_wav('enemyCollision.wav')    
+       
+
+############################################################################################################################################################################################################################        
