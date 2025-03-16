@@ -1,16 +1,16 @@
 import pygame
 import os
 import random
-from pause_quit import *
 import sys
+from screens import Sign_Off
 from utils import *
 
-def pause_quit(screen, quitting=False): # From KINGDOM3.INC (lines 96-183)
+def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
     paused = True
 
     while paused:
         message = "Are you sure you want to quit (Y/N)?" if quitting else "Press any key to Resume"
-        flash_color(screen, message)
+        flash_c(screen, message)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -20,12 +20,13 @@ def pause_quit(screen, quitting=False): # From KINGDOM3.INC (lines 96-183)
             elif event.type == pygame.KEYDOWN:
                 if quitting:
                     if event.key == pygame.K_y: 
-                        return True  # User confirmed quitting
+                        Sign_Off(screen)
+                        return True
                     else:
-                        paused = False  # Cancel quit prompt, stay in pause mode
+                        paused = False
                 else:
                     paused = False  # Resume game
-
+                    
     return False  # User didn't quit
                     
 def hud(screen, WIDTH, HEIGHT, values=None): #From KINGDOM4.INC (lines 96-183)

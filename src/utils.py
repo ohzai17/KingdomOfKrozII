@@ -165,7 +165,7 @@ def flash(screen, text, WIDTH, HEIGHT): # Text disappear and appear rapidly
     if (pygame.time.get_ticks() // 80) % 2 == 0:
         screen.blit(text, (WIDTH // 2 - 120, HEIGHT - 15))
 
-def flash_color(screen, message):
+def flash_c(screen, message):
     current_time = pygame.time.get_ticks()
     color = flash_colors[(current_time // 60) % len(flash_colors)]
     font = load_font(14)

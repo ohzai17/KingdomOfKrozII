@@ -1,5 +1,4 @@
 from utils import *
-from gameplay import levels
 
 ############################################################################################################################################################################################################################
 
@@ -435,7 +434,6 @@ def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
 
 ############################################################################################################################################################################################################################
 
-# START of shareware (info_screen)
 def shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
 
     WIDTH, HEIGHT = screen.get_size()
@@ -553,9 +551,9 @@ def shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
             elif event.type == pygame.KEYDOWN:
                 running = False
         clock.tick(60)
-# END of shareware (info_screen)
 
-# START of instruction1
+############################################################################################################################################################################################################################
+
 def instruction1(screen, color_user_input): #
 
     WIDTH, HEIGHT = screen.get_size()
@@ -627,9 +625,9 @@ def instruction1(screen, color_user_input): #
                 return
             if event.type == pygame.KEYDOWN:
                     running = False
-# END of instruction1       
 
-# START of instruction2
+############################################################################################################################################################################################################################  
+
 def instruction2(screen, color_user_input): #
     
     WIDTH, HEIGHT = screen.get_size()
@@ -745,9 +743,9 @@ def instruction2(screen, color_user_input): #
                 return
             if event.type == pygame.KEYDOWN:
                 running = False
-# END of instruction2
 
-# START of instruction3
+############################################################################################################################################################################################################################
+
 def instruction3(screen, color_user_input): #
 
     WIDTH, HEIGHT = screen.get_size()
@@ -839,9 +837,9 @@ def instruction3(screen, color_user_input): #
                 return
             if event.type == pygame.KEYDOWN:
                 running = False
-# END of instruction3  
 
-# START of instruction4
+############################################################################################################################################################################################################################ 
+
 def instruction4(screen, color_user_input): #
 
     WIDTH, HEIGHT = screen.get_size()
@@ -940,7 +938,6 @@ def instruction4(screen, color_user_input): #
                 return
             if event.type == pygame.KEYDOWN:
                 running = False
-# END of instruction4 
 
 ############################################################################################################################################################################################################################
 
@@ -1238,6 +1235,8 @@ def story_1(screen, color_user_input): # From KINGDOM4.INC (line 379)
             if event.type == pygame.KEYDOWN:
                 running = False
 
+############################################################################################################################################################################################################################
+
 def story_2(screen, color_user_input): # From KINGDOM4.INC (line 379)
 
     if color_user_input == "M":  # change to grayscale
@@ -1528,6 +1527,7 @@ def original(screen, color_user_input): # From KINGDOM4.INC (line 438)
                 return
             if event.type == pygame.KEYDOWN:
                 running = False
+
 ############################################################################################################################################################################################################################
 
 def about(screen, color_user_input): # From KINGDOM4.INC (line 467)
@@ -1678,14 +1678,11 @@ def about(screen, color_user_input): # From KINGDOM4.INC (line 467)
                 pygame.quit()
                 return
             if event.type == pygame.KEYDOWN:
-                running = False
-                
+                running = False     
+
 ############################################################################################################################################################################################################################
 
-# END of load 
-
-# START of ending_creds
-def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
+def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
     # Use the provided screen
     WIDTH, HEIGHT = screen.get_size()
 
@@ -1762,11 +1759,11 @@ def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
                 running = False
             elif event.type == pygame.KEYDOWN:
                 running = False
-# END of ending_creds
+                pygame.quit()  # Terminate pygame
+                exit()  # Immediately exit the program after Sign_Off
 
 ############################################################################################################################################################################################################################
 
-# START of load
 def load(screen, color_user_input): # Init_screen From KINGDOM3.INC (lines 141-495)
     WIDTH, HEIGHT = screen.get_size()
 
@@ -1907,6 +1904,7 @@ def run_all_screens(screen):
     while showMenu: 
         match(user_choice): 
             case "b":
+                from gameplay import levels
                 print(f"Choice: B")
                 descent()                
                 levels(screen)
@@ -1940,3 +1938,5 @@ def run_all_screens(screen):
                 descent()                
                 levels(screen, mixUp=True)
                 showMenu = False
+
+############################################################################################################################################################################################################################
