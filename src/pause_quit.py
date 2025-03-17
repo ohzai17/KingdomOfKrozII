@@ -7,7 +7,7 @@ def pause(screen, quitting=False): # From KINGDOM3.INC (lines 495-541)
     while paused:
         # Choose text dynamically
         message = "Are you sure you want to quit (Y/N)?" if quitting else "Press any key to Resume"
-        flash_color(screen, message)
+        flash_c(screen, message)
 
         pygame.display.flip()
 
