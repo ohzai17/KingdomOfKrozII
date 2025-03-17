@@ -721,7 +721,12 @@ def levels(screen, mixUp=False):
             if grid[new_row][new_col] == "X":
                 grid[new_row][new_col] = " "  # Break the block
                 return True  # Enemy dies when breaking block
-                
+            
+            # Collide with an item
+            elif grid[new_row][new_col] in {"W", "+", "T"}:
+            # Destroy the item and move the enemy
+                grid[new_row][new_col] = enemy_type
+                enemy["row"], enemy["col"] = new_row, new_col
             # Empty space - move there
             elif grid[new_row][new_col] == " ":
                 enemy["row"], enemy["col"] = new_row, new_col
@@ -967,7 +972,7 @@ def levels(screen, mixUp=False):
     MEDIUM_TIMER = 6
     GAME_TICK_RATE = 12.0
     
-    # Game loop
+     # Game loop
     running = True
     clock = pygame.time.Clock()
     tick_counter = 0
@@ -977,21 +982,19 @@ def levels(screen, mixUp=False):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p: # ASCII value 80 
                     pause_quit(screen, quitting=False)
                 elif event.key in (pygame.K_q, pygame.K_ESCAPE): # ASCII value # 81 & 27
                     if pause_quit(screen, quitting=True):
                         running = False   
-            elif event.type == pygame.KEYUP:
-                if event.key in keys_pressed:
-                    keys_pressed[event.key] = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_TAB:
+                elif event.key == pygame.K_TAB:
                     # Go to next level when Tab is pressed
                     current_level_index = (current_level_index + 1) % len(level_maps)
                     change_level(current_level_index)
-                    score += 1000  # Bonus for skipping level
+            elif event.type == pygame.KEYUP:
+                if event.key in keys_pressed:
+                    keys_pressed[event.key] = False
         
         # Process player input
         player_input()
