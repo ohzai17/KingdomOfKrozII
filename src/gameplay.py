@@ -1,40 +1,12 @@
-import pygame
-import os
-import random
-import sys
-from screens import Sign_Off
 from utils import *
 
-def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
-    paused = True
-
-    while paused:
-        message = "Are you sure you want to quit (Y/N)?" if quitting else "Press any key to Resume"
-        flash_c(screen, message)
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            elif event.type == pygame.KEYDOWN:
-                if quitting:
-                    if event.key == pygame.K_y: 
-                        Sign_Off(screen)
-                        return True
-                    else:
-                        paused = False
-                else:
-                    paused = False  # Resume game
-                    
-    return False  # User didn't quit
-                    
-def hud(screen, WIDTH, HEIGHT, values=None): #From KINGDOM4.INC (lines 96-183)
-
-    pygame.draw.rect(screen, BLUE, (0, (TILE_HEIGHT * 23) + 20, WIDTH, HEIGHT - (TILE_HEIGHT * 23)))
+def hud(screen, WIDTH, HEIGHT, values=None):  
+    # Blue rectangle
+    pygame.draw.rect(screen, (8, 4, 180), (0, (TILE_HEIGHT * 23) + 20, WIDTH, HEIGHT - (TILE_HEIGHT * 23)))
 
     # Use provided values if available, otherwise use defaults
     if values is None:
+        # Default values (all zeros)
         Score = 0
         Level = 0
         Gems = 0
@@ -46,37 +18,38 @@ def hud(screen, WIDTH, HEIGHT, values=None): #From KINGDOM4.INC (lines 96-183)
     item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Options"]
     option_list = ["Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
 
-    font = load_font(14)  
+    pygame.font.init()
+    font = pygame.font.Font("src/assets/PressStart2P - Regular.ttf", 14)  
     
-    word_x = 50  # Starting X coordinate of words
-    word_y = (TILE_HEIGHT * 23) + 30  # Y coordinate
+    word_x = 50  # Starting X position for the words
+    word_y = (TILE_HEIGHT * 23) + 30  # Y position (intentional gap between map)
 
-    rect_width = 80  # Width of gray rec
-    rect_height = 30  # Height of gray re
+    rect_width = 80  # Fixed width of the gray rectangles
+    rect_height = 30  # Height of the gray rectangle
 
     for i, word in enumerate(item_tracker):
         
         match(word): # Display items
             case ("Options"): # Rendered differently
                 word_x += 40
-                word_surface = font.render(word, True, CYAN)
-                pygame.draw.rect(screen, DARK_RED, (word_x - 1, word_y - 8, word_surface.get_width() + 1, 30))
+                word_surface = font.render(word, True, (0, 255, 255))
+                pygame.draw.rect(screen, (140, 0, 0), (word_x - 1, word_y - 8, word_surface.get_width() + 1, 30))
                 screen.blit(word_surface, (word_x, word_y))
             case _: 
                 word_surface = font.render(word, True, (254, 254, 6))
                 screen.blit(word_surface, (word_x, word_y))
 
-        if i < len(values): # Values and gray box
-            value_surface = font.render(str(values[i]), True, DARK_RED)
+        if i < len(values): # Display values and gray box
+            value_surface = font.render(str(values[i]), True, (140, 0, 0))
             value_x = word_x + (rect_width - value_surface.get_width()) // 2
             if item_tracker[i] == "Teleports":  # handled differently due to placement issues
                 value_x = value_x + 25
                 word_x = word_x + 25
-                pygame.draw.rect(screen, LIGHT_GRAY, (word_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
+                pygame.draw.rect(screen, (169, 169, 169), (word_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
                 screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17)) # Value
                 word_x = word_x - 25
             else:
-                pygame.draw.rect(screen, LIGHT_GRAY, (word_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
+                pygame.draw.rect(screen, (169, 169, 169), (word_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
                 screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17)) # Value
         
         # Update word_x based on word width
@@ -84,8 +57,8 @@ def hud(screen, WIDTH, HEIGHT, values=None): #From KINGDOM4.INC (lines 96-183)
 
     y_offset = word_y + 30  # Start position of the options_list (below "Options")
     for choice in option_list:
-        first_letter_surface = font.render(choice[0], True, WHITE)
-        rest_surface = font.render(choice[1:], True, GRAY)
+        first_letter_surface = font.render(choice[0], True, (254, 254, 254))
+        rest_surface = font.render(choice[1:], True, (169, 169, 169))
 
         first_rect = first_letter_surface.get_rect(topleft=(word_x - 130, y_offset))
         rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
@@ -96,7 +69,7 @@ def hud(screen, WIDTH, HEIGHT, values=None): #From KINGDOM4.INC (lines 96-183)
         # Move the y_offset down
         y_offset += 20
 
-def levels(screen, mixUp=False):
+def levels(screen):
 
     WIDTH, HEIGHT = screen.get_size()
     
@@ -606,11 +579,11 @@ def levels(screen, mixUp=False):
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})  # Fixed: added colon after "col"
 
-    # Initialize tracking variables *Updated to match NOVICE mode*
+    # Initialize tracking variables
     score = 0
     level_num = 1
-    gems = 20
-    whips = 10
+    gems = 0
+    whips = 0
     teleports = 0
     keys = 0
 
@@ -785,12 +758,6 @@ def levels(screen, mixUp=False):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p: # ASCII value 80 
-                    pause_quit(screen, quitting=False)
-                elif event.key in (pygame.K_q, pygame.K_ESCAPE): # ASCII value # 81 & 27
-                    if pause_quit(screen, quitting=True):
-                        running = False   
             elif event.type == pygame.KEYUP:
                 if event.key in keys_pressed:
                     keys_pressed[event.key] = False
@@ -799,8 +766,7 @@ def levels(screen, mixUp=False):
         player_input()
         
         # Draw the grid
-        screen.fill(BLACK)
-        screen.fill(BLACK)
+        screen.fill((0, 0, 0))
         for row_index, row in enumerate(grid):
             for col_index, char in enumerate(row):
                 if char in tile_mapping:
@@ -828,3 +794,4 @@ def levels(screen, mixUp=False):
         
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
+        

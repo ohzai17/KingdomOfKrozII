@@ -13,7 +13,6 @@ BLACK = (0, 0, 0)
 BLUE = (8,4,180)
 DARK_BLUE = (3, 3, 178)
 OLD_BLUE = (44, 0, 180)
-CYAN = (0, 255, 255)
 GREEN = (0, 128, 0)
 AQUA = (0, 242, 250)
 RED = (255, 0, 0)
@@ -23,15 +22,12 @@ BROWN  = (139, 69, 19)
 YELLOW = (254, 254, 6)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
-MAGENTA = (255, 0, 255)
-LIGHT_GRAY =  (150, 150, 150)
 LIGHT_BLUE = (173, 216, 230)
 LIGHT_GREEN = (0, 241, 54)
 LIGHT_AQUA = (224, 255, 255)
 LIGHT_RED = (255, 182, 193) 
 LIGHT_PURPLE = (221, 160, 221)
 LIGHT_YELLOW = (255, 255, 224)
-DARK_RED = (140, 0, 0)
 
 TILE_WIDTH = 14
 TILE_HEIGHT = 14
@@ -45,7 +41,6 @@ square_size = 8 # Used for square bullets
 logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, LIGHT_BLUE, LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
-flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
 
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -53,7 +48,6 @@ assets_dir = os.path.join(base_dir, "assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 
-pygame.font.init() # Initialize fonts
 def load_font(size):
     return pygame.font.Font(font_path, size)
 
@@ -114,14 +108,14 @@ def change_title_color(time, color_user_input):
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
 
-# Load tiles, used in title screens
+# Load Tiles, loading extra icons that are not in levels.gameplay
 enemy3 = pygame.image.load(os.path.join(assets_dir, "enemy3.png"))
 keys = pygame.image.load(os.path.join(assets_dir, "keys.png"))
 power = pygame.image.load(os.path.join(assets_dir, "power.png"))
 clues = pygame.image.load(os.path.join(assets_dir, "clues.png"))
 surprise = pygame.image.load(os.path.join(assets_dir, "surprise.png"))
 
-# Scale tiles, used in title screens
+# Scale tiles
 enemy3 = pygame.transform.scale(enemy3, (15, 15))
 keys = pygame.transform.scale(keys, (15, 15))
 power = pygame.transform.scale(power, (15, 15))
@@ -161,18 +155,11 @@ def display_icons(screen):
         icon = pygame.transform.scale(icon, (15, 15))
         screen.blit(icon, (40, blit_y + (i * 23)))
 
-def flash(screen, text, WIDTH, HEIGHT): # Text disappear and appear rapidly
+def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
         screen.blit(text, (WIDTH // 2 - 120, HEIGHT - 15))
-
-def flash_c(screen, message):
-    current_time = pygame.time.get_ticks()
-    color = flash_colors[(current_time // 60) % len(flash_colors)]
-    font = load_font(14)
-
-    text_surface = font.render(message, True, color)  # Render text with current color
-    text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
-    screen.blit(text_surface, text_rect)
+        
+############################################################################################################################################################################################################################        
         
 def play_sound(frequency, duration, amplitude=4096):
     sample_rate = 44100
@@ -194,8 +181,17 @@ def play_wav(file_name):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        pygame.time.delay(100)
+        pygame.time.delay(100)              
 
 def descent():
-    play_wav('beginDescent.wav')
-        
+    play_wav('beginDescent.wav') 
+    
+def footStep():
+    sound_file = random.choice(['footStep_1.wav', 'footStep_2.wav'])
+    play_wav(sound_file)
+    
+def enemyCollision():
+    play_wav('enemyCollision.wav')    
+       
+
+############################################################################################################################################################################################################################        
