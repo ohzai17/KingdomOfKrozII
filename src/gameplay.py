@@ -112,7 +112,7 @@ def levels(screen, mixUp=False):
                "cSpell3", "gBlock", "rock", "eWall", "trap5", "tBlock", "tRock", "tGem", "tBlind", 
                "tWhip", "tGold", "tTree", "rope", "dropRope1", "dropRope2", "dropRope3", "dropRope4", 
                "dropRope5", "amulet", "shootRight", "shootLeft", "trap6", "trap7", "trap8", "trap9", 
-               "trap10", "trap11", "trap12", "trap13", "message"]
+               "trap10", "trap11", "trap12", "trap13", "message", "whip1", "whip2", "whip3", "whip4",]
 
     assets_path = os.path.join("src", "assets")
     images = {}
@@ -225,7 +225,11 @@ def levels(screen, mixUp=False):
         "σ": images["trap11"],
         "μ": images["trap12"],
         "τ": images["trap13"],
-        "ⁿ": images["message"]
+        "ⁿ": images["message"],
+        "whip1": images["whip1"],
+        "whip2": images["whip2"],
+        "whip3": images["whip3"],
+        "whip4": images["whip4"]
     }
 
     level1_map = [
@@ -593,7 +597,8 @@ def levels(screen, mixUp=False):
     slow_enemies = []
     medium_enemies = []
     keys_pressed = {pygame.K_UP: False, pygame.K_DOWN: False, 
-                    pygame.K_LEFT: False, pygame.K_RIGHT: False}
+                    pygame.K_LEFT: False, pygame.K_RIGHT: False,
+                    pygame.K_w: False}
     
     # Find player and enemies
     player_row, player_col = 0, 0
@@ -733,69 +738,228 @@ def levels(screen, mixUp=False):
             grid[row][col] = enemy_type  # Stay in place
             
         return False
+    
+    def use_whip(screen, grid, player_row, player_col, whips, slow_enemies, medium_enemies, images, tile_mapping, TILE_WIDTH, TILE_HEIGHT):
+        """Handle the whip animation and enemy interactions"""
+        # Access game state variables from enclosing scope
+        nonlocal score, level_num, gems, teleports, keys, WIDTH, HEIGHT
+        
+        # Check if player has whips
+        if whips <= 0:
+            return 0, [], []  # No whips to use
+        
+        # Define the whip animation positions (counter-clockwise)
+        whip_positions = [
+            {"row": -1, "col": -1, "sprite": "whip1"},  # Top-left
+            {"row": -1, "col":  0, "sprite": "whip3"},  # Top
+            {"row": -1, "col":  1, "sprite": "whip2"},  # Top-right
+            {"row":  0, "col":  1, "sprite": "whip4"},  # Right
+            {"row":  1, "col":  1, "sprite": "whip1"},  # Bottom-right
+            {"row":  1, "col":  0, "sprite": "whip3"},  # Bottom
+            {"row":  1, "col": -1, "sprite": "whip2"},  # Bottom-left
+            {"row":  0, "col": -1, "sprite": "whip4"},  # Left
+        ]
+        
+        # Track affected enemies
+        enemies_hit = []
+        
+        # Timing values
+        delay = 25  # milliseconds per frame
+        
+        # Original grid state before whip animation
+        original_grid = [row[:] for row in grid]
+        
+        # Whip animation loop
+        for position in whip_positions:
+            # Calculate target position
+            whip_row = player_row + position["row"]
+            whip_col = player_col + position["col"]
+            
+            # Check if position is in bounds
+            if not (0 <= whip_row < len(grid) and 0 <= whip_col < len(grid[0])):
+                continue
+            
+            # Original tile at this position
+            original_tile = grid[whip_row][whip_col]
+            
+            # Check for enemy hits at this position
+            if original_tile in ["1", "2", "3"]:
+                enemies_hit.append((whip_row, whip_col, original_tile))
+            
+            # Place whip sprite
+            grid[whip_row][whip_col] = position["sprite"]
+            
+            # Render the grid
+            screen.fill((0, 0, 0))  # BLACK
+            for r_idx, row in enumerate(grid):
+                for c_idx, tile in enumerate(row):
+                    if tile in tile_mapping:
+                        screen.blit(tile_mapping[tile], (c_idx * TILE_WIDTH, r_idx * TILE_HEIGHT))
+            
+            # Draw HUD with updated whip count (show whip being used)
+            values = [score, level_num, gems, whips-1, teleports, keys]
+            hud(screen, WIDTH, HEIGHT, values)
+            
+            pygame.display.flip()
+            pygame.time.wait(delay)
+            
+            # Restore original tile at this position
+            grid[whip_row][whip_col] = original_tile
+        
+        # Process enemy hits and update game state
+        kills = 0
+        new_slow_enemies = []
+        new_medium_enemies = []
+        
+        # Clear enemies hit by whip from both grid and enemy lists
+        for r, c, enemy_type in enemies_hit:
+            grid[r][c] = " "  # Clear enemy from grid
+            kills += 1
+            
+        # Rebuild enemy lists excluding the killed ones
+        for enemy in slow_enemies:
+            if grid[enemy["row"]][enemy["col"]] == "1":
+                new_slow_enemies.append(enemy)
+                
+        for enemy in medium_enemies:
+            if grid[enemy["row"]][enemy["col"]] == "2":
+                new_medium_enemies.append(enemy)
+        
+        return kills, new_slow_enemies, new_medium_enemies
+    
+
+    # Movement settings - simplified for consistent movement
+    movement_cooldown = 100  # ms between moves (one space per 100ms)
+    last_move_time = 0
+    keys_held_time = {
+        pygame.K_UP: 0,
+        pygame.K_DOWN: 0, 
+        pygame.K_LEFT: 0,
+        pygame.K_RIGHT: 0
+    }
+    momentum = {
+        pygame.K_UP: 0,
+        pygame.K_DOWN: 0, 
+        pygame.K_LEFT: 0,
+        pygame.K_RIGHT: 0
+    }
+    
+    # How long a key needs to be held to generate momentum (in ms)
+    MOMENTUM_THRESHOLD = 300
+    # Maximum momentum value (number of extra moves)
+    MAX_MOMENTUM = 5
 
     def player_input():
-        """Handle player movement with key press tracking"""
+        """Handle player movement with consistent rate and momentum"""
         nonlocal player_row, player_col, score, gems, whips, teleports, keys
+        nonlocal slow_enemies, medium_enemies, last_move_time
         
-        # Get current key states
+        current_time = pygame.time.get_ticks()
         current_keys = pygame.key.get_pressed()
+        action_performed = False
         
-        # Calculate new position based on key presses
-        new_row, new_col = player_row, player_col
-        moved = False
+        # Handle whip activation with the 'W' key
+        if current_keys[pygame.K_w]:
+            if not keys_pressed[pygame.K_w]:  # Key just pressed
+                keys_pressed[pygame.K_w] = True
+                if whips > 0:
+                    kills, slow_enemies, medium_enemies = use_whip(
+                        screen, grid, player_row, player_col, whips, 
+                        slow_enemies, medium_enemies, images, tile_mapping, 
+                        TILE_WIDTH, TILE_HEIGHT
+                    )
+                    whips -= 1
+                    score += kills * 150  # Award points for kills
+                    action_performed = True
+        else:
+            keys_pressed[pygame.K_w] = False
         
-        # Cardinal directions (no diagonals for simplicity)
-        if current_keys[pygame.K_UP] and not keys_pressed[pygame.K_UP]:
-            new_row -= 1
-            moved = True
-            keys_pressed[pygame.K_UP] = True
-        elif current_keys[pygame.K_DOWN] and not keys_pressed[pygame.K_DOWN]:
-            new_row += 1
-            moved = True
-            keys_pressed[pygame.K_DOWN] = True
-        elif current_keys[pygame.K_LEFT] and not keys_pressed[pygame.K_LEFT]:
-            new_col -= 1
-            moved = True
-            keys_pressed[pygame.K_LEFT] = True
-        elif current_keys[pygame.K_RIGHT] and not keys_pressed[pygame.K_RIGHT]:
-            new_col += 1
-            moved = True
-            keys_pressed[pygame.K_RIGHT] = True
+        # Check if enough time has passed since last move
+        time_since_last_move = current_time - last_move_time
+        if time_since_last_move < movement_cooldown:
+            return action_performed  # Not time to move yet
         
-        # Reset keys that have been released
-        for key in keys_pressed:
-            if not current_keys[key]:
-                keys_pressed[key] = False
+        # Ready to make a move
+        move_made = False
+        active_direction = None
         
-        # Move player if valid
-        if moved and (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
-            # Check for item collection
-            if grid[new_row][new_col] not in collidable_tiles:
-                # Collect items
-                if grid[new_row][new_col] == "+":  # Gem
-                    gems += 1
-                    score += 100
-                elif grid[new_row][new_col] == "W":  # Whip
-                    whips += 1
-                    score += 50
-                elif grid[new_row][new_col] == "T":  # Teleport
-                    teleports += 1
-                    score += 75
-                elif grid[new_row][new_col] == "K":  # Key
-                    keys += 1
-                    score += 125
-                elif grid[new_row][new_col] == "L":  # Stairs to next level
-                    level_num += 1
-                    score += 1000
-                    # Could add level change logic here
+        # Direction priority: UP, DOWN, LEFT, RIGHT
+        direction_keys = [
+            (pygame.K_UP, (-1, 0)),
+            (pygame.K_DOWN, (1, 0)),
+            (pygame.K_LEFT, (0, -1)),
+            (pygame.K_RIGHT, (0, 1))
+        ]
+        
+        # First check keys being held down
+        for key, (delta_row, delta_col) in direction_keys:
+            if current_keys[key]:
+                if not keys_pressed[key]:  # Key just pressed
+                    keys_pressed[key] = True
+                    keys_held_time[key] = current_time
                 
-                # Move player
-                grid[player_row][player_col] = " "
-                player_row, player_col = new_row, new_col
-                grid[player_row][new_col] = "P"
-                return True
+                # This is our active direction
+                active_direction = key
+                move_made = process_move(player_row + delta_row, player_col + delta_col)
+                if move_made:
+                    last_move_time = current_time
+                    break
+            else:
+                # Key released
+                if keys_pressed[key]:
+                    hold_duration = current_time - keys_held_time[key]
+                    if hold_duration > MOMENTUM_THRESHOLD:
+                        # Add momentum based on hold duration
+                        momentum[key] = min(MAX_MOMENTUM, int((hold_duration - MOMENTUM_THRESHOLD) / 100))
+                    keys_pressed[key] = False
+        
+        # If no key is pressed but we have momentum, apply it
+        if not move_made:
+            for key, (delta_row, delta_col) in direction_keys:
+                if momentum[key] > 0:
+                    move_made = process_move(player_row + delta_row, player_col + delta_col)
+                    if move_made:
+                        momentum[key] -= 1
+                        last_move_time = current_time
+                        break
+        
+        return action_performed or move_made
+    
+    def process_move(new_row, new_col):
+        """Process a player movement to a new position"""
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num
+        
+        # Check if position is valid
+        if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
+            return False
+        
+        # Check if destination is not a wall
+        if grid[new_row][new_col] not in collidable_tiles:
+            # Collect items
+            if grid[new_row][new_col] == "+":  # Gem
+                gems += 1
+                score += 100
+            elif grid[new_row][new_col] == "W":  # Whip
+                whips += 1
+                score += 50
+            elif grid[new_row][new_col] == "T":  # Teleport
+                teleports += 1
+                score += 75
+            elif grid[new_row][new_col] == "K":  # Key
+                keys += 1
+                score += 125
+            elif grid[new_row][new_col] == "L":  # Stairs to next level
+                level_num += 1
+                score += 1000
+                # Could add level change logic here
             
+            # Move player
+            grid[player_row][player_col] = " "
+            player_row, player_col = new_row, new_col
+            grid[player_row][player_col] = "P"
+            return True
+        
+        # Movement was blocked
         return False
 
     # Game constants
