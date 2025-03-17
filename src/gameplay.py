@@ -373,7 +373,7 @@ def levels(screen):
         "00000-00000000000000000---000000000001110-00000=======-=========",
         "--000----------------- ---0WWWWWWWWK01110-000-000000000000000000",
         "00000-000000~~~0000000#---#00-00000001110-000K--<000OO000OOOOO≤*",
-        "--000-000000********3000##VVV##0-------------00000000boulderville├0", # INVESTIGATE ├ symbol
+        "00C000000********3000##VVV##0-------------00000000boulderville├0", # INVESTIGATE ├ symbol
     ]
     level14_map = [
         "###<@@@@@@@@@@@@@@@@@@@@@@@@@#one#@@@@@@@@@@@@@@@@@@@@@@@@@FK###",
@@ -587,6 +587,34 @@ def levels(screen):
     teleports = 0
     keys = 0
 
+    # Function to change to the next level
+    def change_level(next_level_index):
+        nonlocal grid, player_row, player_col, slow_enemies, medium_enemies, level_num
+        
+        # Check if level index is valid
+        if next_level_index >= len(level_maps):
+            next_level_index = 0  # Loop back to first level
+        
+        # Update level number
+        level_num = next_level_index + 1
+        
+        # Reset level grid
+        grid = [list(row) for row in level_maps[next_level_index]]
+        
+        # Reset enemies
+        slow_enemies = []
+        medium_enemies = []
+        
+        # Find new player position and enemies
+        for r, row in enumerate(grid):
+            for c, tile in enumerate(row):
+                if tile == "P":
+                    player_row, player_col = r, c
+                elif tile == "1":
+                    slow_enemies.append({"row": r, "col": c})
+                elif tile == "2":
+                    medium_enemies.append({"row": r, "col": c})
+
     # Core functions
     def has_line_of_sight(from_row, from_col, to_row, to_col):
         """Check if there's a direct line of sight between two positions"""
@@ -761,6 +789,12 @@ def levels(screen):
             elif event.type == pygame.KEYUP:
                 if event.key in keys_pressed:
                     keys_pressed[event.key] = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_TAB:
+                    # Go to next level when Tab is pressed
+                    current_level_index = (current_level_index + 1) % len(level_maps)
+                    change_level(current_level_index)
+                    score += 1000  # Bonus for skipping level
         
         # Process player input
         player_input()
