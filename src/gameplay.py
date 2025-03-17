@@ -721,7 +721,12 @@ def levels(screen, mixUp=False):
             if grid[new_row][new_col] == "X":
                 grid[new_row][new_col] = " "  # Break the block
                 return True  # Enemy dies when breaking block
-                
+            
+            # Collide with an item
+            elif grid[new_row][new_col] in {"W", "+", "T"}:
+            # Destroy the item and move the enemy
+                grid[new_row][new_col] = enemy_type
+                enemy["row"], enemy["col"] = new_row, new_col
             # Empty space - move there
             elif grid[new_row][new_col] == " ":
                 enemy["row"], enemy["col"] = new_row, new_col
