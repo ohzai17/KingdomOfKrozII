@@ -1,10 +1,26 @@
+<<<<<<< HEAD
 name = "project"
+=======
+name = "CS370"
+>>>>>>> 55048e8 (Update kanpilot.toml)
 skipFolders = [ "node_modules", ".vscode", "out", "dist", ".vscode-test" ]
 skipFiles = [ ".gitignore", "package.json" ]
 
 [[processes]]
 id = "process1"
 name = "To Do"
+
+  [[processes.tasks]]
+<<<<<<< HEAD
+  id = "u4hlp41i6zp6jiqdr02t7v6e"
+  title = "Save/Restore feature (Au Sein)"
+  description = "<p></p>"
+  tag = "backlog"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = ""
+  linkCommits = [ ]
 
   [[processes.tasks]]
   id = "yjxgqfvzsgz2qxgfl8uevsgk"
@@ -20,6 +36,10 @@ name = "To Do"
   [[processes.tasks]]
   id = "s0lnlqpde8vdx3xbq2w3320a"
   title = "Diagonal Movement (Ed)"
+=======
+  id = "task1"
+  title = "This is a new feature"
+>>>>>>> 55048e8 (Update kanpilot.toml)
   description = ""
   tag = "backlog"
   linkFiles = [ ]
@@ -45,8 +65,13 @@ name = "In Progress"
 
   [[processes.tasks]]
   id = "task2"
+<<<<<<< HEAD
   title = "Missing monochrome screens in main menu (Au sein)"
   description = "<p></p>"
+=======
+  title = "This is a bug should be repair"
+  description = ""
+>>>>>>> 55048e8 (Update kanpilot.toml)
   tag = "bug"
   linkFiles = [ ]
   dueDate = ""
@@ -54,6 +79,7 @@ name = "In Progress"
   priority = ""
   linkCommits = [ ]
 
+<<<<<<< HEAD
   [[processes.tasks]]
   id = "u4hlp41i6zp6jiqdr02t7v6e"
   title = "Save/Restore feature (Au Sein)"
@@ -65,6 +91,8 @@ name = "In Progress"
   priority = ""
   linkCommits = [ ]
 
+=======
+>>>>>>> 55048e8 (Update kanpilot.toml)
 [[processes]]
 id = "process3"
 name = "Done"
