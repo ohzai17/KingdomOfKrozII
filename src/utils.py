@@ -198,4 +198,19 @@ def play_wav(file_name):
 
 def descent():
     play_wav('beginDescent.wav')
-        
+
+def wait_input(screen):
+    paused = True
+
+    while paused:
+        message = "PRESS ANY KEY TO THIS LEVEL." 
+        flash_c(screen, message)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                paused = False
+                return
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                exit()    

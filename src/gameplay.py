@@ -1,7 +1,6 @@
 import pygame
 import os
 import random
-import sys
 from screens import Sign_Off
 from utils import *
 
@@ -122,8 +121,6 @@ def levels(screen, mixUp=False):
         "enemy2": "enemy2a"
     }
     
-    TILE_WIDTH, TILE_HEIGHT = 13, 13
-
     TILE_WIDTH, TILE_HEIGHT = 13, 13
 
     for sprite in sprites:
@@ -976,7 +973,8 @@ def levels(screen, mixUp=False):
     running = True
     clock = pygame.time.Clock()
     tick_counter = 0
-    
+
+    wait = True
     while running:
         # Handle events
         for event in pygame.event.get():
@@ -1000,7 +998,6 @@ def levels(screen, mixUp=False):
         player_input()
         
         # Draw the grid
-        screen.fill(BLACK)
         screen.fill(BLACK)
         for row_index, row in enumerate(grid):
             for col_index, char in enumerate(row):
@@ -1026,6 +1023,10 @@ def levels(screen, mixUp=False):
             for i in range(len(medium_enemies)-1, -1, -1):
                 if move_enemy(medium_enemies[i], "2", 7):
                     del medium_enemies[i]
-        
+
+        if wait:
+            wait_input(screen)
+            wait = False
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
+levels(screen)
