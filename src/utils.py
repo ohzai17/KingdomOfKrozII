@@ -52,6 +52,7 @@ assets_dir = os.path.join(base_dir, "assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 
+pygame.font.init()
 def load_font(size):
     return pygame.font.Font(font_path, size)
 
