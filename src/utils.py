@@ -34,7 +34,6 @@ LIGHT_YELLOW = (255, 255, 224)
 DARK_RED = (140, 0, 0)
 
 TILE_WIDTH = 14
-TILE_HEIGHT = 14
 
 WIDTH, HEIGHT = screen.get_size()
 
@@ -53,7 +52,6 @@ assets_dir = os.path.join(base_dir, "assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 
-pygame.font.init() # Initialize fonts
 def load_font(size):
     return pygame.font.Font(font_path, size)
 
@@ -114,14 +112,14 @@ def change_title_color(time, color_user_input):
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
 
-# Load tiles, used in title screens
+# Load Tiles, loading extra icons that are not in levels.gameplay
 enemy3 = pygame.image.load(os.path.join(assets_dir, "enemy3.png"))
 keys = pygame.image.load(os.path.join(assets_dir, "keys.png"))
 power = pygame.image.load(os.path.join(assets_dir, "power.png"))
 clues = pygame.image.load(os.path.join(assets_dir, "clues.png"))
 surprise = pygame.image.load(os.path.join(assets_dir, "surprise.png"))
 
-# Scale tiles, used in title screens
+# Scale tiles
 enemy3 = pygame.transform.scale(enemy3, (15, 15))
 keys = pygame.transform.scale(keys, (15, 15))
 power = pygame.transform.scale(power, (15, 15))
@@ -161,7 +159,7 @@ def display_icons(screen):
         icon = pygame.transform.scale(icon, (15, 15))
         screen.blit(icon, (40, blit_y + (i * 23)))
 
-def flash(screen, text, WIDTH, HEIGHT): # Text disappear and appear rapidly
+def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
         screen.blit(text, (WIDTH // 2 - 120, HEIGHT - 15))
 
@@ -173,7 +171,7 @@ def flash_c(screen, message):
     text_surface = font.render(message, True, color)  # Render text with current color
     text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
     screen.blit(text_surface, text_rect)
-        
+
 def play_sound(frequency, duration, amplitude=4096):
     sample_rate = 44100
     n_samples = int(sample_rate * duration / 1000)
@@ -194,10 +192,18 @@ def play_wav(file_name):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        pygame.time.delay(100)
+        pygame.time.delay(100)              
 
 def descent():
     play_wav('beginDescent.wav')
+    
+def footStep():
+    sound_file = random.choice(['footStep_1.wav', 'footStep_2.wav'])
+    play_wav(sound_file)
+    
+def enemyCollision():
+    play_wav('enemyCollision.wav')    
+       
 
 def wait_input(screen):
     paused = True
