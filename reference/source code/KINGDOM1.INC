@@ -324,7 +324,7 @@ procedure PrintNum(YPos:byte; Num:longint);
   gotoxy(73-length(StrVal) div 2,YPos);
   write(StrVal);
  end;
-
+ 
 procedure Update_Info;
  begin
   bak(7,0);col(4,7);
