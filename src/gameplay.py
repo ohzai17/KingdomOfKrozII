@@ -1,7 +1,6 @@
 import pygame
 import os
 import random
-from screens import Sign_Off
 from utils import *
 
 def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
@@ -18,7 +17,8 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if quitting:
-                    if event.key == pygame.K_y: 
+                    if event.key == pygame.K_y:
+                        from screens import Sign_Off 
                         Sign_Off(screen)
                         return True
                     else:

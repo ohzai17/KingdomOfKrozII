@@ -1238,6 +1238,8 @@ def story_1(screen, color_user_input): # From KINGDOM4.INC (line 379)
             if event.type == pygame.KEYDOWN:
                 running = False
 
+############################################################################################################################################################################################################################
+
 def story_2(screen, color_user_input): # From KINGDOM4.INC (line 379)
 
     if color_user_input == "M":  # change to grayscale
@@ -1682,10 +1684,8 @@ def about(screen, color_user_input): # From KINGDOM4.INC (line 467)
                 
 ############################################################################################################################################################################################################################
 
-# END of load 
-
 # START of ending_creds
-def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
+def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
     # Use the provided screen
     WIDTH, HEIGHT = screen.get_size()
 
@@ -1763,8 +1763,6 @@ def end_screen(screen): # From KINGDOM1.INC (lines 471-493)
             elif event.type == pygame.KEYDOWN:
                 running = False
 # END of ending_creds
-
-############################################################################################################################################################################################################################
 
 # START of load
 def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes other screens
@@ -1891,8 +1889,7 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
                     load_selection = key_map[event.key]
                     return load_selection
         pygame.display.update()
-        
-############################################################################################################################################################################################################################        
+# END of load                
 
 def run_all_screens(screen):
     color_user_input = color(screen)
