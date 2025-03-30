@@ -280,20 +280,20 @@ procedure Player_Move;
          end
         else begin gotoxy(PX,PY);bak(0,0);col(0,0);write(' ');end;
        end;
-
+       
        { Whip }
     87:begin
         if Whips < 1 then begin NoneSound; exit; end;
         Whips:=Whips-1;
         sound(70);
         if (PY>YBot) and (PX>XBot) then Hit(PX-1,PY-1,'\');
-        if (PX>XBot) then Hit(PX-1,PY,'Ä');
+        if (PX>XBot) then Hit(PX-1,PY,'ï¿½');
         if (PY<YTop) and (PX>XBot) then Hit(PX-1,PY+1,'/');
-        if (PY<YTop) then Hit(PX,PY+1,'³');
+        if (PY<YTop) then Hit(PX,PY+1,'ï¿½');
         if (PY<YTop) and (PX<XTop) then Hit(PX+1,PY+1,'\');
-        if (PX<XTop) then Hit(PX+1,PY,'Ä');
+        if (PX<XTop) then Hit(PX+1,PY,'ï¿½');
         if (PY>YBot) and (PX<XTop) then Hit(PX+1,PY-1,'/');
-        if (PY>YBot) then Hit(PX,PY-1,'³');
+        if (PY>YBot) then Hit(PX,PY-1,'ï¿½');
         nosound;
         Update_Info;
         ClearKeys;
