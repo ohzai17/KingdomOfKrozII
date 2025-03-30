@@ -12,6 +12,7 @@ name = "To Do"
 
   [[processes.tasks]]
 <<<<<<< HEAD
+<<<<<<< HEAD
   id = "u4hlp41i6zp6jiqdr02t7v6e"
   title = "Save/Restore feature (Au Sein)"
   description = "<p></p>"
@@ -23,6 +24,8 @@ name = "To Do"
   linkCommits = [ ]
 
   [[processes.tasks]]
+=======
+>>>>>>> cf76f52 (update)
   id = "yjxgqfvzsgz2qxgfl8uevsgk"
   title = "HUD logic (Erik)"
   description = "<p>Fix math for values in the HUD</p>"
