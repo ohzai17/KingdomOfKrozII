@@ -744,7 +744,8 @@ def levels(screen, mixUp=False):
     speed_time_effect = 0 # T[6] in original
     freeze_effect = 0     # T[7] in original
     
-    GAME_TICK_RATE = 12.0
+    # Higher rate faster enemies move
+    GAME_TICK_RATE = 16.0
     
     # Game loop
     running = True
@@ -756,10 +757,10 @@ def levels(screen, mixUp=False):
     medium_counter = 0
     fast_counter = 0
 
-    # How many ticks to wait between enemy movements (lower = faster)
-    slow_threshold = 14
-    medium_threshold = 10
-    fast_threshold = 8
+    # How many ticks to wait between enemy movements (higher = slower)
+    slow_threshold = 4  # Slowest enemy (type 1)
+    medium_threshold = 2  # Medium speed enemy (type 2)
+    fast_threshold = 1  # Fastest enemy (type 3)
     
     wait = True
     while running:
@@ -818,9 +819,9 @@ def levels(screen, mixUp=False):
             fast_threshold = 20
         else:
             # Normal speeds
-            slow_threshold = 18
-            medium_threshold = 12
-            fast_threshold = 8
+            slow_threshold = 10
+            medium_threshold = 7
+            fast_threshold = 4
         
         # Update game state and enemy movement counters
         tick_counter += 1
