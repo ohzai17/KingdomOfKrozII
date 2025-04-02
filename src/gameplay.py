@@ -247,7 +247,26 @@ def levels(screen, mixUp=False):
     fast_enemies = []
     keys_pressed = {pygame.K_UP: False, pygame.K_DOWN: False, 
                     pygame.K_LEFT: False, pygame.K_RIGHT: False,
-                    pygame.K_w: False}
+                    pygame.K_w: False,
+                    pygame.K_u: False, pygame.K_i: False, pygame.K_o: False,
+                    pygame.K_j: False, pygame.K_l: False, 
+                    pygame.K_n: False, pygame.K_m: False, pygame.K_COMMA: False}
+    
+    # Add key hold time tracking for new keys
+    keys_held_time = {
+        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+    }
+    
+    # Add momentum tracking for new keys
+    momentum = {
+        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+    }
     
     # Find player and enemies
     player_row, player_col = 0, 0
@@ -559,13 +578,19 @@ def levels(screen, mixUp=False):
         pygame.K_UP: 0,
         pygame.K_DOWN: 0, 
         pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0
+        pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
     }
     momentum = {
         pygame.K_UP: 0,
         pygame.K_DOWN: 0, 
         pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0
+        pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
     }
     
     # How long a key needs to be held to generate momentum (in ms)
@@ -605,25 +630,34 @@ def levels(screen, mixUp=False):
         
         # Ready to make a move
         move_made = False
-        active_direction = None
         
-        # Direction priority: UP, DOWN, LEFT, RIGHT
+        # Define all direction keys with their movement vectors (delta_row, delta_col)
         direction_keys = [
+            # Arrow keys
             (pygame.K_UP, (-1, 0)),
             (pygame.K_DOWN, (1, 0)),
             (pygame.K_LEFT, (0, -1)),
-            (pygame.K_RIGHT, (0, 1))
+            (pygame.K_RIGHT, (0, 1)),
+            
+            # UIOJLNM, keys
+            (pygame.K_u, (-1, -1)),  # Up-left
+            (pygame.K_i, (-1, 0)),   # Up
+            (pygame.K_o, (-1, 1)),   # Up-right
+            (pygame.K_j, (0, -1)),   # Left
+            (pygame.K_l, (0, 1)),    # Right
+            (pygame.K_n, (1, -1)),   # Down-left
+            (pygame.K_m, (1, 0)),    # Down
+            (pygame.K_COMMA, (1, 1)) # Down-right
         ]
         
-        # First check keys being held down
+        # First check keys being held down - using all direction keys
         for key, (delta_row, delta_col) in direction_keys:
             if current_keys[key]:
                 if not keys_pressed[key]:  # Key just pressed
                     keys_pressed[key] = True
                     keys_held_time[key] = current_time
                 
-                # This is our active direction
-                active_direction = key
+                # Try to move in the direction
                 move_made = process_move(player_row + delta_row, player_col + delta_col)
                 if move_made:
                     last_move_time = current_time
