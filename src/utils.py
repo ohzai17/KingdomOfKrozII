@@ -43,8 +43,12 @@ square_size = 8 # Used for square bullets
 
 logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, LIGHT_BLUE, LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
-rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
+rect_colors_list = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
+
+# Random rectangle Colors to cycle through 
+rect_colors_cycle = rect_colors_list
+rand_color = random.choice(rect_colors_cycle)
 
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))

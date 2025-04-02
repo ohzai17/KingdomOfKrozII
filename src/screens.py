@@ -437,71 +437,120 @@ def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
 
 # START of shareware (info_screen)
 def shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
-
-    WIDTH, HEIGHT = screen.get_size()
-
-    if color_user_input == "M":  # Monochrome mode
-        YELLOW = (255, 255, 255)
-        WHITE = (255, 255, 255)
-        WHITE2 = (0, 0, 0)
-        OLD_BLUE = BLACK
+    
+    if color_user_input == "M":  # change to grayscale
+        BACKGROUND = BLACK
+        FOOTER_COLOR = BLACK
+        BODY_TEXT_COLOR_1 = GRAY
+        BODY_TEXT_COLOR_2 = GRAY
+        
     else:
-        YELLOW = (255, 255, 0)
-        WHITE = (255, 255, 255)
-        WHITE2 = (0, 0, 0)
-        OLD_BLUE = (44, 0, 180)
-
-    # Random rectangle Colors to cycle through 
-    colors = rect_colors
-    rand_color = random.choice(colors)
-
-    # Font setup
-    title_font = load_font(13)
-    text_font = load_font(10)
+        BACKGROUND = BLUE
+        FOOTER_COLOR = WHITE        
+        BODY_TEXT_COLOR_1 = WHITE
+        BODY_TEXT_COLOR_2 = YELLOW
+    
+    title_font, body_font = load_fonts([WIDTH // 60, WIDTH // 80])
 
     title = title_font.render("KINGDOM OF KROZ II -  REGISTER", True, WHITE)
-    prompt_text = text_font.render("Press any key to continue", True, WHITE)
-   
-    paragraph1 = ["  This is not a shareware game, but it is user-supported. If you enjoy this",
-        "game, you are asked by the author to please send a registration ",
-        "check in the amount of $7.50 to Apogee Software.",
-        "  This registration fee will qualify you to order any of the other Kroz",
-        "volumes available:"]
-
-    kroz_volumes = ["Caverns of Kroz   - the first discovery of Kroz",
-        "Dungeons of Kroz  - the dark side of Kroz, fast-paced action", 
-        "Kingdom of Kroz I - the national contest winner (\"Best Game\" in 1988)",
-        "Return of Kroz    - the discovery of entirely  new underground chambers",
-        "Temple of Kroz    - the bizarre side of Kroz, nothing is what is seems",
-        "The Final Crusade of Kroz - the surprising finish?"]
-
-    paragraph2 = ["Each gam is priced $7.50 each, any three for $20, or all six for only $35.",
-        "You'll also get a secret code that makes this game easier to complete,",
-        "Plus a \"Hints Tricks and Scoring Secrets\" guide and \"The Domain of Kroz\" map.",
-        " ",
-        " ",
-        "Please make checks payable to:",
-        " ",
-        "Address is always valid!",
-        " ",
-        "Thank you and enjoy the game.  -- Scott Miller"] 
-
-    check_info = ["apogee Software     (phone: 214/240-0614)",
-        "4206 Mayflower",
-        "Garland, TX 75045   (USA)"]
-
-    # Atrributes for square bullet
-    start_x, start_y = 30, 190
-    line_spacing = 25
-    bullet_size = 8
-
+    prompt_text = body_font.render("Press any key to continue", True, FOOTER_COLOR)
+    
     title_rect = title.get_rect(center=(WIDTH // 2, 10))
+    
+    body_text_1 = render_text(body_font, "   This is not a shareware game, but it is user-supported. If you enjoy this", GRAY)
+    body_text_2 = render_text(body_font, "game, you are asked by the author to please send a registration", GRAY)
+    body_text_3 = render_text(body_font, "check in the amount of $7.50 to Apogee Software.", GRAY)
+    body_text_4 = render_text(body_font, "   This registration fee will qualify you to order any of the other Kroz", GRAY)
+    body_text_5 = render_text(body_font, "volumes available:", GRAY)
+    
+    body_text_6 = render_text(body_font, "Caverns of Kroz   - the first discovery of Kroz", BODY_TEXT_COLOR_1)
+    body_text_7 = render_text(body_font, "Dungeons of Kroz  - the dark side of Kroz, fast-paced action", BODY_TEXT_COLOR_1)
+    body_text_8 = render_text(body_font, "Kingdom of Kroz I - the national contest winner (\"Best Game\" in 1988)", BODY_TEXT_COLOR_1)
+    body_text_9 = render_text(body_font, "Return of Kroz    - the discovery of entirely new underground chambers", BODY_TEXT_COLOR_1)
+    body_text_10 = render_text(body_font, "Temple of Kroz    - the bizarre side of Kroz, nothing is what it seems", BODY_TEXT_COLOR_1)
+    body_text_11 = render_text(body_font, "The Final Crusade of Kroz - the surprising finish?", BODY_TEXT_COLOR_1)
+   
+    body_text_12 = render_text(body_font, "Each game is priced $7.50 each, any three for $20, or all six for only $35.", GRAY)
+    body_text_13 = render_text(body_font, "You'll also get a secret code that makes this game easier to complete,", GRAY)
+    body_text_14 = render_text(body_font, "Plus a Hints Tricks and Scoring Secrets guide and The Domain of Kroz map.", GRAY)
+    body_text_15 = render_text(body_font, "Please make checks payable to:", GRAY)
+    body_text_16 = render_text(body_font, "                                   apogee Software     (phone: 214/240-0614)", BODY_TEXT_COLOR_2)
+    body_text_17 = render_text(body_font, "                                   4206 Mayflower", BODY_TEXT_COLOR_2)  
+    body_text_18 = render_text(body_font, "Address is always valid!", WHITE)
+    body_text_19 = render_text(body_font, "                                   Garland, TX 75045   (USA)", BODY_TEXT_COLOR_2)  
+    body_text_20 = render_text(body_font, "Thank you and enjoy the game.  -- Scott Miller", WHITE)    
+    
+    # Adjust text alignment to be left-justified
+    body_text_1_x = 10  # Left margin
+    body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 1)
+
+    body_text_2_x = 10
+    body_text_2_y = position_subtext_y(body_text_1_y, body_font.get_height(), 1)
+
+    body_text_3_x = 10
+    body_text_3_y = position_subtext_y(body_text_2_y, body_font.get_height(), 1)
+
+    body_text_4_x = 10
+    body_text_4_y = position_subtext_y(body_text_3_y, body_font.get_height(), 1)
+
+    body_text_5_x = 10
+    body_text_5_y = position_subtext_y(body_text_4_y, body_font.get_height(), 1)
+    
+    # Positioning for body_text_6 to body_text_11
+    bullet_x = 30  # Left margin for bullets
+    text_indent_x = 50  # Indent for text after bullets
+    bullet_size = 8  # Size of the square bullet
+
+    body_text_6_x = text_indent_x
+    body_text_6_y = position_subtext_y(body_text_5_y, body_font.get_height(), 2)
+
+    body_text_7_x = text_indent_x
+    body_text_7_y = position_subtext_y(body_text_6_y, body_font.get_height(), 1)
+
+    body_text_8_x = text_indent_x
+    body_text_8_y = position_subtext_y(body_text_7_y, body_font.get_height(), 1)
+
+    body_text_9_x = text_indent_x
+    body_text_9_y = position_subtext_y(body_text_8_y, body_font.get_height(), 1)
+
+    body_text_10_x = text_indent_x
+    body_text_10_y = position_subtext_y(body_text_9_y, body_font.get_height(), 1)
+
+    body_text_11_x = text_indent_x
+    body_text_11_y = position_subtext_y(body_text_10_y, body_font.get_height(), 1)
+
+    body_text_12_x = 10
+    body_text_12_y = position_subtext_y(body_text_11_y, body_font.get_height(), 2)
+
+    body_text_13_x = 10
+    body_text_13_y = position_subtext_y(body_text_12_y, body_font.get_height(), 1)
+
+    body_text_14_x = 10
+    body_text_14_y = position_subtext_y(body_text_13_y, body_font.get_height(), 1)
+
+    body_text_15_x = 10
+    body_text_15_y = position_subtext_y(body_text_14_y, body_font.get_height(), 2)
+
+    body_text_16_x = 10
+    body_text_16_y = position_subtext_y(body_text_14_y, body_font.get_height(), 2)
+
+    body_text_17_x = 10
+    body_text_17_y = position_subtext_y(body_text_16_y, body_font.get_height(), 1)
+
+    body_text_18_x = 10
+    body_text_18_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_19_x = 10
+    body_text_19_y = position_subtext_y(body_text_17_y, body_font.get_height(), 1)
+
+    body_text_20_x = 10
+    body_text_20_y = position_subtext_y(body_text_19_y, body_font.get_height(), 2)
+
 
     running = True
-    clock = pygame.time.Clock()
     while running:
 
-        screen.fill(OLD_BLUE) 
+        screen.fill(BACKGROUND) 
 
         screen.blit(title, title_rect) # Title
         
@@ -509,36 +558,41 @@ def shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
         line_y = title_rect.bottom + 8
         pygame.draw.line(screen, GRAY, (0, line_y), (WIDTH, line_y), 1)
         
-        # Paragraph 1
-        y_offset = line_y + 10
-        for line in paragraph1:
-            rendered_line = text_font.render(line, True, GRAY)
-            screen.blit(rendered_line, (2, y_offset))
-            y_offset += 20
+        screen.blit(body_text_1, (body_text_1_x, body_text_1_y))
+        screen.blit(body_text_2, (body_text_2_x, body_text_2_y))
+        screen.blit(body_text_3, (body_text_3_x, body_text_3_y))
+        screen.blit(body_text_4, (body_text_4_x, body_text_4_y))
+        screen.blit(body_text_5, (body_text_5_x, body_text_5_y))
 
-        # Paragraph of Kroz Volumes
-        for i, name in enumerate(kroz_volumes):
-            y_pos = start_y + i * line_spacing
-            pygame.draw.rect(screen, WHITE, (start_x, y_pos, bullet_size, bullet_size))
-            text_surface = text_font.render(name, False, WHITE)
-            screen.blit(text_surface, (start_x + 20, y_pos))
+        # Render body text with square bullets
+        pygame.draw.rect(screen, WHITE, (bullet_x, body_text_6_y + body_font.get_height() // 4, bullet_size, bullet_size))
+        screen.blit(body_text_6, (body_text_6_x, body_text_6_y))
 
-        # Paragraph 2
-        y_offset = 380
-        for index, line in enumerate(paragraph2):
-            if index == 7:
-                rendered_line = text_font.render(line, True, WHITE) # loop to single out a line
-            else:
-                rendered_line = text_font.render(line, True, GRAY)
-            screen.blit(rendered_line, (2, y_offset))
-            y_offset += 20
-        
-        # Check information
-        y_offset = 480
-        for line in check_info:
-            rendered_line = text_font.render(line, True, YELLOW)
-            screen.blit(rendered_line, (320, y_offset))
-            y_offset += 20
+        pygame.draw.rect(screen, WHITE, (bullet_x, body_text_7_y + body_font.get_height() // 4, bullet_size, bullet_size))
+        screen.blit(body_text_7, (body_text_7_x, body_text_7_y))
+
+        pygame.draw.rect(screen, WHITE, (bullet_x, body_text_8_y + body_font.get_height() // 4, bullet_size, bullet_size))
+        screen.blit(body_text_8, (body_text_8_x, body_text_8_y))
+
+        pygame.draw.rect(screen, WHITE, (bullet_x, body_text_9_y + body_font.get_height() // 4, bullet_size, bullet_size))
+        screen.blit(body_text_9, (body_text_9_x, body_text_9_y))
+
+        pygame.draw.rect(screen, WHITE, (bullet_x, body_text_10_y + body_font.get_height() // 4, bullet_size, bullet_size))
+        screen.blit(body_text_10, (body_text_10_x, body_text_10_y))
+
+        pygame.draw.rect(screen, WHITE, (bullet_x, body_text_11_y + body_font.get_height() // 4, bullet_size, bullet_size))
+        screen.blit(body_text_11, (body_text_11_x, body_text_11_y))
+
+        # Render remaining body text
+        screen.blit(body_text_12, (body_text_12_x, body_text_12_y))
+        screen.blit(body_text_13, (body_text_13_x, body_text_13_y))
+        screen.blit(body_text_14, (body_text_14_x, body_text_14_y))
+        screen.blit(body_text_15, (body_text_15_x, body_text_15_y))
+        screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
+        screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
+        screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+        screen.blit(body_text_20, (body_text_20_x, body_text_20_y))        
 
         # Random color rectangle
         pygame.draw.rect(screen, rand_color, (0, HEIGHT - 17, WIDTH, 17)) # (x, y, width, height)
@@ -548,12 +602,12 @@ def shareware(screen, color_user_input): # From KINGDOM3.INC (lines 495-541)
         pygame.display.update()
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
-            elif event.type == pygame.KEYDOWN:
-                running = False
-        clock.tick(60)
-# END of shareware (info_screen)
+            match event.type:
+                case pygame.QUIT:
+                    pygame.quit()
+                    return None
+                case pygame.KEYDOWN:
+                    running = False
 
 # START of instruction1
 def instruction1(screen, color_user_input): #
@@ -949,11 +1003,9 @@ def marketing(screen, color_user_input): # From KINGDOM3.INC (line 348)
     if color_user_input == "M":  # change to grayscale
         BACKGROUND = BLACK
         TITLE_COLOR = WHITE
-        FOOTER = WHITE
         FOOTER_COLOR = WHITE
     else:
         TITLE_COLOR = YELLOW
-        FOOTER = WHITE
         FOOTER_COLOR = WHITE
         BACKGROUND = BLUE
 
@@ -1507,17 +1559,16 @@ def original(screen, color_user_input): # From KINGDOM4.INC (line 438)
         screen.blit(body_text_16, (body_text_16_x, body_text_16_y))
         screen.blit(body_text_17, (body_text_17_x, body_text_17_y))
         screen.blit(body_text_18, (body_text_18_x, body_text_18_y))
-        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))
+        screen.blit(body_text_19, (body_text_19_x, body_text_19_y))  
 
-        # Draw squares where the � characters were
-        square_size = 10
+        square_size = 8
         square_color = WHITE
-        pygame.draw.rect(screen, square_color, (body_text_6_x + 20, body_text_6_y + 5, square_size, square_size))
-        pygame.draw.rect(screen, square_color, (body_text_6_x + 180, body_text_6_y + 5, square_size, square_size))
-        pygame.draw.rect(screen, square_color, (body_text_6_x + 340, body_text_6_y + 5, square_size, square_size))
-        pygame.draw.rect(screen, square_color, (body_text_13_x + 20, body_text_13_y + 5, square_size, square_size))
-        pygame.draw.rect(screen, square_color, (body_text_13_x + 180, body_text_13_y + 5, square_size, square_size))
-        pygame.draw.rect(screen, square_color, (body_text_13_x + 340, body_text_13_y + 5, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_6_x + 140, body_text_6_y, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_6_x + 340, body_text_6_y, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_6_x + 540, body_text_6_y, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_13_x + 30, body_text_13_y, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_13_x + 220, body_text_13_y, square_size, square_size))
+        pygame.draw.rect(screen, square_color, (body_text_13_x + 410, body_text_13_y, square_size, square_size))
 
         flash(screen, prompt_text, WIDTH, HEIGHT)
 
@@ -1758,11 +1809,14 @@ def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
         pygame.display.flip()
         
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                running = False
-# END of ending_creds
+            match event.type:
+                case pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                case pygame.KEYDOWN:
+                    running = False
+                    pygame.quit()  # Terminate pygame
+                    exit()  # Immediately exit the program after Sign_Off
 
 # START of load
 def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes other screens
@@ -1880,23 +1934,38 @@ def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes
         screen.blit(blinking_b, (selector_x + selector.get_width() + 8, selector_y))
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == cursor_timer:
-                cursor_visible = not cursor_visible
-            elif event.type == pygame.KEYDOWN:
-                if event.key in key_map:
-                    load_selection = key_map[event.key]
-                    return load_selection
+            match event.type:
+                case pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                case pygame.KEYDOWN:
+                    match event.key:
+                        case pygame.K_b:
+                            return "b"
+                        case pygame.K_i:
+                            return "i"
+                        case pygame.K_m:
+                            return "m"
+                        case pygame.K_s:
+                            return "s"
+                        case pygame.K_o:
+                            return "o"
+                        case pygame.K_a:
+                            return "a"
+                        case pygame.K_r:
+                            return "r"
+                        case pygame.K_ESCAPE:
+                            pygame.quit()
+                            sys.exit()
         pygame.display.update()
 # END of load                
 
 def run_all_screens(screen):
     color_user_input = color(screen)
-    speed_user_input = speed(screen, color_user_input)
-    title(screen, color_user_input)
-    difficulty(screen, color_user_input)
-    shareware(screen, color_user_input)
+    # speed_user_input = speed(screen, color_user_input)
+    # title(screen, color_user_input)
+    # difficulty(screen, color_user_input)
+    # shareware(screen, color_user_input)
     user_choice = load(screen, color_user_input)
     
     # This runs and proccess the loading screen along with screens in load()
