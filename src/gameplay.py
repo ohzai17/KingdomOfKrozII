@@ -10,7 +10,7 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
         message = "Are you sure you want to quit (Y/N)?" if quitting else "Press any key to Resume"
         flash_c(screen, message)
         pygame.display.flip()
-
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -28,7 +28,7 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     
     return False  # User didn't quit
                     
-def hud(screen, WIDTH, HEIGHT, values=None): #From KINGDOM4.INC (lines 96-183)
+def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
 
     pygame.draw.rect(screen, BLUE, (0, (TILE_HEIGHT * 23) + 20, WIDTH, HEIGHT - (TILE_HEIGHT * 23)))
 
@@ -101,7 +101,7 @@ def levels(screen, mixUp=False):
     
     screen.fill(BLACK)
 
-    sprites = ["block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "stairs", "teleport", 
+    sprites = ["block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport", 
                "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river", 
                "power", "forest", "tree", "bomb", "lava", "pit", "tome", "tunnel", "freeze", "nugget", 
                "quake", "iBlock", "iWall", "iDoor", "stop", "trap2", "zap", "create", "generator", 
@@ -143,6 +143,7 @@ def levels(screen, mixUp=False):
         ".": images["trap"],
         "L": images["stairs"],
         "P": images["player"],
+        "TP": images["teleport_player"],
         "S": images["slowTime"],
         "I": images["invisible"],
         "K": images["key"],
@@ -588,7 +589,7 @@ def levels(screen, mixUp=False):
     collidable_tiles = {"X", "#", ";", "/", "J", "R", "4", "5", "6", "8", "9"}
 
     dynamic_tiles = {"P", "1", "2", "3"}
- # Game state
+    # Game state
     grid = [list(row) for row in level1_map]
     collidable_tiles = {"X", "#"}
     slow_enemies = []
@@ -608,12 +609,12 @@ def levels(screen, mixUp=False):
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})  # Fixed: added colon after "col"
 
-    # Initialize tracking variables *Updated to match NOVICE mode*
+    # Initialize score tracking variables *Updated to match NOVICE mode*
     score = 0
     level_num = 1
     gems = 20
     whips = 10
-    teleports = 0
+    teleports = 10
     keys = 0
 
     # Function to change to the next level
@@ -830,6 +831,83 @@ def levels(screen, mixUp=False):
         return kills, new_slow_enemies, new_medium_enemies
     
 
+
+    def teleport2(grid, player_row, player_col, tile_mapping, screen):  
+        """Teleports the player to a random empty space on the grid with a flickering effect before and after teleporting."""
+    
+        if teleports <= 0:
+            return player_row, player_col
+
+        # Find all empty spaces
+        empty_spaces = [(r, c) for r in range(len(grid)) for c in range(len(grid[0])) if grid[r][c] == ' ']
+
+        if not empty_spaces:
+            return player_row, player_col
+
+        # Flicker at the original position (10 times)
+        for _ in range(10):  
+            random_color = random.choice(blinking_text_color_list)
+
+            # Fill original position with random color
+            screen.fill(random_color, (player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+
+            # Draw the player sprite at the original location
+            screen.blit(tile_mapping['P'], (player_col * TILE_WIDTH, player_row * TILE_HEIGHT))
+
+            pygame.display.update(pygame.Rect(player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+            pygame.time.delay(80)
+
+        # Clear the player's original position (set to black)
+        screen.fill((BLACK), (player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+        pygame.display.update([pygame.Rect(player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)])
+
+        for _ in range(50):  # Repeat flickering teleportation 50 times
+            # Select a random empty space
+            new_row, new_col = random.choice(empty_spaces)
+
+            # Flicker at the intermediate locations with only the TP icon (no random colors)
+            screen.fill((BLACK), (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))  # Clear previous
+
+            # Draw the TP icon at the new location
+            screen.blit(tile_mapping['TP'], (new_col * TILE_WIDTH, new_row * TILE_HEIGHT))
+
+            pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+            pygame.time.delay(80)
+            screen.fill((BLACK), (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+            pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+
+        # Flicker at the final destination (10 times)
+        for _ in range(10):  
+            random_color = random.choice(blinking_text_color_list)
+
+            # Fill final position with random color
+            screen.fill(random_color, (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+
+            # Draw the player sprite at the final location
+            screen.blit(tile_mapping['P'], (new_col * TILE_WIDTH, new_row * TILE_HEIGHT))
+
+            pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+            pygame.time.delay(80)
+
+        # Clear the final position before placing the player
+        screen.fill((BLACK), (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+        pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
+
+
+        # Clear old player position from the grid
+        grid[player_row][player_col] = ' '
+
+        # Update the grid with new player position
+        grid[new_row][new_col] = 'P'
+
+        # Ensure final player placement is visible
+        screen.blit(tile_mapping['P'], (new_col * TILE_WIDTH, new_row * TILE_HEIGHT))
+        pygame.display.update([pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)])
+
+        # Return new player position
+        return new_row, new_col
+
+
     # Movement settings - simplified for consistent movement
     movement_cooldown = 100  # ms between moves (one space per 100ms)
     last_move_time = 0
@@ -875,7 +953,19 @@ def levels(screen, mixUp=False):
                     action_performed = True
         else:
             keys_pressed[pygame.K_w] = False
-        
+
+        # Handle Teleport activation with the 't' key
+        if current_keys[pygame.K_t]:
+            if not keys_pressed[pygame.K_t]:
+                keys_pressed[pygame.K_t] = True
+                if teleports > 0:
+                    player_row, player_col = teleport2(grid, player_row, player_col, tile_mapping, screen)
+                    teleports -= 1
+                action_performed = True
+        else:
+            keys_pressed[pygame.K_t] = False
+
+
         # Check if enough time has passed since last move
         time_since_last_move = current_time - last_move_time
         if time_since_last_move < movement_cooldown:
