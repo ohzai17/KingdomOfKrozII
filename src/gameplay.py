@@ -1,6 +1,3 @@
-import pygame
-import os
-import random
 from maps import *
 from utils import *
 
@@ -19,8 +16,8 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
             elif event.type == pygame.KEYDOWN:
                 if quitting:
                     if event.key == pygame.K_y:
-                        from screens import Sign_Off 
-                        Sign_Off(screen)
+                        from screens import sign_off 
+                        sign_off(screen)
                         return True
                     else:
                         paused = False

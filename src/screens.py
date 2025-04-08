@@ -5,8 +5,6 @@ from gameplay import levels
 
 def color(screen): # From KINGDOM4.INC (line 66)
     
-    WIDTH, HEIGHT = screen.get_size()
-
     # Fonts
     title_font, heading_font = load_fonts([WIDTH // 50, WIDTH // 70])
 
@@ -68,7 +66,6 @@ def color(screen): # From KINGDOM4.INC (line 66)
 
 def speed(screen, color_user_input): # From KINGDOM4.INC (line 87)
     
-    WIDTH, HEIGHT = screen.get_size()
 
     # Fonts
     title_font, heading_font, subtext_font = load_fonts([WIDTH // 50, WIDTH // 70, WIDTH // 70])
@@ -151,8 +148,6 @@ def speed(screen, color_user_input): # From KINGDOM4.INC (line 87)
 
 def title(screen, color_user_input): # From KINGDOM3.INC (line 64)
 
-    # Use the dimensions of the passed screen
-    WIDTH, HEIGHT = screen.get_size()
 
     # Logo setup
     logo = pygame.image.load("src/assets/kroz_logo.png").convert_alpha()
@@ -231,7 +226,6 @@ def title(screen, color_user_input): # From KINGDOM3.INC (line 64)
 
 def difficulty(screen, color_user_input): # From KINGDOM3.INC (line 86)
     
-    WIDTH, HEIGHT = screen.get_size()
 
     # Fonts
     title_font, heading_font, subtext_font, footer_font = load_fonts([WIDTH // 50, WIDTH // 80, WIDTH // 80, WIDTH // 80])
@@ -1051,22 +1045,22 @@ def instructions_4(screen, color_user_input): #
     
     title_rect = title.get_rect(center=(WIDTH // 2, 30))
 
-    body_text_1 = render_text(body_font, "  You can now save three different levels during a single game. When you", BODY_TEXT_COLOR_1)
-    body_text_2 = render_text(body_font, "  select the 'save' command you will also be asked to enter a letter, either", BODY_TEXT_COLOR_1)
-    body_text_3 = render_text(body_font, "  A, B or C. If you just hit the space bar then A is the default selection.", BODY_TEXT_COLOR_1)
-    body_text_4 = render_text(body_font, "  These letters do not refer to disk drives! They actually refer to the file", BODY_TEXT_COLOR_1)
-    body_text_5 = render_text(body_font, "  names used by the game. The restore command lets you pick from A, B or C.", BODY_TEXT_COLOR_1)
+    body_text_1 = render_text(body_font, "You can now save three different levels during a single game. When you", BODY_TEXT_COLOR_1)
+    body_text_2 = render_text(body_font, "select the 'save' command you will also be asked to enter a letter, either", BODY_TEXT_COLOR_1)
+    body_text_3 = render_text(body_font, "A, B or C. If you just hit the space bar then A is the default selection.", BODY_TEXT_COLOR_1)
+    body_text_4 = render_text(body_font, "These letters do not refer to disk drives! They actually refer to the file", BODY_TEXT_COLOR_1)
+    body_text_5 = render_text(body_font, "names used by the game. The restore command lets you pick from A, B or C.", BODY_TEXT_COLOR_1)
 
-    body_text_6 = render_text(body_font, "  Sideways levels can be recognized by the pause message that appears at", BODY_TEXT_COLOR_1)
-    body_text_7 = render_text(body_font, "  the bottom of the screen, which states that it's a 'sideways' level.", BODY_TEXT_COLOR_1)
+    body_text_6 = render_text(body_font, "Sideways levels can be recognized by the pause message that appears at", BODY_TEXT_COLOR_1)
+    body_text_7 = render_text(body_font, "the bottom of the screen, which states that it's a 'sideways' level.", BODY_TEXT_COLOR_1)
 
-    body_text_8 = render_text(body_font, "  If you are tired of seeing the descriptions at the bottom of the screen", BODY_TEXT_COLOR_1)
-    body_text_9 = render_text(body_font, "  that appear whenever you touch a new object, you can disable most of the", BODY_TEXT_COLOR_1)
-    body_text_10 = render_text(body_font, "  messages by pressing the minus (-) key. The plus key (+) resets messages.", BODY_TEXT_COLOR_1)
+    body_text_8 = render_text(body_font, "If you are tired of seeing the descriptions at the bottom of the screen", BODY_TEXT_COLOR_1)
+    body_text_9 = render_text(body_font, "that appear whenever you touch a new object, you can disable most of the", BODY_TEXT_COLOR_1)
+    body_text_10 = render_text(body_font, "messages by pressing the minus (-) key. The plus key (+) resets messages.", BODY_TEXT_COLOR_1)
 
-    body_text_11 = render_text(body_font, "  Kingdom of Kroz II is a completely updated and improved version over the", BODY_TEXT_COLOR_1)
-    body_text_12 = render_text(body_font, "  original version of Kingdom of Kroz. If you desire to play the original", BODY_TEXT_COLOR_1)
-    body_text_13 = render_text(body_font, "  Kingdom of Kroz, please send $7.50. Over 17 levels are different!", BODY_TEXT_COLOR_1)
+    body_text_11 = render_text(body_font, "Kingdom of Kroz II is a completely updated and improved version over the", BODY_TEXT_COLOR_1)
+    body_text_12 = render_text(body_font, "original version of Kingdom of Kroz. If you desire to play the original", BODY_TEXT_COLOR_1)
+    body_text_13 = render_text(body_font, "Kingdom of Kroz, please send $7.50. Over 17 levels are different!", BODY_TEXT_COLOR_1)
 
     body_text_1_x = center_text_x(WIDTH, body_text_1.get_width())
     body_text_1_y = position_subtext_y(title_rect.bottom, body_font.get_height(), 2)
@@ -1883,9 +1877,7 @@ def about(screen, color_user_input): # From KINGDOM4.INC (line 467)
 ############################################################################################################################################################################################################################
 
 # START of ending_creds
-def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
-    # Use the provided screen
-    WIDTH, HEIGHT = screen.get_size()
+def sign_off(screen): # From KINGDOM1.INC (lines 471-493)
 
     # Font setup
     text_font = load_font(10)
@@ -1963,7 +1955,7 @@ def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
                 case pygame.KEYDOWN:
                     running = False
                     pygame.quit()  # Terminate pygame
-                    exit()  # Immediately exit the program after Sign_Off
+                    exit()  # Immediately exit the program after sign_off
                     
 
 ############################################################################################################################################################################################################################
@@ -1971,7 +1963,6 @@ def Sign_Off(screen): # From KINGDOM1.INC (lines 471-493)
 # START of load
 def load(screen, color_user_input): # From KINGDOM3.INC (lines 141-495) includes other screens
 
-    WIDTH, HEIGHT = screen.get_size()
 
     if color_user_input == "M":  # change to grayscale
         RED = (128, 128, 128)
