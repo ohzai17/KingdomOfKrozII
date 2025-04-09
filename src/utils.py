@@ -53,6 +53,7 @@ rand_color = random.choice(rect_colors_cycle)
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
 assets_dir = os.path.join(base_dir, "assets")
+screens_assets_dir = os.path.join(base_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 
