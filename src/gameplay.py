@@ -1,6 +1,3 @@
-import pygame
-import os
-import random
 from maps import *
 from utils import *
 
@@ -19,8 +16,8 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
             elif event.type == pygame.KEYDOWN:
                 if quitting:
                     if event.key == pygame.K_y:
-                        from screens import Sign_Off 
-                        Sign_Off(screen)
+                        from screens import sign_off 
+                        sign_off(screen)
                         return True
                     else:
                         paused = False
@@ -247,7 +244,26 @@ def levels(screen, mixUp=False):
     fast_enemies = []
     keys_pressed = {pygame.K_UP: False, pygame.K_DOWN: False, 
                     pygame.K_LEFT: False, pygame.K_RIGHT: False,
-                    pygame.K_w: False}
+                    pygame.K_w: False,
+                    pygame.K_u: False, pygame.K_i: False, pygame.K_o: False,
+                    pygame.K_j: False, pygame.K_l: False, 
+                    pygame.K_n: False, pygame.K_m: False, pygame.K_COMMA: False}
+    
+    # Add key hold time tracking for new keys
+    keys_held_time = {
+        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+    }
+    
+    # Add momentum tracking for new keys
+    momentum = {
+        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+    }
     
     # Find player and enemies
     player_row, player_col = 0, 0
@@ -334,7 +350,7 @@ def levels(screen, mixUp=False):
 
     def move_enemy(enemy, enemy_type, move_prob):
         """Move an enemy toward the player if they can see the player"""
-        nonlocal Score,gems  # Add this declaration to access Score from the outer scope
+        nonlocal Score, gems  # Access Score and gems from the outer scope
         
         row, col = enemy["row"], enemy["col"]
         
@@ -342,10 +358,13 @@ def levels(screen, mixUp=False):
         if grid[row][col] != enemy_type:
             return True  # Remove enemy
             
-        # Random chance for player move
-        if random.randint(0, move_prob-1) == 0:
-            player_input()
-            
+        # Original game had different odds for different enemy types
+        # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
+        # Only give player a move chance if the player can see the enemy
+        if has_line_of_sight(row, col, player_row, player_col):
+            if random.randint(0, move_prob-1) == 0:
+                player_input()
+        
         # Check if enemy can see player
         if not has_line_of_sight(row, col, player_row, player_col):
             return False  # Stay still if can't see player
@@ -357,19 +376,43 @@ def levels(screen, mixUp=False):
         new_row, new_col = row, col
         x_dir, y_dir = 0, 0
         
-        if player_col < col:
-            new_col -= 1
-            x_dir = 1
-        elif player_col > col:
-            new_col += 1
-            x_dir = -1
-            
-        if player_row < row:
-            new_row -= 1
-            y_dir = 1
-        elif player_row > row:
-            new_row += 1
-            y_dir = -1
+        # Try to move closer to the player along optimal axis first
+        x_dist = abs(player_col - col)
+        y_dist = abs(player_row - row)
+        
+        # Move along the axis with greater distance first
+        # This makes enemies try to minimize the longest dimension first
+        if x_dist > y_dist:
+            # Move horizontally first
+            if player_col < col:
+                new_col -= 1
+                x_dir = 1
+            elif player_col > col:
+                new_col += 1
+                x_dir = -1
+        else:
+            # Move vertically first
+            if player_row < row:
+                new_row -= 1
+                y_dir = 1
+            elif player_row > row:
+                new_row += 1
+                y_dir = -1
+        
+        # If no movement was determined, try the other axis
+        if new_row == row and new_col == col:
+            if player_col < col:
+                new_col -= 1
+                x_dir = 1
+            elif player_col > col:
+                new_col += 1
+                x_dir = -1
+            elif player_row < row:
+                new_row -= 1
+                y_dir = 1
+            elif player_row > row:
+                new_row += 1
+                y_dir = -1
         
         # Handle movement and collisions
         if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
@@ -389,7 +432,7 @@ def levels(screen, mixUp=False):
                 elif enemy_type == "3": gems -= 3
                 
                 if gems < 0:
-                    # Ideally call a death function here, but just return for now
+                    # Ideally call a death function here
                     return True
                 
                 # Update display
@@ -418,19 +461,19 @@ def levels(screen, mixUp=False):
                 elif enemy_type == "3": gems -= 3
                 
                 if gems < 0:
-                    # Ideally call a death function here, but just return for now
+                    # Ideally call a death function here
                     pass
                     
                 return True  # Enemy dies
                 
-            # Blocked - try to find another way
+            # Blocked - stay in place
             else:
-                grid[row][col] = enemy_type  # Stay in place
+                grid[row][col] = enemy_type
                 return False
         else:
             grid[row][col] = enemy_type  # Stay in place
             return False
-    
+
     def use_whip(screen, grid, player_row, player_col, whips, slow_enemies, medium_enemies, fast_enemies, images, tile_mapping, TILE_WIDTH, TILE_HEIGHT):
         """Handle the whip animation and enemy interactions"""
         # Access game state variables from enclosing scope
@@ -532,13 +575,19 @@ def levels(screen, mixUp=False):
         pygame.K_UP: 0,
         pygame.K_DOWN: 0, 
         pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0
+        pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
     }
     momentum = {
         pygame.K_UP: 0,
         pygame.K_DOWN: 0, 
         pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0
+        pygame.K_RIGHT: 0,
+        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
+        pygame.K_j: 0, pygame.K_l: 0, 
+        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
     }
     
     # How long a key needs to be held to generate momentum (in ms)
@@ -578,25 +627,34 @@ def levels(screen, mixUp=False):
         
         # Ready to make a move
         move_made = False
-        active_direction = None
         
-        # Direction priority: UP, DOWN, LEFT, RIGHT
+        # Define all direction keys with their movement vectors (delta_row, delta_col)
         direction_keys = [
+            # Arrow keys
             (pygame.K_UP, (-1, 0)),
             (pygame.K_DOWN, (1, 0)),
             (pygame.K_LEFT, (0, -1)),
-            (pygame.K_RIGHT, (0, 1))
+            (pygame.K_RIGHT, (0, 1)),
+            
+            # UIOJLNM, keys
+            (pygame.K_u, (-1, -1)),  # Up-left
+            (pygame.K_i, (-1, 0)),   # Up
+            (pygame.K_o, (-1, 1)),   # Up-right
+            (pygame.K_j, (0, -1)),   # Left
+            (pygame.K_l, (0, 1)),    # Right
+            (pygame.K_n, (1, -1)),   # Down-left
+            (pygame.K_m, (1, 0)),    # Down
+            (pygame.K_COMMA, (1, 1)) # Down-right
         ]
         
-        # First check keys being held down
+        # First check keys being held down - using all direction keys
         for key, (delta_row, delta_col) in direction_keys:
             if current_keys[key]:
                 if not keys_pressed[key]:  # Key just pressed
                     keys_pressed[key] = True
                     keys_held_time[key] = current_time
                 
-                # This is our active direction
-                active_direction = key
+                # Try to move in the direction
                 move_made = process_move(player_row + delta_row, player_col + delta_col)
                 if move_made:
                     last_move_time = current_time
@@ -660,16 +718,47 @@ def levels(screen, mixUp=False):
         return False
 
     # Game constants
-    SLOW_TIMER = 5  # STime
-    MEDIUM_TIMER = 6  # MTime
-    FAST_TIMER = 3  # FTime
-    GAME_TICK_RATE = 12.0
+    FAST_PC = True  # Modern computers are "fast" compared to original era
     
-     # Game loop
+    # Timer initialization (from KINGDOM4.INC lines 61-63)
+    if FAST_PC:
+        BASE_SLOW_TIMER = 10
+        BASE_MEDIUM_TIMER = 8
+        BASE_FAST_TIMER = 6
+    else:
+        BASE_SLOW_TIMER = 3
+        BASE_MEDIUM_TIMER = 2
+        BASE_FAST_TIMER = 1
+    
+    # Current timer values
+    SLOW_TIMER = BASE_SLOW_TIMER
+    MEDIUM_TIMER = BASE_MEDIUM_TIMER
+    FAST_TIMER = BASE_FAST_TIMER
+    
+    # Spell effect timers
+    slow_time_effect = 0  # T[4] in original
+    invisible_effect = 0  # T[5] in original
+    speed_time_effect = 0 # T[6] in original
+    freeze_effect = 0     # T[7] in original
+    
+    # Higher rate faster enemies move
+    GAME_TICK_RATE = 16.0
+    
+    # Game loop
     running = True
     clock = pygame.time.Clock()
     tick_counter = 0
+    
+    # Individual enemy movement counters - separate timing for each enemy type
+    slow_counter = 0
+    medium_counter = 0
+    fast_counter = 0
 
+    # How many ticks to wait between enemy movements (higher = slower)
+    slow_threshold = 4  # Slowest enemy (type 1)
+    medium_threshold = 2  # Medium speed enemy (type 2)
+    fast_threshold = 1  # Fastest enemy (type 3)
+    
     wait = True
     while running:
         # Handle events
@@ -691,7 +780,7 @@ def levels(screen, mixUp=False):
                     keys_pressed[event.key] = False
         
         # Process player input
-        player_input()
+        action_performed = player_input()
         
         # Draw the grid
         screen.fill(BLACK)
@@ -704,28 +793,88 @@ def levels(screen, mixUp=False):
         values = [Score, level_num, gems, whips, teleports, keys]
         hud(screen, WIDTH, HEIGHT, values)
         
-        # Update game state
+        # Update spell effect timers
+        if slow_time_effect > 0:
+            slow_time_effect -= 1
+        if invisible_effect > 0:
+            invisible_effect -= 1
+        if speed_time_effect > 0:
+            speed_time_effect -= 1
+        if freeze_effect > 0:
+            freeze_effect -= 1
+        
+        # Update movement thresholds based on spell effects
+        if speed_time_effect > 0:
+            # Speed time makes enemies move very fast
+            slow_threshold = 6
+            medium_threshold = 5
+            fast_threshold = 4
+        elif slow_time_effect > 0:
+            # Slow time makes enemies move much slower
+            slow_threshold = 30
+            medium_threshold = 25
+            fast_threshold = 20
+        else:
+            # Normal speeds
+            slow_threshold = 10
+            medium_threshold = 7
+            fast_threshold = 4
+        
+        # Update game state and enemy movement counters
         tick_counter += 1
         
-        # Move enemies on their respective timers
-        if tick_counter % SLOW_TIMER == 0:
-            # Move slow enemies
-            for i in range(len(slow_enemies)-1, -1, -1):
-                if move_enemy(slow_enemies[i], "1", 8):
-                    del slow_enemies[i]
+        # Only increment counters and allow movement if freeze effect is inactive
+        if freeze_effect <= 0:
+            # Increment individual enemy counters
+            slow_counter += 1
+            medium_counter += 1
+            fast_counter += 1
+            
+            # Move slow enemies (type 1)
+            if slow_counter >= slow_threshold:
+                for i in range(len(slow_enemies)-1, -1, -1):
+                    if i < len(slow_enemies):  # Make sure the enemy still exists
+                        if move_enemy(slow_enemies[i], "1", 8):
+                            del slow_enemies[i]
+                slow_counter = 0  # Reset the counter
+                
+            # Move medium enemies (type 2)
+            if medium_counter >= medium_threshold:
+                for i in range(len(medium_enemies)-1, -1, -1):
+                    if i < len(medium_enemies):  # Make sure the enemy still exists
+                        if move_enemy(medium_enemies[i], "2", 7):
+                            del medium_enemies[i]
+                medium_counter = 0  # Reset the counter
+                
+            # Move fast enemies (type 3)
+            if fast_counter >= fast_threshold:
+                for i in range(len(fast_enemies)-1, -1, -1):
+                    if i < len(fast_enemies):  # Make sure the enemy still exists
+                        if move_enemy(fast_enemies[i], "3", 6):
+                            del fast_enemies[i]
+                fast_counter = 0  # Reset the counter
         
-        if tick_counter % MEDIUM_TIMER == 0:
-            # Move medium enemies
-            for i in range(len(medium_enemies)-1, -1, -1):
-                if move_enemy(medium_enemies[i], "2", 7):
-                    del medium_enemies[i]
-        
-        if tick_counter % FAST_TIMER == 0:
-            # Move fast enemies
-            for i in range(len(fast_enemies)-1, -1, -1):
-                if move_enemy(fast_enemies[i], "3", 6):
-                    del fast_enemies[i]
-        
+        # Handle speed and slow time powerups
+        for row_index, row in enumerate(grid):
+            for col_index, char in enumerate(row):
+                # If player is on the slowtime powerup
+                if char == "S" and row_index == player_row and col_index == player_col:
+                    slow_time_effect = 70 if not FAST_PC else 100
+                    grid[row_index][col_index] = " "
+                    # Visual/sound effects would go here
+                    
+                # If player is on the speedtime powerup
+                if char == "F" and row_index == player_row and col_index == player_col:
+                    speed_time_effect = 50 if not FAST_PC else 80
+                    grid[row_index][col_index] = " "
+                    # Visual/sound effects would go here
+                    
+                # If player is on the freeze powerup
+                if char == "Z" and row_index == player_row and col_index == player_col:
+                    freeze_effect = 55 if not FAST_PC else 60
+                    grid[row_index][col_index] = " "
+                    # Visual/sound effects would go here
+
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
 levels(screen)
