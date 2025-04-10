@@ -3,6 +3,7 @@ import random
 import os
 import sys
 import time
+import json
 import numpy as np
 
 screen = pygame.display.set_mode((832, 624))
@@ -52,6 +53,7 @@ rand_color = random.choice(rect_colors_cycle)
 
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
+saves_dir = os.path.join(base_dir, "saves")
 assets_dir = os.path.join(base_dir, "assets")
 screens_assets_dir = os.path.join(base_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
@@ -211,18 +213,3 @@ def enemyCollision():
     play_wav('enemyCollision.wav')    
        
 
-def wait_input(screen):
-    paused = True
-
-    while paused:
-        message = "PRESS ANY KEY TO THIS LEVEL." 
-        flash_c(screen, message)
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                paused = False
-                return
-            elif event.type == pygame.QUIT:
-                pygame.quit()
-                exit()    
