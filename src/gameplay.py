@@ -1,5 +1,24 @@
 from maps import *
 from utils import *
+from draw_text import draw_text
+
+"""
+def draw_text(row, text, text_color=None, center=True, flashing=False, text_background=None):
+    Draws a single row of text using character sprites onto the screen.
+
+    Args:
+        row (int): The grid row number (1-25) to draw the text on.
+        text (str): The string of text to draw.
+        text_color (tuple | str | None, optional): RGB color tuple for static text,
+            the string "CHANGING" for cycling colors, or None to use the sprite's original color.
+            Defaults to None.
+        center (bool, optional): If True, center the text horizontally on the grid row.
+            Defaults to True.
+        flashing (bool, optional): If True, make the text flash.
+            Defaults to False.
+        text_background (tuple, optional): RGB color tuple for the background behind each char.
+            Defaults to None.
+"""
 
 def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
     paused = True
@@ -984,4 +1003,4 @@ def levels(screen, mixUp=False):
 
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-levels(screen)
+#levels(screen)

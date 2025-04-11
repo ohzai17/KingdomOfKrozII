@@ -1,12 +1,20 @@
 import pygame
 import random
 import os
-import sys
 import time
 import json
 import numpy as np
 
-screen = pygame.display.set_mode((832, 624))
+pygame.init()
+pygame.mixer.init()
+# 16:9
+WIDTH, HEIGHT = 1320, 1
+HEIGHT = int(WIDTH * 9 / 16)
+resolution = (WIDTH, HEIGHT)
+screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
+GRID_WIDTH, GRID_HEIGHT = 80, 25
+TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
+CHAR_WIDTH, CHAR_HEIGHT = WIDTH // 80, HEIGHT // 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
 # Colors used in the game
@@ -55,7 +63,7 @@ rand_color = random.choice(rect_colors_cycle)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 saves_dir = os.path.join(base_dir, "saves")
 assets_dir = os.path.join(base_dir, "assets")
-screens_assets_dir = os.path.join(base_dir, "screens_assets")
+screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 

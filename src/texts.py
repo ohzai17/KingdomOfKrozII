@@ -1,23 +1,18 @@
 # General
-title = "KINGDOM OF KROZ II"
+game_title = "KINGDOM OF KROZ II"
 press_any_key = "Press any key to continue"
 press_any_key_dot = "Press any key to continue."
 
 # color screen
-color_heading_1 = "Is your screen color or monochrome (C/M)? C"
-color_cursor_char = "C"
-color_user_input_m = "M"
-color_log_prefix = "Color:"
+color_heading = "Is your screen color or monochrome (C/M)? C"
+color_cursor =  "                                          █"
 
 # speed screen
 speed_heading_1 = "Slow or Fast PC (S/F)? S"
+speed_cursor =    "                       █"
 speed_subtext_1 = "If you have an older PC (like an XT model) choose \"S\" for Slow."
 speed_subtext_2 = "If you have a PC AT, 80386 chip, etc., choose \"F\" for Fast."
 speed_subtext_3 = "(Default = Slow)"
-speed_cursor_char = "S"
-speed_user_input_s = "S"
-speed_user_input_f = "F"
-speed_log_prefix = "Speed:"
 
 # title screen
 title_heading_1 = "Apogee Software Presents"
@@ -42,16 +37,6 @@ difficulty_subtext_10 = "helpful, others deadly..."
 difficulty_heading_3_1 = "Are you a  ovice, an  xperienced, or an  dvanced player? "
 difficulty_heading_3_2 = "          N          E                  A"
 difficulty_footer_1 = "Press any key. "
-difficulty_cursor_char = "?"
-difficulty_user_input_n = "N"
-difficulty_user_input_e = "E"
-difficulty_user_input_a = "A"
-difficulty_user_input_x = "X"
-difficulty_blinking_novice = "NOVICE"
-difficulty_blinking_experienced = "EXPERIENCED"
-difficulty_blinking_advanced = "ADVANCED"
-difficulty_blinking_secret = "SECRET MODE"
-difficulty_log_prefix = "Difficulty:"
 
 # shareware screen
 shareware_title = "KINGDOM OF KROZ II -  REGISTER"
@@ -331,7 +316,6 @@ about_body_texts = [
 ]
 
 # Sign_Off (ending_creds) screen
-ending_title = title
 ending_subtitle = "An Apogee Software Production"
 ending_subtitle2 = "Other great games available from Scott Miller:"
 ending_paragraphs1 = [
@@ -358,7 +342,6 @@ ending_paragraphs3 = [
 
 
 # load screen
-load_title = title
 load_subtext1 = "Copyright (c) 1990 Apogee Softwate Productions"
 load_subtext2 = "Version 2.0 -- by Scott Miller"
 load_para1 = [
@@ -374,12 +357,3 @@ load_choice_list = [
     "About the Author"
 ]
 load_selector = "Your choice (B, I, M, S, O, A)?"
-load_blinking_char = "B"
-
-# run_all_screens logic
-run_choice_log_b = "Choice: B"
-run_choice_log_i = "Choice: I"
-run_choice_log_m = "Choice: M"
-run_choice_log_s = "Choice: S"
-run_choice_log_o = "Choice: O"
-run_choice_log_a = "Choice: A"
