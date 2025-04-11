@@ -10,9 +10,9 @@ digits = string.digits
 special_char_names = [
     "ampersand", "asterisk", "at", "backslash", "brace_close", "brace_open",
     "bracket_closed", "bracket_open", "caret", "colon", "comma", "cursor",
-    "dash", "dollar", "doublequote", "equals", "exclamation", "greater", "hash",
+    "dash", "dollar", "doublequote", "equals", "exclamation", "greater",
     "less", "minus", "paren_close", "paren_open", "percent", "period", "pipe",
-    "question", "semicolon", "singlequote", "slash", "space", "tilde", "underscore"
+    "question", "semicolon", "shade", "singlequote", "slash", "space", "tilde", "underscore"
 ]
 # Map special character names to their symbols
 special_char_symbols = {
@@ -20,10 +20,10 @@ special_char_symbols = {
     "brace_close": "}", "brace_open": "{", "bracket_closed": "]",
     "bracket_open": "[", "caret": "^", "colon": ":", "comma": ",",
     "cursor": "█", "dash": "—", "dollar": "$", "doublequote": '"',
-    "equals": "=", "exclamation": "!", "greater": ">", "hash": "#",
+    "equals": "=", "exclamation": "!", "greater": ">",
     "less": "<", "minus": "-", "paren_close": ")", "paren_open": "(",
     "percent": "%", "period": ".", "pipe": "|", "question": "?", "semicolon": ";",
-    "singlequote": "'", "slash": "/", "space": " ", "tilde": "~", "underscore": "_"
+    "shade": "#", "singlequote": "'", "slash": "/", "space": " ", "tilde": "~", "underscore": "_"
 }
 
 def load_sprite(char_key, filename_base):
@@ -37,11 +37,11 @@ def load_sprite(char_key, filename_base):
     except FileNotFoundError:
         print(f"Warning: Image file not found: '{full_path}'")
 
-# Load uppercase letters (A-Z) and digits (0-9)
+# Load uppercase letters and digits
 for char in uppercase_letters + digits:
     load_sprite(char, char)
 
-# Load lowercase letters (la.png, lb.png, etc.)
+# Load lowercase letters
 for char in lowercase_letters:
     filename_base = f"l{char}"
     load_sprite(char, filename_base)
@@ -73,7 +73,7 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
     """
     y = row * CHAR_HEIGHT
     text_pixel_width = len(text) * CHAR_WIDTH
-    grid_pixel_width = GRID_WIDTH * CHAR_WIDTH # Assuming GRID_WIDTH is available
+    grid_pixel_width = GRID_WIDTH * CHAR_WIDTH
 
     start_x = 0
     if center:
@@ -83,25 +83,23 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
 
     current_time = pygame.time.get_ticks()
 
-    # Flashing logic: Check visibility based on time
+    # Flashing logic
     is_visible = True
     if flashing:
         if (current_time // 250) % 2 != 0:
             is_visible = False
 
     if not is_visible:
-        return # Don't draw anything if flashing and currently invisible
+        return
 
     # Determine the actual color to use
-    current_actual_color = None # The color to apply (if any)
+    current_actual_color = None # The color to apply
     if text_color == "CHANGING":
         # Ensure the color list is not empty to avoid division by zero
         if blinking_text_color_list:
             color_index = (current_time // 150) % len(blinking_text_color_list)
             current_actual_color = blinking_text_color_list[color_index]
         else:
-            # Fallback if list is empty - maybe default to white or skip coloring?
-            # Here we'll default to None, meaning original sprite color.
             current_actual_color = None
             print("Warning: blinking_text_color_list is empty, cannot use 'CHANGING'.")
     elif isinstance(text_color, tuple): # Check if it's a static color tuple
@@ -117,16 +115,15 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
 
         if char in char_map:
             original_sprite = char_map[char]
-            sprite_to_draw = original_sprite # Default to original
+            sprite_to_draw = original_sprite
 
             # Apply color modification if a color was determined
             if current_actual_color is not None:
                 # Create a colored version
                 color_surface = pygame.Surface(original_sprite.get_size(), pygame.SRCALPHA)
-                # Fill with the target color (respecting alpha)
+                # Fill with the target color
                 color_surface.fill(current_actual_color)
                 # Use the original sprite's alpha channel to mask the color
-                # This effectively colors the opaque parts of the original sprite
                 color_surface.blit(original_sprite, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
                 sprite_to_draw = color_surface
 
@@ -138,8 +135,5 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
             screen.blit(sprite_to_draw, (char_x, y))
 
         else:
-            # Optional: Handle characters not found in the map
-            # print(f"Warning: Character '{char}' not found in char_map.")
-            # Optionally draw a background square even if the char is missing
              if text_background is not None:
                  pygame.draw.rect(screen, text_background, (char_x, y, CHAR_WIDTH, CHAR_HEIGHT))
