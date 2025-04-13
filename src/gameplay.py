@@ -673,12 +673,9 @@ def levels(screen, mixUp=False):
     last_move_time = 0
     keys_held_time = {
         pygame.K_UP: 0,
-        pygame.K_DOWN: 0, 
-        pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0,
+        pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
         pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+        pygame.K_j: 0, pygame.K_l: 0, pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
     }
     momentum = {
         pygame.K_UP: 0,
@@ -887,6 +884,86 @@ def levels(screen, mixUp=False):
     fast_threshold = 1  # Fastest enemy (type 3)
     
     wait = True
+
+    def save_game(state, slot):
+        """Save the game state to a JSON file."""
+        save_path = os.path.join(saves_dir, f"save_{slot.lower()}.json")  # Use saves_dir from utils
+        with open(save_path, "w") as save_file:
+            # Format the grid as a single line
+            state["grid"] = ["".join(row) for row in state["grid"]]
+            json.dump(state, save_file, indent=4)
+        print(f"Saving to file {slot.upper()}...")
+        pygame.time.wait(2000)  # Wait for 2 seconds
+
+    def restore_game(slot):
+        """Restore the game state from a JSON file."""
+        save_path = os.path.join(saves_dir, f"save_{slot.lower()}.json")  # Use saves_dir from utils
+        if os.path.exists(save_path):
+            with open(save_path, "r") as save_file:
+                state = json.load(save_file)
+            print(f"Restoring from file {slot.upper()}...")
+            pygame.time.wait(2000)  # Wait for 2 seconds
+            # Convert grid back to a list of lists
+            state["grid"] = [list(row) for row in state["grid"]]
+            return state
+        else:
+            print(f"No save file found for slot {slot.upper()}.")
+            print("\nGame RESUMED.\n")  # Output when no save file is found
+            return None
+
+    def handle_save(screen, state):
+        """Handle the save process."""
+        paused = True
+        print("\nGame is PAUSED.\n")  # Output when the game is paused for saving
+        print("Are you sure you want to SAVE (Y/N)?")
+        while paused:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        paused = False
+                        save_slot = prompt_save_restore(screen, "SAVE")
+                        if save_slot:
+                            save_game(state, save_slot)
+                    elif event.key == pygame.K_n:
+                        paused = False
+                    elif event.key == pygame.K_ESCAPE:
+                        paused = False
+        print("\nGame RESUMED.\n")  # Output when the game resumes after saving
+
+    def handle_restore(screen):
+        """Handle the restore process."""
+        paused = True
+        print("\nGame is PAUSED.\n")  # Output when the game is paused for restoring
+        print("Are you sure you want to RESTORE (Y/N)?")
+        while paused:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        paused = False
+                        restore_slot = prompt_save_restore(screen, "RESTORE")
+                        if restore_slot:
+                            return restore_game(restore_slot)
+                    elif event.key == pygame.K_n:
+                        paused = False
+                    elif event.key == pygame.K_ESCAPE:
+                        paused = False
+        print("\nGame RESUMED.\n")  # Output when the game resumes after restoring
+        return None
+
+    def prompt_save_restore(screen, action):
+        """Prompt the user to pick a save/restore slot."""
+        slot = None
+        print(f"Pick which letter to {action} to/from: A, B, or C? A")  # Print the prompt once
+        while slot not in {"A", "B", "C"}:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_a, pygame.K_b, pygame.K_c):
+                        slot = chr(event.key).upper()
+                        return slot
+
     while running:
         # Handle events
         for event in pygame.event.get():
@@ -902,6 +979,30 @@ def levels(screen, mixUp=False):
                     # Go to next level when Tab is pressed
                     current_level_index = (current_level_index + 1) % len(level_maps)
                     change_level(current_level_index)
+                elif event.key == pygame.K_s:
+                    handle_save(screen, {
+                        "grid": grid,
+                        "player_row": player_row,
+                        "player_col": player_col,
+                        "Score": Score,
+                        "level_num": level_num,
+                        "gems": gems,
+                        "whips": whips,
+                        "teleports": teleports,
+                        "keys": keys
+                    })
+                elif event.key == pygame.K_r:
+                    restored_state = handle_restore(screen)
+                    if restored_state:
+                        grid = restored_state["grid"]
+                        player_row = restored_state["player_row"]
+                        player_col = restored_state["player_col"]
+                        Score = restored_state["Score"]
+                        level_num = restored_state["level_num"]
+                        gems = restored_state["gems"]
+                        whips = restored_state["whips"]
+                        teleports = restored_state["teleports"]
+                        keys = restored_state["keys"]
             elif event.type == pygame.KEYUP:
                 if event.key in keys_pressed:
                     keys_pressed[event.key] = False
@@ -1004,4 +1105,4 @@ def levels(screen, mixUp=False):
 
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-#levels(screen)
+# levels(screen)
