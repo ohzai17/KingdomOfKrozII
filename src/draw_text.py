@@ -9,7 +9,7 @@ lowercase_letters = string.ascii_lowercase
 digits = string.digits
 special_char_names = [
     "ampersand", "asterisk", "at", "backslash", "brace_close", "brace_open",
-    "bracket_closed", "bracket_open", "caret", "colon", "comma", "cursor",
+    "bracket_closed", "bracket_open", "bullet", "caret", "colon", "comma", "cursor",
     "dash", "dollar", "doublequote", "equals", "exclamation", "greater",
     "less", "minus", "paren_close", "paren_open", "percent", "period", "pipe",
     "question", "semicolon", "shade", "singlequote", "slash", "space", "tilde", "underscore"
@@ -18,7 +18,7 @@ special_char_names = [
 special_char_symbols = {
     "ampersand": "&", "asterisk": "*", "at": "@", "backslash": "\\",
     "brace_close": "}", "brace_open": "{", "bracket_closed": "]",
-    "bracket_open": "[", "caret": "^", "colon": ":", "comma": ",",
+    "bracket_open": "[", "bullet": "•", "caret": "^", "colon": ":", "comma": ",",
     "cursor": "█", "dash": "—", "dollar": "$", "doublequote": '"',
     "equals": "=", "exclamation": "!", "greater": ">",
     "less": "<", "minus": "-", "paren_close": ")", "paren_open": "(",
@@ -54,7 +54,7 @@ for name in special_char_names:
     else:
         print(f"Warning: No symbol mapping found for special character name: '{name}'")
 
-def draw_text(row, text, text_color=None, center=True, flashing=False, text_background=None):
+def draw_text(row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False):
     """
     Draws a single row of text using character sprites onto the screen.
 
@@ -64,26 +64,19 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
         text_color (tuple | str | None, optional): RGB color tuple for static text,
             the string "CHANGING" for cycling colors, or None to use the sprite's original color.
             Defaults to None.
-        center (bool, optional): If True, center the text horizontally on the grid row.
-            Defaults to True.
         flashing (bool, optional): If True, make the text flash.
             Defaults to False.
+        center (bool, optional): If True, center the text horizontally on the grid row.
+            Defaults to True.
         text_background (tuple, optional): RGB color tuple for the background behind each char.
             Defaults to None.
     """
-    y = row * CHAR_HEIGHT
+    y = (row * CHAR_HEIGHT) - CHAR_HEIGHT
     text_pixel_width = len(text) * CHAR_WIDTH
     grid_pixel_width = GRID_WIDTH * CHAR_WIDTH
 
-    start_x = 0
-    if center:
-        start_x = (grid_pixel_width - text_pixel_width) // 2
-        # Ensure start_x is non-negative
-        start_x = max(0, start_x)
-
+    # Flashing
     current_time = pygame.time.get_ticks()
-
-    # Flashing logic
     is_visible = True
     if flashing:
         if (current_time // 250) % 2 != 0:
@@ -91,6 +84,13 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
 
     if not is_visible:
         return
+
+    # Centering
+    start_x = 0
+    if center:
+        start_x = (grid_pixel_width - text_pixel_width) // 2
+        # Ensure start_x is non-negative
+        start_x = max(0, start_x)
 
     # Determine the actual color to use
     current_actual_color = None # The color to apply
@@ -105,6 +105,20 @@ def draw_text(row, text, text_color=None, center=True, flashing=False, text_back
     elif isinstance(text_color, tuple): # Check if it's a static color tuple
         current_actual_color = text_color
     # If text_color is None or an invalid type, current_actual_color remains None
+
+    # Draw the special "title" background before drawing characters if specified
+    if title_box:
+        bg_x = start_x
+        # Calculate extended Y position and height
+        bg_y = y - int(0.5 * CHAR_HEIGHT)
+        bg_height = CHAR_HEIGHT + int(0.5 * CHAR_HEIGHT) + int(0.5 * CHAR_HEIGHT) # Or simply 2 * CHAR_HEIGHT if integer extensions guaranteed
+        bg_width = text_pixel_width
+        # Ensure calculated dimensions are non-negative
+        bg_y = max(0, bg_y)
+        bg_height = max(0, bg_height)
+        bg_width = max(0, bg_width)
+        # Draw the single background rectangle for the title
+        pygame.draw.rect(screen, text_background, (bg_x, bg_y, bg_width, bg_height))
 
     for i, char in enumerate(text):
         char_x = start_x + (i * CHAR_WIDTH)
