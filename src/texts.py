@@ -50,6 +50,7 @@ difficulty_subtext_9 = "You are on your own to discover what other mysteries awa
 difficulty_subtext_10 = "helpful, others deadly..."
 difficulty_heading_3_1 = "Are you a  ovice, an  xperienced, or an  dvanced player? "
 difficulty_heading_3_2 = "          N          E                  A                "
+difficulty_cursor =      "                                                        █"
 difficulty_footer = "Press any key. "
 
 # shareware screen
