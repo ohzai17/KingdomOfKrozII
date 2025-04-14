@@ -1,7 +1,7 @@
 import pygame
 import os
 import random
-from utils import *
+from utilsRight import *
 
 def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
     paused = True
@@ -28,65 +28,61 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     
     return False  # User didn't quit
                     
-def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
-    
-    pygame.draw.rect(screen, BLUE, (0, (TILE_HEIGHT * 23) + 20, WIDTH, HEIGHT - (TILE_HEIGHT * 23)))
+def hud(screen, WIDTH, HEIGHT, values=None):  # From KINGDOM4.INC (lines 96-183)
+    hud_width = 130
+    hud_x = WIDTH - hud_width  # Right-hand side
+    pygame.draw.rect(screen, BLUE, (hud_x, 0, hud_width, HEIGHT))  # Sidebar
 
+    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloak", "Options"]
+    option_list = ["Cloak", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
 
-    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloaks", "Options"]
-    option_list = ["Cloaks", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
+    font = load_font(11)
 
-    font = load_font(13)  
-    
-    word_x = 5  # Starting X coordinate of words
-    word_y = (TILE_HEIGHT * 23) + 30  # Y coordinate
+    word_x = hud_x + 35  # Padding from the left edge of sidebar
+    word_y = 5  # Top padding
 
-    rect_width = 78  # Width of gray rec
-    rect_height = 30  # Height of gray re
+    rect_width = 88
+    rect_height = 25
 
     for i, word in enumerate(item_tracker):
-        
-        match(word): # Display items
-            case ("Options"): # Rendered differently
-                word_x += 5
-                word_surface = font.render(word, True, CYAN)
-                pygame.draw.rect(screen, DARK_RED, (word_x - 1, word_y - 8, word_surface.get_width() + 1, 30))
-                screen.blit(word_surface, (word_x, word_y)) 
-            case _: 
+        if word == "Options":
+            word_y += group_height - 43  
 
-                word_surface = font.render(word, True, (YELLOW))
-                screen.blit(word_surface, (word_x, word_y))
+            word_surface = font.render(word, True, CYAN)
+            pygame.draw.rect(screen, DARK_RED, (word_x - 12, word_y + 7, word_surface.get_width() + 6, 30))
+            screen.blit(word_surface, (word_x - 8, word_y + 15))
+            word_y += word_surface.get_height() + 15  # Smaller gap (no rect below)
+        else:
+            render_x = word_x - 25 if word == "Teleports" else word_x  # Center "Teleports"
+            word_surface = font.render(word, True, YELLOW)
+            screen.blit(word_surface, (render_x, word_y))
 
-        if i < len(values): # Values and gray box
-            if item_tracker[i] == "Teleports":  # handled differently due to placement issues
-                value_surface = font.render(str(values[i]), True, DARK_RED)
-                box_x = word_x + ((word_surface.get_width() // 2) - (rect_width // 2) - 18)
-                value_x = (box_x + ((rect_width - value_surface.get_width()) // 2) + 16)
-                pygame.draw.rect(screen, LIGHT_GRAY, (box_x, word_y + word_surface.get_height() + 10, rect_width + 35, rect_height))
-                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17))
-            else:
-                value_surface = font.render(str(values[i]), True, DARK_RED)
-                box_x = (word_x + (word_surface.get_width() // 2) - (rect_width // 2) + 5)
-                value_x = box_x + (rect_width - value_surface.get_width()) // 2
-                pygame.draw.rect(screen, LIGHT_GRAY, (box_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
-                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17))
+        if i < len(values):
+            value_surface = font.render(str(values[i]), True, DARK_RED)
+            box_x = word_x - 12
+            box_w = rect_width
 
-        # Update word_x based on word width
-        word_x += word_surface.get_width() + 30
+            box_y = word_y + word_surface.get_height() + 5
+            value_x = box_x + (box_w - value_surface.get_width()) // 2
+            pygame.draw.rect(screen, LIGHT_GRAY, (box_x, box_y, box_w, rect_height))
+            screen.blit(value_surface, (value_x, box_y + 5))
 
-    y_offset = word_y + 30  # Start position of the options_list (below "Options")
+        group_height = word_surface.get_height() + rect_height
+        word_y += group_height + 15  # Wider gap *after* each label+value pair
+
+    # Option list below stat items
+    y_offset = word_y - 40
     for choice in option_list:
         first_letter_surface = font.render(choice[0], True, WHITE)
         rest_surface = font.render(choice[1:], True, GRAY)
 
-        first_rect = first_letter_surface.get_rect(topleft=(word_x - 120, y_offset))
+        first_rect = first_letter_surface.get_rect(topleft=(word_x - 10, y_offset))
         rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
 
         screen.blit(first_letter_surface, first_rect)
         screen.blit(rest_surface, rest_rect)
-        
-        # Move the y_offset down
-        y_offset += 20
+
+        y_offset += 14
 
 def levels(screen, difficulty_input, mixUp=False):
 
@@ -114,7 +110,7 @@ def levels(screen, difficulty_input, mixUp=False):
         "enemy2": "enemy2a"
     }
     
-    TILE_WIDTH, TILE_HEIGHT = 13, 17
+    TILE_WIDTH, TILE_HEIGHT = 13, 19
 
     for sprite in sprites:
         filename = special_cases.get(sprite, sprite) + ".png"
@@ -839,7 +835,7 @@ def levels(screen, difficulty_input, mixUp=False):
     cloaks = 0
     is_cloaked = False
     cloak_start_time = 0
-    CLOAK_DURATION = 8000
+    CLOAK_DURATION = 5000
 
     def cloak(): 
         """ Handles cloak pickup, activation, and duration. """
@@ -894,7 +890,7 @@ def levels(screen, difficulty_input, mixUp=False):
             screen.fill((BLACK), (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
             pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
 
-        # Flicker at the final destination (10 times)
+        # Flicker at the final destination
         for _ in range(20):  
             random_color = random.choice(blinking_text_color_list)
 
@@ -912,7 +908,7 @@ def levels(screen, difficulty_input, mixUp=False):
         pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
 
 
-        # Clear old player position from the grid
+        # Clear old player position 
         grid[player_row][player_col] = ' '
 
         # Update the grid with new player position

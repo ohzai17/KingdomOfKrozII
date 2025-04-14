@@ -5,10 +5,10 @@ import sys
 import time
 import numpy as np
 
-screen = pygame.display.set_mode((833 , 600))
+screen = pygame.display.set_mode((960 , 500))
 pygame.display.set_caption("Kingdom of Kroz II")
 
-difficulty_input = "place_holder" # Initialized to be used in levels
+difficulty_input = "X" # Initialized to be used in levels
 
 # Colors used in the game
 BLACK = (0, 0, 0)
@@ -172,7 +172,7 @@ def flash_c(screen, message):
     font = load_font(12)
 
     text_surface = font.render(message, True, color)  # Render text with current color
-    text_rect = text_surface.get_rect(midbottom=(screen.get_width() // 2, screen.get_height() - 190))
+    text_rect = text_surface.get_rect(midbottom=((screen.get_width() - 120) // 2, screen.get_height() - 30))
     screen.blit(text_surface, text_rect)
 
 def play_sound(frequency, duration, amplitude=4096):
