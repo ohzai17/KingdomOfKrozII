@@ -3,21 +3,22 @@ from utils import *
 from draw_text import draw_text
 
 """
-def draw_text(row, text, text_color=None, center=True, flashing=False, text_background=None):
-    Draws a single row of text using character sprites onto the screen.
+draw_text(row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False)
+Draws a single row of text using character sprites onto the screen.
 
-    Args:
-        row (int): The grid row number (1-25) to draw the text on.
-        text (str): The string of text to draw.
-        text_color (tuple | str | None, optional): RGB color tuple for static text,
-            the string "CHANGING" for cycling colors, or None to use the sprite's original color.
-            Defaults to None.
-        center (bool, optional): If True, center the text horizontally on the grid row.
-            Defaults to True.
-        flashing (bool, optional): If True, make the text flash.
-            Defaults to False.
-        text_background (tuple, optional): RGB color tuple for the background behind each char.
-            Defaults to None.
+Args:
+    row (int): The grid row number (1-25) to draw the text on.
+    text (str): The string of text to draw.
+    text_color (tuple | str | None, optional): RGB color tuple for static text,
+        the string "CHANGING" for cycling colors, or None to use the sprite's original color.
+        Defaults to None.
+    flashing (bool, optional): If True, make the text flash.
+        Defaults to False.
+    center (bool, optional): If True, center the text horizontally on the grid row.
+        Defaults to True.
+    text_background (tuple, optional): RGB color tuple for the background behind each char.
+        Defaults to None.
+    title_box (bool, optional): For special title screen background.
 """
 
 def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
@@ -46,55 +47,48 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
     return False  # User didn't quit
                     
 def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
-
+    
     pygame.draw.rect(screen, BLUE, (0, (TILE_HEIGHT * 23) + 20, WIDTH, HEIGHT - (TILE_HEIGHT * 23)))
 
-    # Use provided values if available, otherwise use defaults
-    if values is None:
-        Score = 0
-        Level = 0
-        Gems = 0
-        Whips = 0
-        Teleports = 0
-        Keys = 0
-        values = [Score, Level, Gems, Whips, Teleports, Keys]
 
-    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Options"]
-    option_list = ["Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
+    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloaks", "Options"]
+    option_list = ["Cloaks", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
 
-    font = load_font(14)  
+    font = load_font(13)  
     
-    word_x = 50  # Starting X coordinate of words
+    word_x = 5  # Starting X coordinate of words
     word_y = (TILE_HEIGHT * 23) + 30  # Y coordinate
 
-    rect_width = 80  # Width of gray rec
+    rect_width = 78  # Width of gray rec
     rect_height = 30  # Height of gray re
 
     for i, word in enumerate(item_tracker):
         
         match(word): # Display items
             case ("Options"): # Rendered differently
-                word_x += 40
+                word_x += 5
                 word_surface = font.render(word, True, CYAN)
                 pygame.draw.rect(screen, DARK_RED, (word_x - 1, word_y - 8, word_surface.get_width() + 1, 30))
-                screen.blit(word_surface, (word_x, word_y))
+                screen.blit(word_surface, (word_x, word_y)) 
             case _: 
-                word_surface = font.render(word, True, (254, 254, 6))
+
+                word_surface = font.render(word, True, (YELLOW))
                 screen.blit(word_surface, (word_x, word_y))
 
         if i < len(values): # Values and gray box
-            value_surface = font.render(str(values[i]), True, DARK_RED)
-            value_x = word_x + (rect_width - value_surface.get_width()) // 2
             if item_tracker[i] == "Teleports":  # handled differently due to placement issues
-                value_x = value_x + 25
-                word_x = word_x + 25
-                pygame.draw.rect(screen, LIGHT_GRAY, (word_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
-                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17)) # Value
-                word_x = word_x - 25
+                value_surface = font.render(str(values[i]), True, DARK_RED)
+                box_x = word_x + ((word_surface.get_width() // 2) - (rect_width // 2) - 18)
+                value_x = (box_x + ((rect_width - value_surface.get_width()) // 2) + 16)
+                pygame.draw.rect(screen, LIGHT_GRAY, (box_x, word_y + word_surface.get_height() + 10, rect_width + 35, rect_height))
+                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17))
             else:
-                pygame.draw.rect(screen, LIGHT_GRAY, (word_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
-                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17)) # Value
-        
+                value_surface = font.render(str(values[i]), True, DARK_RED)
+                box_x = (word_x + (word_surface.get_width() // 2) - (rect_width // 2) + 5)
+                value_x = box_x + (rect_width - value_surface.get_width()) // 2
+                pygame.draw.rect(screen, LIGHT_GRAY, (box_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
+                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17))
+
         # Update word_x based on word width
         word_x += word_surface.get_width() + 30
 
@@ -103,7 +97,7 @@ def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
         first_letter_surface = font.render(choice[0], True, WHITE)
         rest_surface = font.render(choice[1:], True, GRAY)
 
-        first_rect = first_letter_surface.get_rect(topleft=(word_x - 130, y_offset))
+        first_rect = first_letter_surface.get_rect(topleft=(word_x - 120, y_offset))
         rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
 
         screen.blit(first_letter_surface, first_rect)
@@ -112,7 +106,7 @@ def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
         # Move the y_offset down
         y_offset += 20
 
-def levels(screen, mixUp=False):
+def levels(screen, difficulty_input, mixUp=False):
 
     WIDTH, HEIGHT = screen.get_size()
     
@@ -138,7 +132,7 @@ def levels(screen, mixUp=False):
         "enemy2": "enemy2a"
     }
     
-    TILE_WIDTH, TILE_HEIGHT = 13, 13
+    TILE_WIDTH, TILE_HEIGHT = 13, 17
 
     for sprite in sprites:
         filename = special_cases.get(sprite, sprite) + ".png"
@@ -157,6 +151,7 @@ def levels(screen, mixUp=False):
         "3": images["enemy3"],
         "+": images["gem"],
         "T": images["teleport"],
+        "_": images["teleport_player"],
         ".": images["trap"],
         "L": images["stairs"],
         "P": images["player"],
@@ -298,14 +293,25 @@ def levels(screen, mixUp=False):
             elif tile == "3":
                 fast_enemies.append({"row": r, "col": c})
 
-    # Initialize tracking variables *Updated to match NOVICE mode*
-    Score = 0
-    level_num = 1
-    gems = 20
-    whips = 10
-    teleports = 10
-    keys = 0
-
+    # Initialize score tracking variables *Based off difficulty*
+    match(difficulty_input):
+        case "E":
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
+        case "A":
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 2, 0, 0, 0, 0
+        case "N", " ":
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
+        case "X":
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 0
+        case _:
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
+        
+    if mixUp:
+        score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, 2
+    
+    values = [score, level_num, gems, whips, teleports, keys, cloaks]
+    hud(screen, WIDTH, HEIGHT, values)
+        
     # Function to change to the next level
     def change_level(next_level_index):
         nonlocal grid, player_row, player_col, slow_enemies, medium_enemies, fast_enemies, level_num
@@ -369,14 +375,17 @@ def levels(screen, mixUp=False):
         return True
 
     def move_enemy(enemy, enemy_type, move_prob):
-        """Move an enemy toward the player if they can see the player"""
-        nonlocal Score, gems  # Access Score and gems from the outer scope
+        if is_cloaked:
+            pass
+        else:
+            """Move an enemy toward the player if they can see the player"""
+            nonlocal score, gems  # Access Score and gems from the outer scope
         
         row, col = enemy["row"], enemy["col"]
-        
-        # Check if enemy was removed
+            
+            # Check if enemy was removed
         if grid[row][col] != enemy_type:
-            return True  # Remove enemy
+                return True  # Remove enemy
             
         # Original game had different odds for different enemy types
         # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
@@ -440,9 +449,9 @@ def levels(screen, mixUp=False):
             if grid[new_row][new_col] == "X":
                 grid[new_row][new_col] = " "  # Break the block
                 # Award points based on enemy type
-                if enemy_type == "1": Score += 1
-                elif enemy_type == "2": Score += 2
-                elif enemy_type == "3": Score += 3
+                if enemy_type == "1": score += 1
+                elif enemy_type == "2": score += 2
+                elif enemy_type == "3": score += 3
                 return True  # Enemy dies when breaking block
             
             # Handle collision with gems, whips, teleports
@@ -497,7 +506,7 @@ def levels(screen, mixUp=False):
     def use_whip(screen, grid, player_row, player_col, whips, slow_enemies, medium_enemies, fast_enemies, images, tile_mapping, TILE_WIDTH, TILE_HEIGHT):
         """Handle the whip animation and enemy interactions"""
         # Access game state variables from enclosing scope
-        nonlocal Score, level_num, gems, teleports, keys, WIDTH, HEIGHT
+        nonlocal score, level_num, gems, teleports, keys, WIDTH, HEIGHT
         
         # Check if player has whips
         if whips <= 0:
@@ -545,21 +554,20 @@ def levels(screen, mixUp=False):
             grid[whip_row][whip_col] = position["sprite"]
             
             # Render the grid
-            screen.fill((0, 0, 0))  # BLACK
+            screen.fill((BLACK))
             for r_idx, row in enumerate(grid):
                 for c_idx, tile in enumerate(row):
                     if tile in tile_mapping:
                         screen.blit(tile_mapping[tile], (c_idx * TILE_WIDTH, r_idx * TILE_HEIGHT))
-            
-            # Draw HUD with updated whip count (show whip being used)
-            values = [Score, level_num, gems, whips-1, teleports, keys]
-            hud(screen, WIDTH, HEIGHT, values)
-            
+                        
             pygame.display.flip()
             pygame.time.wait(delay)
             
             # Restore original tile at this position
             grid[whip_row][whip_col] = original_tile
+
+            # Draw HUD with updated whip count (show whip being used)
+            hud(screen, WIDTH, HEIGHT, values)
         
         # Process enemy hits and update game state
         kills = 0
@@ -571,7 +579,7 @@ def levels(screen, mixUp=False):
         for r, c, enemy_type in enemies_hit:
             grid[r][c] = " "  # Clear enemy from grid
             # Add points based on enemy type (1, 2, or 3 points)
-            Score += int(enemy_type)
+            score += int(enemy_type)
             kills += 1
             
         # Rebuild enemy lists excluding the killed ones
@@ -589,7 +597,19 @@ def levels(screen, mixUp=False):
         
         return kills, new_slow_enemies, new_medium_enemies, new_fast_enemies
     
+    cloaks = 0
+    is_cloaked = False
+    cloak_start_time = 0
+    CLOAK_DURATION = 8000
 
+    def cloak(): 
+        """ Handles cloak pickup, activation, and duration. """
+        nonlocal cloaks, is_cloaked, cloak_start_time, values, CLOAK_DURATION
+        
+        cloak_start_time = pygame.time.get_ticks()
+        is_cloaked = True
+        cloaks -= 1
+        print(f"{cloaks}")
 
     def teleport2(grid, player_row, player_col, tile_mapping, screen):  
         """Teleports the player to a random empty space on the grid with a flickering effect before and after teleporting."""
@@ -603,8 +623,8 @@ def levels(screen, mixUp=False):
         if not empty_spaces:
             return player_row, player_col
 
-        # Flicker at the original position (10 times)
-        for _ in range(10):  
+        # Flicker at the original position 
+        for _ in range(20):  
             random_color = random.choice(blinking_text_color_list)
 
             # Fill original position with random color
@@ -614,13 +634,13 @@ def levels(screen, mixUp=False):
             screen.blit(tile_mapping['P'], (player_col * TILE_WIDTH, player_row * TILE_HEIGHT))
 
             pygame.display.update(pygame.Rect(player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
-            pygame.time.delay(80)
+            pygame.time.delay(40)
 
-        # Clear the player's original position (set to black)
+        # Clear the player's original position
         screen.fill((BLACK), (player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
         pygame.display.update([pygame.Rect(player_col * TILE_WIDTH, player_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)])
 
-        for _ in range(50):  # Repeat flickering teleportation 50 times
+        for _ in range(250): 
             # Select a random empty space
             new_row, new_col = random.choice(empty_spaces)
 
@@ -631,12 +651,12 @@ def levels(screen, mixUp=False):
             screen.blit(tile_mapping['TP'], (new_col * TILE_WIDTH, new_row * TILE_HEIGHT))
 
             pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
-            pygame.time.delay(80)
+            pygame.time.delay(8)
             screen.fill((BLACK), (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
             pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
 
         # Flicker at the final destination (10 times)
-        for _ in range(10):  
+        for _ in range(20):  
             random_color = random.choice(blinking_text_color_list)
 
             # Fill final position with random color
@@ -646,7 +666,7 @@ def levels(screen, mixUp=False):
             screen.blit(tile_mapping['P'], (new_col * TILE_WIDTH, new_row * TILE_HEIGHT))
 
             pygame.display.update(pygame.Rect(new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
-            pygame.time.delay(80)
+            pygame.time.delay(40)
 
         # Clear the final position before placing the player
         screen.fill((BLACK), (new_col * TILE_WIDTH, new_row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT))
@@ -666,18 +686,14 @@ def levels(screen, mixUp=False):
         # Return new player position
         return new_row, new_col
 
-
     # Movement settings - simplified for consistent movement
     movement_cooldown = 100  # ms between moves (one space per 100ms)
     last_move_time = 0
     keys_held_time = {
         pygame.K_UP: 0,
-        pygame.K_DOWN: 0, 
-        pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0,
+        pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
         pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+        pygame.K_j: 0, pygame.K_l: 0, pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
     }
     momentum = {
         pygame.K_UP: 0,
@@ -696,8 +712,8 @@ def levels(screen, mixUp=False):
 
     def player_input():
         """Handle player movement with consistent rate and momentum"""
-        nonlocal player_row, player_col, Score, gems, whips, teleports, keys
-        nonlocal slow_enemies, medium_enemies, fast_enemies, last_move_time
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys
+        nonlocal slow_enemies, medium_enemies, fast_enemies, last_move_time, cloaks, is_cloaked
         
         current_time = pygame.time.get_ticks()
         current_keys = pygame.key.get_pressed()
@@ -714,7 +730,7 @@ def levels(screen, mixUp=False):
                         TILE_WIDTH, TILE_HEIGHT
                     )
                     whips -= 1
-                    Score += kills * 150  # Award points for kills
+                    score += kills * 150  # Award points for kills
                     action_performed = True
         else:
             keys_pressed[pygame.K_w] = False
@@ -729,6 +745,17 @@ def levels(screen, mixUp=False):
                 action_performed = True
         else:
             keys_pressed[pygame.K_t] = False
+
+        # Handle cloak activation with the 'c' key
+        # Activate cloak if 'c' is pressed
+        if current_keys[pygame.K_c]:
+            if not keys_pressed[pygame.K_c]:
+                keys_pressed[pygame.K_c] = True
+                if cloaks > 0 and not is_cloaked:
+                    cloak()  
+                action_performed = True
+        else:
+            keys_pressed[pygame.K_c] = False
 
 
         # Check if enough time has passed since last move
@@ -793,7 +820,7 @@ def levels(screen, mixUp=False):
     
     def process_move(new_row, new_col):
         """Process a player movement to a new position"""
-        nonlocal player_row, player_col, Score, gems, whips, teleports, keys, level_num
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks
         
         # Check if position is valid
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
@@ -804,32 +831,35 @@ def levels(screen, mixUp=False):
             # Collect items
             if grid[new_row][new_col] == "+":  # Gem
                 gems += 1
-                Score += 1  # Original game awards 1 point per gem
+                score += 1  # Original game awards 1 point per gem
             elif grid[new_row][new_col] == "W":  # Whip
                 whips += 1
-                Score += 1  # Original game awards 1 point per whip
+                score += 1  # Original game awards 1 point per whip
             elif grid[new_row][new_col] == "T":  # Teleport
                 teleports += 1
-                Score += 1  # Original game awards 1 point per teleport
+                score += 1  # Original game awards 1 point per teleport
             elif grid[new_row][new_col] == "K":  # Key
                 keys += 1
-                Score += 1  # Original game doesn't specify key points explicitly
+                score += 1  # Original game doesn't specify key points explicitly
             elif grid[new_row][new_col] == "L":  # Stairs to next level
                 level_num += 1
-                Score += level_num  # Original game awards points equal to the level number
+                score += level_num  # Original game awards points equal to the level number
+            elif grid[new_row][new_col] == "_":  # Cloak
+                cloaks += 1
+                score += 60  # optional, just for fun
                 # Could add level change logic here
             elif grid[new_row][new_col] == "*":  # Nugget
-                Score += 50  # Gold nuggets are worth 50 points
+                score += 50  # Gold nuggets are worth 50 points
             elif grid[new_row][new_col] == "S":  # SlowTime
-                Score += 5  # SlowTime bonus
+                score += 5  # SlowTime bonus
             elif grid[new_row][new_col] == "I":  # Invisible
-                Score += 10  # Invisible bonus
+                score += 10  # Invisible bonus
             elif grid[new_row][new_col] == "F":  # SpeedTime
-                Score += 2  # SpeedTime bonus
+                score += 2  # SpeedTime bonus
             elif grid[new_row][new_col] == "C":  # Chest
-                Score += 5  # Chest bonus
+                score += 5  # Chest bonus
             elif grid[new_row][new_col] == "!":  # Tablet
-                Score += level_num + 250  # Tablet bonus (level + fixed bonus)
+                score += level_num + 250  # Tablet bonus (level + fixed bonus)
             
             # Move player
             grid[player_row][player_col] = " "
@@ -839,10 +869,10 @@ def levels(screen, mixUp=False):
         
         # Movement was blocked
         if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
-            if Score > 2:  # Only subtract if score is greater than 2
-                Score -= 2  # Original game deducts 2 points for hitting walls
+            if score > 2:  # Only subtract if score is greater than 2
+                score -= 2  # Original game deducts 2 points for hitting walls
         return False
-
+    
     # Game constants
     FAST_PC = True  # Modern computers are "fast" compared to original era
     
@@ -886,6 +916,108 @@ def levels(screen, mixUp=False):
     fast_threshold = 1  # Fastest enemy (type 3)
     
     wait = True
+
+    def save_game(state, slot):
+        """Save the game state to a JSON file."""
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
+        with open(save_path, "w") as save_file:
+            json.dump(state, save_file, indent=4)  # Save only the player state
+        print(f"Saving to file {slot}...")
+        pygame.time.wait(2000)  # Wait for 2 seconds
+
+    def restore_game(slot):
+        """Restore the game state from a JSON file."""
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
+        if os.path.exists(save_path):
+            with open(save_path, "r") as save_file:
+                state = json.load(save_file)
+            print(f"Restoring from file {slot}...")
+            pygame.time.wait(2000)  # Wait for 2 seconds
+            return state  # Return the restored state
+        else:
+            print(f"No save file found for slot {slot}.")
+            return None
+
+    def handle_save(screen, state):
+        """Handle the save process."""
+        paused = True
+        print("\nGame is PAUSED.\n")  # Output when the game is paused for saving
+        print("Are you sure you want to SAVE (Y/N)?")
+        while paused:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        paused = False
+                        save_slot = prompt_save_restore(screen, "SAVE")
+                        if save_slot:
+                            save_game({
+                                "player_row": state["player_row"],
+                                "player_col": state["player_col"],
+                                "Score": state["Score"],
+                                "level_num": state["level_num"],  # Save the level number
+                                "gems": state["gems"],
+                                "whips": state["whips"],
+                                "teleports": state["teleports"],
+                                "keys": state["keys"]
+                            }, save_slot)
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
+                        paused = False
+        print("\nGame RESUMED.\n")  # Output when the game resumes after saving
+
+    def handle_restore(screen):
+        """Handle the restore process."""
+        paused = True
+        print("\nGame is PAUSED.\n")  # Output when the game is paused for restoring
+        print("Are you sure you want to RESTORE (Y/N)?")
+        while paused:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        paused = False
+                        restore_slot = prompt_save_restore(screen, "RESTORE")
+                        if restore_slot:
+                            restored_state = restore_game(restore_slot)
+                            if restored_state:
+                                # Regenerate the grid based on the saved level number
+                                grid = generate_grid_for_level(restored_state["level_num"])
+                                return {
+                                    "grid": grid,  # Regenerated grid
+                                    "player_row": restored_state["player_row"],
+                                    "player_col": restored_state["player_col"],
+                                    "Score": restored_state["Score"],
+                                    "level_num": restored_state["level_num"],
+                                    "gems": restored_state["gems"],
+                                    "whips": restored_state["whips"],
+                                    "teleports": restored_state["teleports"],
+                                    "keys": restored_state["keys"]
+                                }
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
+                        paused = False
+        print("\nGame RESUMED.\n")  # Output when the game resumes after restoring
+        return None
+
+    def prompt_save_restore(screen, action):
+        """Prompt the user to pick a save/restore slot."""
+        slot = None
+        print(f"Pick which letter to {action} to/from: A, B, or C? A")  # Print the prompt once
+        while slot not in {"A", "B", "C"}:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_a, pygame.K_b, pygame.K_c):
+                        slot = chr(event.key).upper()
+                        return slot
+                    
+    def generate_grid_for_level(level_num):
+        """Generate the grid for the given level number."""
+        # Ensure the level number is valid
+        if 1 <= level_num <= len(level_maps):
+            return [list(row) for row in level_maps[level_num - 1]]  # Convert strings to lists of characters
+        else:
+            raise ValueError(f"Level {level_num} is not defined in level_maps.")
+
     while running:
         # Handle events
         for event in pygame.event.get():
@@ -901,22 +1033,54 @@ def levels(screen, mixUp=False):
                     # Go to next level when Tab is pressed
                     current_level_index = (current_level_index + 1) % len(level_maps)
                     change_level(current_level_index)
+                elif event.key == pygame.K_s:
+                    handle_save(screen, {
+                        "player_row": player_row,
+                        "player_col": player_col,
+                        "Score": score,
+                        "level_num": level_num,
+                        "gems": gems,
+                        "whips": whips,
+                        "teleports": teleports,
+                        "keys": keys
+                    })
+                elif event.key == pygame.K_r:
+                    restored_state = handle_restore(screen)
+                    if restored_state:
+                        grid = generate_grid_for_level(restored_state["level_num"])  # Regenerate grid
+                        player_row = restored_state["player_row"]
+                        player_col = restored_state["player_col"]
+                        score = restored_state["Score"]
+                        level_num = restored_state["level_num"]
+                        gems = restored_state["gems"]
+                        whips = restored_state["whips"]
+                        teleports = restored_state["teleports"]
+                        keys = restored_state["keys"]
             elif event.type == pygame.KEYUP:
                 if event.key in keys_pressed:
                     keys_pressed[event.key] = False
         
         # Process player input
         action_performed = player_input()
-        
+
+         # Auto-deactivate cloak after duration
+        if is_cloaked and pygame.time.get_ticks() - cloak_start_time > 5000:
+            is_cloaked = False
+
         # Draw the grid
         screen.fill(BLACK)
         for row_index, row in enumerate(grid):
             for col_index, char in enumerate(row):
-                if char in tile_mapping:
+                if char == "P":
+                    if is_cloaked: # Changed player icon
+                        screen.blit(tile_mapping['TP'], (col_index * TILE_WIDTH, row_index * TILE_HEIGHT)) 
+                    else:
+                        screen.blit(tile_mapping['P'], (col_index * TILE_WIDTH, row_index * TILE_HEIGHT))
+                elif char in tile_mapping:
                     screen.blit(tile_mapping[char], (col_index * TILE_WIDTH, row_index * TILE_HEIGHT))
-        
+
         # Update the item tracking UI with current values
-        values = [Score, level_num, gems, whips, teleports, keys]
+        values = [score, level_num, gems, whips-1, teleports, keys, cloaks]
         hud(screen, WIDTH, HEIGHT, values)
         
         # Update spell effect timers
@@ -1003,4 +1167,4 @@ def levels(screen, mixUp=False):
 
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-#levels(screen)
+#levels(screen, difficulty_input, mixUp = False)

@@ -1,24 +1,14 @@
 import pygame
 import random
 import os
-import time
-import json
 import sys
+import time
 import numpy as np
 
-pygame.init()
-pygame.mixer.init()
-# 16:9
-WIDTH, HEIGHT = 1200, 1
-HEIGHT = int(WIDTH * 9 / 16)
-resolution = (WIDTH, HEIGHT)
-screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
-GRID_WIDTH, GRID_HEIGHT = 80, 25
-TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
-CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25 - 0.1 # Fix cutoff text
+screen = pygame.display.set_mode((960 , 500))
 pygame.display.set_caption("Kingdom of Kroz II")
 
-difficulty_input = "place_holder" # Initialized to be used in levels
+difficulty_input = "X" # Initialized to be used in levels
 
 # Colors used in the game
 BLACK = (0, 0, 0)
@@ -31,7 +21,7 @@ AQUA = (0, 242, 250)
 RED = (255, 0, 0)
 PURPLE = (128, 0, 128)
 ORANGE = (255, 66, 77)
-BROWN  = (170, 85, 0)
+BROWN  = (139, 69, 19)
 YELLOW = (254, 254, 6)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
@@ -44,9 +34,8 @@ LIGHT_RED = (255, 182, 193)
 LIGHT_PURPLE = (221, 160, 221)
 LIGHT_YELLOW = (255, 255, 224)
 DARK_RED = (140, 0, 0)
-BACKGROUND = BLUE
 
-TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
+TILE_WIDTH, TILE_HEIGHT = 13, 17
 
 WIDTH, HEIGHT = screen.get_size()
 
@@ -56,52 +45,45 @@ square_size = 8 # Used for square bullets
 
 logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, BLUE, GREEN, RED, PURPLE, YELLOW]
-rect_colors_list = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
 
-# Random rectangle Colors to cycle through 
-rect_colors_cycle = rect_colors_list
-rand_color = random.choice(rect_colors_cycle)
-
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
-saves_dir = os.path.join(base_dir, "saves")
 assets_dir = os.path.join(base_dir, "assets")
-screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
-logo_path = os.path.join(assets_dir, "kroz_logo.png")
-
-def set_monochrome_palette():
-    global BACKGROUND, BLUE, DARK_BLUE, OLD_BLUE, CYAN, GREEN, AQUA, RED, PURPLE, ORANGE, BROWN, YELLOW, WHITE, GRAY, MAGENTA, LIGHT_GRAY, LIGHT_BLUE,LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, DARK_RED
-    BACKGROUND = BLACK
-    BLUE = (8,4,180)
-    DARK_BLUE = (3, 3, 178)
-    OLD_BLUE = (44, 0, 180)
-    CYAN = (0, 255, 255)
-    GREEN = (0, 128, 0)
-    AQUA = (0, 242, 250)
-    RED = (255, 0, 0)
-    PURPLE = (128, 0, 128)
-    ORANGE = (255, 66, 77)
-    BROWN  = (139, 69, 19)
-    YELLOW = (254, 254, 6)
-    WHITE = (255, 255, 255)
-    GRAY = (128, 128, 128)
-    MAGENTA = (255, 0, 255)
-    LIGHT_GRAY =  (150, 150, 150)
-    LIGHT_BLUE = (173, 216, 230)
-    LIGHT_GREEN = (0, 241, 54)
-    LIGHT_AQUA = (224, 255, 255)
-    LIGHT_RED = (255, 182, 193) 
-    LIGHT_PURPLE = (221, 160, 221)
-    LIGHT_YELLOW = (255, 255, 224)
-    DARK_RED = (140, 0, 0)
 
 pygame.font.init()
 def load_font(size):
     return pygame.font.Font(font_path, size)
+
+def load_fonts(sizes):
+    return [pygame.font.Font(font_path, size) for size in sizes]
+
+def render_text(font, text, color):
+    return font.render(text, True, color)
+
+def setup_cursor(timer_interval=250):
+    cursor_visible = True
+    cursor_timer = pygame.USEREVENT + 1
+    pygame.time.set_timer(cursor_timer, timer_interval)
+    return cursor_visible, cursor_timer
+
+def setup_blinking_text(timer_interval=250):
+    blinking_text = True
+    blinking_text_timer = pygame.USEREVENT + 2
+    pygame.time.set_timer(blinking_text_timer, timer_interval)
+    return blinking_text, blinking_text_timer
+
+def center_text_x(screen_width, text_width):
+    return (screen_width - text_width) // 2
+
+def position_text_y(screen_height, relative_position, font_height):
+    return screen_height * relative_position - font_height
+
+def position_subtext_y(base_y, font_height, index, spacing=2):
+    return base_y + font_height * index * spacing
 
 def apply_grayscale(image):
     grayscale_image = pygame.Surface(image.get_size(), pygame.SRCALPHA) # Create alpha channel over image
@@ -190,7 +172,7 @@ def flash_c(screen, message):
     font = load_font(12)
 
     text_surface = font.render(message, True, color)  # Render text with current color
-    text_rect = text_surface.get_rect(midbottom=(screen.get_width() // 2, screen.get_height() - 190))
+    text_rect = text_surface.get_rect(midbottom=((screen.get_width() - 120) // 2, screen.get_height() - 30))
     screen.blit(text_surface, text_rect)
 
 def play_sound(frequency, duration, amplitude=4096):
@@ -225,6 +207,7 @@ def footStep():
 def enemyCollision():
     play_wav('enemyCollision.wav')    
        
+
 def wait_input(screen):
     paused = True
 
