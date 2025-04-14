@@ -51,12 +51,20 @@ def player_death(screen):
     print("you have died")
     
     # Display death message on screen
-    draw_text(1, "YOU HAVE DIED!!!", BLACK, True, True, LIGHT_GRAY)
+    draw_text(1, "YOU HAVE DIED!!!", BLACK, True, False, LIGHT_GRAY)
+    draw_text(3, "Press any key to continue...", WHITE, False, True, None) # Add prompt
     pygame.display.flip()
     
-    # Pause briefly so player can see the death message
-    pygame.time.wait(2000)  # 2 seconds
-    
+    # Wait for user input
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                waiting_for_input = False # Exit loop on any key press
+                
     # Go to sign-off screen
     from screens import sign_off
     sign_off(screen)
