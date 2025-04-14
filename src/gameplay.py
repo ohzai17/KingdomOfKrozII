@@ -50,10 +50,14 @@ def player_death(screen):
     """Handle player death when out of gems"""
     print("you have died")
     
+    pygame.event.clear()  # Clear any pending events
+    
     # Display death message on screen
-    draw_text(1, "YOU HAVE DIED!!!", BLACK, True, False, LIGHT_GRAY)
-    draw_text(3, "Press any key to continue...", WHITE, False, True, None) # Add prompt
+    draw_text(1, "YOU HAVE DIED!!!", BLACK, True, True, LIGHT_GRAY)
+    draw_text(16, "Press any key to continue...", WHITE, False, True, None) # Add prompt
     pygame.display.flip()
+    
+    pygame.time.delay(500)  # Pause for 2 seconds to show message
     
     # Wait for user input
     waiting_for_input = True
