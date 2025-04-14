@@ -939,6 +939,11 @@ def levels(screen, difficulty_input, mixUp=False):
     
     wait = True
 
+    # Ensure the "saves" directory exists
+    saves_dir = os.path.join("src", "saves")
+    if not os.path.exists(saves_dir):
+        os.makedirs(saves_dir)
+
     def save_game(state, slot):
         """Save the game state to a JSON file."""
         save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
