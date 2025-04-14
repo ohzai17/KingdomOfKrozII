@@ -256,29 +256,9 @@ def levels(screen, difficulty_input, mixUp=False):
     collidable_tiles = {"X", "#"}
     slow_enemies = []
     medium_enemies = []
-    fast_enemies = []
     keys_pressed = {pygame.K_UP: False, pygame.K_DOWN: False, 
                     pygame.K_LEFT: False, pygame.K_RIGHT: False,
-                    pygame.K_w: False,
-                    pygame.K_u: False, pygame.K_i: False, pygame.K_o: False,
-                    pygame.K_j: False, pygame.K_l: False, 
-                    pygame.K_n: False, pygame.K_m: False, pygame.K_COMMA: False}
-    
-    # Add key hold time tracking for new keys
-    keys_held_time = {
-        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
-    }
-    
-    # Add momentum tracking for new keys
-    momentum = {
-        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
-    }
+                    pygame.K_w: False}
     
     # Find player and enemies
     player_row, player_col = 0, 0
@@ -290,8 +270,6 @@ def levels(screen, difficulty_input, mixUp=False):
                 slow_enemies.append({"row": r, "col": c})
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})  # Fixed: added colon after "col"
-            elif tile == "3":
-                fast_enemies.append({"row": r, "col": c})
 
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
@@ -302,9 +280,9 @@ def levels(screen, difficulty_input, mixUp=False):
         case "N", " ":
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
         case "X":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 10
         case _:
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks = 10, 1, 20, 10, 10, 10, 10
         
     if mixUp:
         score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, 2
@@ -314,7 +292,7 @@ def levels(screen, difficulty_input, mixUp=False):
         
     # Function to change to the next level
     def change_level(next_level_index):
-        nonlocal grid, player_row, player_col, slow_enemies, medium_enemies, fast_enemies, level_num
+        nonlocal grid, player_row, player_col, slow_enemies, medium_enemies, level_num
         
         # Check if level index is valid
         if next_level_index >= len(level_maps):
@@ -329,7 +307,6 @@ def levels(screen, difficulty_input, mixUp=False):
         # Reset enemies
         slow_enemies = []
         medium_enemies = []
-        fast_enemies = []
         
         # Find new player position and enemies
         for r, row in enumerate(grid):
@@ -337,11 +314,9 @@ def levels(screen, difficulty_input, mixUp=False):
                 if tile == "P":
                     player_row, player_col = r, c
                 elif tile == "1":
-                    slow_enemies.append({"row": r, "col":c})
+                    slow_enemies.append({"row": r, "col": c})
                 elif tile == "2":
                     medium_enemies.append({"row": r, "col": c})
-                elif tile == "3":
-                    fast_enemies.append({"row": r, "col": c})
 
     # Core functions
     def has_line_of_sight(from_row, from_col, to_row, to_col):
@@ -379,138 +354,77 @@ def levels(screen, difficulty_input, mixUp=False):
             pass
         else:
             """Move an enemy toward the player if they can see the player"""
-            nonlocal score, gems  # Access Score and gems from the outer scope
-        
-        row, col = enemy["row"], enemy["col"]
+            row, col = enemy["row"], enemy["col"]
             
             # Check if enemy was removed
-        if grid[row][col] != enemy_type:
+            if grid[row][col] != enemy_type:
                 return True  # Remove enemy
             
-        # Original game had different odds for different enemy types
-        # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
-        # Only give player a move chance if the player can see the enemy
-        if has_line_of_sight(row, col, player_row, player_col):
+            # Random chance for player move
             if random.randint(0, move_prob-1) == 0:
                 player_input()
-        
-        # Check if enemy can see player
-        if not has_line_of_sight(row, col, player_row, player_col):
-            return False  # Stay still if can't see player
-        
-        # Clear current position
-        grid[row][col] = " "
-        
-        # Calculate move direction toward player
-        new_row, new_col = row, col
-        x_dir, y_dir = 0, 0
-        
-        # Try to move closer to the player along optimal axis first
-        x_dist = abs(player_col - col)
-        y_dist = abs(player_row - row)
-        
-        # Move along the axis with greater distance first
-        # This makes enemies try to minimize the longest dimension first
-        if x_dist > y_dist:
-            # Move horizontally first
+            
+            # Check if enemy can see player
+            if not has_line_of_sight(row, col, player_row, player_col):
+                return False  # Stay still if can't see player
+            
+            # Clear current position
+            grid[row][col] = " "
+            
+            # Calculate move direction toward player
+            new_row, new_col = row, col
+            x_dir, y_dir = 0, 0
+            
             if player_col < col:
                 new_col -= 1
                 x_dir = 1
             elif player_col > col:
                 new_col += 1
                 x_dir = -1
-        else:
-            # Move vertically first
+            
             if player_row < row:
                 new_row -= 1
                 y_dir = 1
             elif player_row > row:
                 new_row += 1
                 y_dir = -1
-        
-        # If no movement was determined, try the other axis
-        if new_row == row and new_col == col:
-            if player_col < col:
-                new_col -= 1
-                x_dir = 1
-            elif player_col > col:
-                new_col += 1
-                x_dir = -1
-            elif player_row < row:
-                new_row -= 1
-                y_dir = 1
-            elif player_row > row:
-                new_row += 1
-                y_dir = -1
-        
-        # Handle movement and collisions
-        if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
-            # Breaking X blocks
-            if grid[new_row][new_col] == "X":
-                grid[new_row][new_col] = " "  # Break the block
-                # Award points based on enemy type
-                if enemy_type == "1": score += 1
-                elif enemy_type == "2": score += 2
-                elif enemy_type == "3": score += 3
-                return True  # Enemy dies when breaking block
             
-            # Handle collision with gems, whips, teleports
-            elif grid[new_row][new_col] == "+":  # Gem
-                if enemy_type == "1": gems -= 1
-                elif enemy_type == "2": gems -= 2
-                elif enemy_type == "3": gems -= 3
+            # Handle movement and collisions
+            if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
+                # Breaking X blocks
+                if grid[new_row][new_col] == "X":
+                    grid[new_row][new_col] = " "  # Break the block
+                    return True  # Enemy dies when breaking block
                 
-                if gems < 0:
-                    # Ideally call a death function here
-                    return True
+                # Collide with an item
+                elif grid[new_row][new_col] in {"W", "+", "T"}:
+                    # Destroy the item and move the enemy
+                    grid[new_row][new_col] = enemy_type
+                    enemy["row"], enemy["col"] = new_row, new_col
+                # Empty space - move there
+                elif grid[new_row][new_col] == " ":
+                    enemy["row"], enemy["col"] = new_row, new_col
+                    grid[new_row][new_col] = enemy_type
                 
-                # Update display
-                enemy["row"], enemy["col"] = new_row, new_col
-                grid[new_row][new_col] = enemy_type
-                return False
+                # Hit player
+                elif grid[new_row][new_col] == "P":
+                    return True  # Enemy dies
                 
-            # Collide with an item (whip, teleport)
-            elif grid[new_row][new_col] in {"W", "T"}:
-                # Destroy the item and move the enemy
-                enemy["row"], enemy["col"] = new_row, new_col
-                grid[new_row][new_col] = enemy_type
-                return False
-                
-            # Empty space - move there
-            elif grid[new_row][new_col] == " ":
-                enemy["row"], enemy["col"] = new_row, new_col
-                grid[new_row][new_col] = enemy_type
-                return False
-
-            # Hit player
-            elif grid[new_row][new_col] == "P":
-                # Attack player by taking gems
-                if enemy_type == "1": gems -= 1
-                elif enemy_type == "2": gems -= 2
-                elif enemy_type == "3": gems -= 3
-                
-                if gems < 0:
-                    # Ideally call a death function here
-                    pass
-                    
-                return True  # Enemy dies
-                
-            # Blocked - stay in place
+                # Blocked - try to find another way
+                else:
+                    grid[row][col] = enemy_type  # Stay in place
             else:
-                grid[row][col] = enemy_type
-                return False
-        else:
-            grid[row][col] = enemy_type  # Stay in place
-            return False
-
-    def use_whip(screen, grid, player_row, player_col, whips, slow_enemies, medium_enemies, fast_enemies, images, tile_mapping, TILE_WIDTH, TILE_HEIGHT):
+                grid[row][col] = enemy_type  # Stay in place
+    
+    def use_whip(screen, grid, player_row, player_col, whips, slow_enemies, medium_enemies, images, tile_mapping, TILE_WIDTH, TILE_HEIGHT):
         """Handle the whip animation and enemy interactions"""
         # Access game state variables from enclosing scope
         nonlocal score, level_num, gems, teleports, keys, WIDTH, HEIGHT
         
         # Check if player has whips
         if whips <= 0:
-            return 0, [], [], []  # No whips to use
+            return 0, [], []  # No whips to use
+        whips -= 1
         
         # Define the whip animation positions (counter-clockwise)
         whip_positions = [
@@ -573,13 +487,10 @@ def levels(screen, difficulty_input, mixUp=False):
         kills = 0
         new_slow_enemies = []
         new_medium_enemies = []
-        new_fast_enemies = []
         
         # Clear enemies hit by whip from both grid and enemy lists
         for r, c, enemy_type in enemies_hit:
             grid[r][c] = " "  # Clear enemy from grid
-            # Add points based on enemy type (1, 2, or 3 points)
-            score += int(enemy_type)
             kills += 1
             
         # Rebuild enemy lists excluding the killed ones
@@ -590,14 +501,9 @@ def levels(screen, difficulty_input, mixUp=False):
         for enemy in medium_enemies:
             if grid[enemy["row"]][enemy["col"]] == "2":
                 new_medium_enemies.append(enemy)
-                
-        for enemy in fast_enemies:
-            if grid[enemy["row"]][enemy["col"]] == "3":
-                new_fast_enemies.append(enemy)
         
-        return kills, new_slow_enemies, new_medium_enemies, new_fast_enemies
+        return kills, new_slow_enemies, new_medium_enemies
     
-    cloaks = 0
     is_cloaked = False
     cloak_start_time = 0
     CLOAK_DURATION = 8000
@@ -691,18 +597,15 @@ def levels(screen, difficulty_input, mixUp=False):
     last_move_time = 0
     keys_held_time = {
         pygame.K_UP: 0,
-        pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+        pygame.K_DOWN: 0, 
+        pygame.K_LEFT: 0,
+        pygame.K_RIGHT: 0
     }
     momentum = {
         pygame.K_UP: 0,
         pygame.K_DOWN: 0, 
         pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+        pygame.K_RIGHT: 0
     }
     
     # How long a key needs to be held to generate momentum (in ms)
@@ -713,7 +616,7 @@ def levels(screen, difficulty_input, mixUp=False):
     def player_input():
         """Handle player movement with consistent rate and momentum"""
         nonlocal player_row, player_col, score, gems, whips, teleports, keys
-        nonlocal slow_enemies, medium_enemies, fast_enemies, last_move_time, cloaks, is_cloaked
+        nonlocal slow_enemies, medium_enemies, last_move_time, cloaks, is_cloaked
         
         current_time = pygame.time.get_ticks()
         current_keys = pygame.key.get_pressed()
@@ -724,9 +627,9 @@ def levels(screen, difficulty_input, mixUp=False):
             if not keys_pressed[pygame.K_w]:  # Key just pressed
                 keys_pressed[pygame.K_w] = True
                 if whips > 0:
-                    kills, slow_enemies, medium_enemies, fast_enemies = use_whip(
+                    kills, slow_enemies, medium_enemies = use_whip(
                         screen, grid, player_row, player_col, whips, 
-                        slow_enemies, medium_enemies, fast_enemies, images, tile_mapping, 
+                        slow_enemies, medium_enemies, images, tile_mapping, 
                         TILE_WIDTH, TILE_HEIGHT
                     )
                     whips -= 1
@@ -765,34 +668,25 @@ def levels(screen, difficulty_input, mixUp=False):
         
         # Ready to make a move
         move_made = False
+        active_direction = None
         
-        # Define all direction keys with their movement vectors (delta_row, delta_col)
+        # Direction priority: UP, DOWN, LEFT, RIGHT
         direction_keys = [
-            # Arrow keys
             (pygame.K_UP, (-1, 0)),
             (pygame.K_DOWN, (1, 0)),
             (pygame.K_LEFT, (0, -1)),
-            (pygame.K_RIGHT, (0, 1)),
-            
-            # UIOJLNM, keys
-            (pygame.K_u, (-1, -1)),  # Up-left
-            (pygame.K_i, (-1, 0)),   # Up
-            (pygame.K_o, (-1, 1)),   # Up-right
-            (pygame.K_j, (0, -1)),   # Left
-            (pygame.K_l, (0, 1)),    # Right
-            (pygame.K_n, (1, -1)),   # Down-left
-            (pygame.K_m, (1, 0)),    # Down
-            (pygame.K_COMMA, (1, 1)) # Down-right
+            (pygame.K_RIGHT, (0, 1))
         ]
         
-        # First check keys being held down - using all direction keys
+        # First check keys being held down
         for key, (delta_row, delta_col) in direction_keys:
             if current_keys[key]:
                 if not keys_pressed[key]:  # Key just pressed
                     keys_pressed[key] = True
                     keys_held_time[key] = current_time
                 
-                # Try to move in the direction
+                # This is our active direction
+                active_direction = key
                 move_made = process_move(player_row + delta_row, player_col + delta_col)
                 if move_made:
                     last_move_time = current_time
@@ -831,35 +725,23 @@ def levels(screen, difficulty_input, mixUp=False):
             # Collect items
             if grid[new_row][new_col] == "+":  # Gem
                 gems += 1
-                score += 1  # Original game awards 1 point per gem
+                score += 100
             elif grid[new_row][new_col] == "W":  # Whip
                 whips += 1
-                score += 1  # Original game awards 1 point per whip
+                score += 50
             elif grid[new_row][new_col] == "T":  # Teleport
                 teleports += 1
-                score += 1  # Original game awards 1 point per teleport
+                score += 75
             elif grid[new_row][new_col] == "K":  # Key
                 keys += 1
-                score += 1  # Original game doesn't specify key points explicitly
+                score += 125
             elif grid[new_row][new_col] == "L":  # Stairs to next level
                 level_num += 1
-                score += level_num  # Original game awards points equal to the level number
+                score += 1000
             elif grid[new_row][new_col] == "_":  # Cloak
                 cloaks += 1
                 score += 60  # optional, just for fun
                 # Could add level change logic here
-            elif grid[new_row][new_col] == "*":  # Nugget
-                score += 50  # Gold nuggets are worth 50 points
-            elif grid[new_row][new_col] == "S":  # SlowTime
-                score += 5  # SlowTime bonus
-            elif grid[new_row][new_col] == "I":  # Invisible
-                score += 10  # Invisible bonus
-            elif grid[new_row][new_col] == "F":  # SpeedTime
-                score += 2  # SpeedTime bonus
-            elif grid[new_row][new_col] == "C":  # Chest
-                score += 5  # Chest bonus
-            elif grid[new_row][new_col] == "!":  # Tablet
-                score += level_num + 250  # Tablet bonus (level + fixed bonus)
             
             # Move player
             grid[player_row][player_col] = " "
@@ -868,156 +750,19 @@ def levels(screen, difficulty_input, mixUp=False):
             return True
         
         # Movement was blocked
-        if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
-            if score > 2:  # Only subtract if score is greater than 2
-                score -= 2  # Original game deducts 2 points for hitting walls
         return False
     
     # Game constants
-    FAST_PC = True  # Modern computers are "fast" compared to original era
+    SLOW_TIMER = 5
+    MEDIUM_TIMER = 6
+    GAME_TICK_RATE = 12.0
     
-    # Timer initialization (from KINGDOM4.INC lines 61-63)
-    if FAST_PC:
-        BASE_SLOW_TIMER = 10
-        BASE_MEDIUM_TIMER = 8
-        BASE_FAST_TIMER = 6
-    else:
-        BASE_SLOW_TIMER = 3
-        BASE_MEDIUM_TIMER = 2
-        BASE_FAST_TIMER = 1
-    
-    # Current timer values
-    SLOW_TIMER = BASE_SLOW_TIMER
-    MEDIUM_TIMER = BASE_MEDIUM_TIMER
-    FAST_TIMER = BASE_FAST_TIMER
-    
-    # Spell effect timers
-    slow_time_effect = 0  # T[4] in original
-    invisible_effect = 0  # T[5] in original
-    speed_time_effect = 0 # T[6] in original
-    freeze_effect = 0     # T[7] in original
-    
-    # Higher rate faster enemies move
-    GAME_TICK_RATE = 16.0
-    
-    # Game loop
+     # Game loop
     running = True
     clock = pygame.time.Clock()
     tick_counter = 0
-    
-    # Individual enemy movement counters - separate timing for each enemy type
-    slow_counter = 0
-    medium_counter = 0
-    fast_counter = 0
 
-    # How many ticks to wait between enemy movements (higher = slower)
-    slow_threshold = 4  # Slowest enemy (type 1)
-    medium_threshold = 2  # Medium speed enemy (type 2)
-    fast_threshold = 1  # Fastest enemy (type 3)
-    
     wait = True
-
-    def save_game(state, slot):
-        """Save the game state to a JSON file."""
-        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
-        with open(save_path, "w") as save_file:
-            json.dump(state, save_file, indent=4)  # Save only the player state
-        print(f"Saving to file {slot}...")
-        pygame.time.wait(2000)  # Wait for 2 seconds
-
-    def restore_game(slot):
-        """Restore the game state from a JSON file."""
-        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
-        if os.path.exists(save_path):
-            with open(save_path, "r") as save_file:
-                state = json.load(save_file)
-            print(f"Restoring from file {slot}...")
-            pygame.time.wait(2000)  # Wait for 2 seconds
-            return state  # Return the restored state
-        else:
-            print(f"No save file found for slot {slot}.")
-            return None
-
-    def handle_save(screen, state):
-        """Handle the save process."""
-        paused = True
-        print("\nGame is PAUSED.\n")  # Output when the game is paused for saving
-        print("Are you sure you want to SAVE (Y/N)?")
-        while paused:
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_y:
-                        paused = False
-                        save_slot = prompt_save_restore(screen, "SAVE")
-                        if save_slot:
-                            save_game({
-                                "player_row": state["player_row"],
-                                "player_col": state["player_col"],
-                                "Score": state["Score"],
-                                "level_num": state["level_num"],  # Save the level number
-                                "gems": state["gems"],
-                                "whips": state["whips"],
-                                "teleports": state["teleports"],
-                                "keys": state["keys"]
-                            }, save_slot)
-                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
-                        paused = False
-        print("\nGame RESUMED.\n")  # Output when the game resumes after saving
-
-    def handle_restore(screen):
-        """Handle the restore process."""
-        paused = True
-        print("\nGame is PAUSED.\n")  # Output when the game is paused for restoring
-        print("Are you sure you want to RESTORE (Y/N)?")
-        while paused:
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_y:
-                        paused = False
-                        restore_slot = prompt_save_restore(screen, "RESTORE")
-                        if restore_slot:
-                            restored_state = restore_game(restore_slot)
-                            if restored_state:
-                                # Regenerate the grid based on the saved level number
-                                grid = generate_grid_for_level(restored_state["level_num"])
-                                return {
-                                    "grid": grid,  # Regenerated grid
-                                    "player_row": restored_state["player_row"],
-                                    "player_col": restored_state["player_col"],
-                                    "Score": restored_state["Score"],
-                                    "level_num": restored_state["level_num"],
-                                    "gems": restored_state["gems"],
-                                    "whips": restored_state["whips"],
-                                    "teleports": restored_state["teleports"],
-                                    "keys": restored_state["keys"]
-                                }
-                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
-                        paused = False
-        print("\nGame RESUMED.\n")  # Output when the game resumes after restoring
-        return None
-
-    def prompt_save_restore(screen, action):
-        """Prompt the user to pick a save/restore slot."""
-        slot = None
-        print(f"Pick which letter to {action} to/from: A, B, or C? A")  # Print the prompt once
-        while slot not in {"A", "B", "C"}:
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key in (pygame.K_a, pygame.K_b, pygame.K_c):
-                        slot = chr(event.key).upper()
-                        return slot
-                    
-    def generate_grid_for_level(level_num):
-        """Generate the grid for the given level number."""
-        # Ensure the level number is valid
-        if 1 <= level_num <= len(level_maps):
-            return [list(row) for row in level_maps[level_num - 1]]  # Convert strings to lists of characters
-        else:
-            raise ValueError(f"Level {level_num} is not defined in level_maps.")
-
     while running:
         # Handle events
         for event in pygame.event.get():
@@ -1033,35 +778,12 @@ def levels(screen, difficulty_input, mixUp=False):
                     # Go to next level when Tab is pressed
                     current_level_index = (current_level_index + 1) % len(level_maps)
                     change_level(current_level_index)
-                elif event.key == pygame.K_s:
-                    handle_save(screen, {
-                        "player_row": player_row,
-                        "player_col": player_col,
-                        "Score": score,
-                        "level_num": level_num,
-                        "gems": gems,
-                        "whips": whips,
-                        "teleports": teleports,
-                        "keys": keys
-                    })
-                elif event.key == pygame.K_r:
-                    restored_state = handle_restore(screen)
-                    if restored_state:
-                        grid = generate_grid_for_level(restored_state["level_num"])  # Regenerate grid
-                        player_row = restored_state["player_row"]
-                        player_col = restored_state["player_col"]
-                        score = restored_state["Score"]
-                        level_num = restored_state["level_num"]
-                        gems = restored_state["gems"]
-                        whips = restored_state["whips"]
-                        teleports = restored_state["teleports"]
-                        keys = restored_state["keys"]
             elif event.type == pygame.KEYUP:
                 if event.key in keys_pressed:
                     keys_pressed[event.key] = False
         
         # Process player input
-        action_performed = player_input()
+        player_input()
 
          # Auto-deactivate cloak after duration
         if is_cloaked and pygame.time.get_ticks() - cloak_start_time > 5000:
@@ -1080,91 +802,28 @@ def levels(screen, difficulty_input, mixUp=False):
                     screen.blit(tile_mapping[char], (col_index * TILE_WIDTH, row_index * TILE_HEIGHT))
 
         # Update the item tracking UI with current values
-        values = [score, level_num, gems, whips-1, teleports, keys, cloaks]
+        values = [score, level_num, gems, whips, teleports, keys, cloaks]
         hud(screen, WIDTH, HEIGHT, values)
         
-        # Update spell effect timers
-        if slow_time_effect > 0:
-            slow_time_effect -= 1
-        if invisible_effect > 0:
-            invisible_effect -= 1
-        if speed_time_effect > 0:
-            speed_time_effect -= 1
-        if freeze_effect > 0:
-            freeze_effect -= 1
-        
-        # Update movement thresholds based on spell effects
-        if speed_time_effect > 0:
-            # Speed time makes enemies move very fast
-            slow_threshold = 6
-            medium_threshold = 5
-            fast_threshold = 4
-        elif slow_time_effect > 0:
-            # Slow time makes enemies move much slower
-            slow_threshold = 30
-            medium_threshold = 25
-            fast_threshold = 20
-        else:
-            # Normal speeds
-            slow_threshold = 10
-            medium_threshold = 7
-            fast_threshold = 4
-        
-        # Update game state and enemy movement counters
+        # Update game state
         tick_counter += 1
         
-        # Only increment counters and allow movement if freeze effect is inactive
-        if freeze_effect <= 0:
-            # Increment individual enemy counters
-            slow_counter += 1
-            medium_counter += 1
-            fast_counter += 1
-            
-            # Move slow enemies (type 1)
-            if slow_counter >= slow_threshold:
-                for i in range(len(slow_enemies)-1, -1, -1):
-                    if i < len(slow_enemies):  # Make sure the enemy still exists
-                        if move_enemy(slow_enemies[i], "1", 8):
-                            del slow_enemies[i]
-                slow_counter = 0  # Reset the counter
-                
-            # Move medium enemies (type 2)
-            if medium_counter >= medium_threshold:
-                for i in range(len(medium_enemies)-1, -1, -1):
-                    if i < len(medium_enemies):  # Make sure the enemy still exists
-                        if move_enemy(medium_enemies[i], "2", 7):
-                            del medium_enemies[i]
-                medium_counter = 0  # Reset the counter
-                
-            # Move fast enemies (type 3)
-            if fast_counter >= fast_threshold:
-                for i in range(len(fast_enemies)-1, -1, -1):
-                    if i < len(fast_enemies):  # Make sure the enemy still exists
-                        if move_enemy(fast_enemies[i], "3", 6):
-                            del fast_enemies[i]
-                fast_counter = 0  # Reset the counter
+        # Move enemies on their respective timers
+        if tick_counter % SLOW_TIMER == 0:
+            # Move slow enemies
+            for i in range(len(slow_enemies)-1, -1, -1):
+                if move_enemy(slow_enemies[i], "1", 8):
+                    del slow_enemies[i]
         
-        # Handle speed and slow time powerups
-        for row_index, row in enumerate(grid):
-            for col_index, char in enumerate(row):
-                # If player is on the slowtime powerup
-                if char == "S" and row_index == player_row and col_index == player_col:
-                    slow_time_effect = 70 if not FAST_PC else 100
-                    grid[row_index][col_index] = " "
-                    # Visual/sound effects would go here
-                    
-                # If player is on the speedtime powerup
-                if char == "F" and row_index == player_row and col_index == player_col:
-                    speed_time_effect = 50 if not FAST_PC else 80
-                    grid[row_index][col_index] = " "
-                    # Visual/sound effects would go here
-                    
-                # If player is on the freeze powerup
-                if char == "Z" and row_index == player_row and col_index == player_col:
-                    freeze_effect = 55 if not FAST_PC else 60
-                    grid[row_index][col_index] = " "
-                    # Visual/sound effects would go here
+        if tick_counter % MEDIUM_TIMER == 0:
+            # Move medium enemies
+            for i in range(len(medium_enemies)-1, -1, -1):
+                if move_enemy(medium_enemies[i], "2", 7):
+                    del medium_enemies[i]
 
+        if wait:
+            wait_input(screen)
+            wait = False
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
 levels(screen, difficulty_input, mixUp = False)
