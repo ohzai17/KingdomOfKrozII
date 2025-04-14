@@ -837,4 +837,4 @@ def levels(screen, difficulty_input, mixUp=False):
             wait = False
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-#levels(screen, difficulty_input, mixUp = False)
+levels(screen, difficulty_input, mixUp = False)
