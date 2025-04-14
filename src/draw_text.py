@@ -70,6 +70,7 @@ def draw_text(row, text, text_color=None, flashing=False, center=True, text_back
             Defaults to True.
         text_background (tuple, optional): RGB color tuple for the background behind each char.
             Defaults to None.
+        title_box (bool, optional): For special title screen background.
     """
     y = (row * CHAR_HEIGHT) - CHAR_HEIGHT
     text_pixel_width = len(text) * CHAR_WIDTH

@@ -517,7 +517,7 @@ def levels(screen, difficulty_input, mixUp=False):
         cloaks -= 1
         print(f"{cloaks}")
 
-    def teleport2(grid, player_row, player_col, tile_mapping, screen):  
+    def teleport(grid, player_row, player_col, tile_mapping, screen):  
         """Teleports the player to a random empty space on the grid with a flickering effect before and after teleporting."""
     
         if teleports <= 0:
@@ -643,7 +643,7 @@ def levels(screen, difficulty_input, mixUp=False):
             if not keys_pressed[pygame.K_t]:
                 keys_pressed[pygame.K_t] = True
                 if teleports > 0:
-                    player_row, player_col = teleport2(grid, player_row, player_col, tile_mapping, screen)
+                    player_row, player_col = teleport(grid, player_row, player_col, tile_mapping, screen)
                     teleports -= 1
                 action_performed = True
         else:
@@ -740,8 +740,19 @@ def levels(screen, difficulty_input, mixUp=False):
                 score += 1000
             elif grid[new_row][new_col] == "_":  # Cloak
                 cloaks += 1
-                score += 60  # optional, just for fun
-                # Could add level change logic here
+                score += 60  # optional value
+            elif grid[new_row][new_col] == "*":  # Nugget
+                score += 50  # Gold nuggets are worth 50 points
+            elif grid[new_row][new_col] == "S":  # SlowTime
+                score += 5  # SlowTime bonus
+            elif grid[new_row][new_col] == "I":  # Invisible
+                score += 10  # Invisible bonus
+            elif grid[new_row][new_col] == "F":  # SpeedTime
+                score += 2  # SpeedTime bonus
+            elif grid[new_row][new_col] == "C":  # Chest
+                score += 5  # Chest bonus
+            elif grid[new_row][new_col] == "!":  # Tablet
+                score += level_num + 250  # Tablet bonus (level + fixed bonus)
             
             # Move player
             grid[player_row][player_col] = " "
@@ -826,4 +837,4 @@ def levels(screen, difficulty_input, mixUp=False):
             wait = False
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-levels(screen, difficulty_input, mixUp = False)
+#levels(screen, difficulty_input, mixUp = False)
