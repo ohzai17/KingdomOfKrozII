@@ -165,21 +165,17 @@ def difficulty(screen, BACKGROUND): # From KINGDOM3.INC (line 86)
                                 blinking_difficulty_text = "EXPERIENCED"
                                 play_sound(300, 100)
                                 play_sound(700, 100)
-                                return blinking_difficulty_text
                             case pygame.K_a:
                                 difficulty_user_input = 'A'
                                 blinking_difficulty_text = "ADVANCED"
                                 play_sound(300, 100)
-                                play_sound(700, 100)  
-                                return blinking_difficulty_text                              
+                                play_sound(700, 100)                                
                             case pygame.K_x:
                                 difficulty_user_input = 'X'
                                 blinking_difficulty_text = "SECRET MODE  "
                                 play_sound(300, 100)
-                                play_sound(700, 100) 
-                                return blinking_difficulty_text                               
+                                play_sound(700, 100)                                
                             case _:
-                                difficulty_user_input = 'N'
                                 blinking_difficulty_text = "NOVICE"
                                 play_sound(300, 100)
                                 play_sound(700, 100)
