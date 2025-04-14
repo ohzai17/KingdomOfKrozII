@@ -1,11 +1,20 @@
 import pygame
 import random
 import os
-import sys
 import time
+import json
 import numpy as np
 
-screen = pygame.display.set_mode((833 , 600))
+pygame.init()
+pygame.mixer.init()
+# 16:9
+WIDTH, HEIGHT = 1320, 1
+HEIGHT = int(WIDTH * 9 / 16)
+resolution = (WIDTH, HEIGHT)
+screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
+GRID_WIDTH, GRID_HEIGHT = 80, 25
+TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
+CHAR_WIDTH, CHAR_HEIGHT = WIDTH // 80, HEIGHT // 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
 difficulty_input = "place_holder" # Initialized to be used in levels
@@ -45,12 +54,19 @@ square_size = 8 # Used for square bullets
 
 logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
 blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, BLUE, GREEN, RED, PURPLE, YELLOW]
+rect_colors_list = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
 
+# Random rectangle Colors to cycle through 
+rect_colors_cycle = rect_colors_list
+rand_color = random.choice(rect_colors_cycle)
+
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
+saves_dir = os.path.join(base_dir, "saves")
 assets_dir = os.path.join(base_dir, "assets")
+screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 
@@ -207,7 +223,6 @@ def footStep():
 def enemyCollision():
     play_wav('enemyCollision.wav')    
        
-
 def wait_input(screen):
     paused = True
 
