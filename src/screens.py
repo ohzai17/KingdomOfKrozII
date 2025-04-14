@@ -145,6 +145,7 @@ def difficulty(screen, BACKGROUND): # From KINGDOM3.INC (line 86)
         if blinking_difficulty_text == "":
             draw_text(22, difficulty_heading_3_1, YELLOW)
             draw_text(22, difficulty_heading_3_2)
+            draw_text(22, difficulty_cursor, ORANGE, True)
         else:
             draw_text(22, blinking_difficulty_text, YELLOW, True)
             draw_text(25, difficulty_footer, GRAY)
