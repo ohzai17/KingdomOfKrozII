@@ -887,28 +887,23 @@ def levels(screen, mixUp=False):
 
     def save_game(state, slot):
         """Save the game state to a JSON file."""
-        save_path = os.path.join(saves_dir, f"save_{slot.lower()}.json")  # Use saves_dir from utils
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
         with open(save_path, "w") as save_file:
-            # Format the grid as a single line
-            state["grid"] = ["".join(row) for row in state["grid"]]
-            json.dump(state, save_file, indent=4)
-        print(f"Saving to file {slot.upper()}...")
+            json.dump(state, save_file, indent=4)  # Save only the player state
+        print(f"Saving to file {slot}...")
         pygame.time.wait(2000)  # Wait for 2 seconds
 
     def restore_game(slot):
         """Restore the game state from a JSON file."""
-        save_path = os.path.join(saves_dir, f"save_{slot.lower()}.json")  # Use saves_dir from utils
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
         if os.path.exists(save_path):
             with open(save_path, "r") as save_file:
                 state = json.load(save_file)
-            print(f"Restoring from file {slot.upper()}...")
+            print(f"Restoring from file {slot}...")
             pygame.time.wait(2000)  # Wait for 2 seconds
-            # Convert grid back to a list of lists
-            state["grid"] = [list(row) for row in state["grid"]]
-            return state
+            return state  # Return the restored state
         else:
-            print(f"No save file found for slot {slot.upper()}.")
-            print("\nGame RESUMED.\n")  # Output when no save file is found
+            print(f"No save file found for slot {slot}.")
             return None
 
     def handle_save(screen, state):
@@ -924,10 +919,17 @@ def levels(screen, mixUp=False):
                         paused = False
                         save_slot = prompt_save_restore(screen, "SAVE")
                         if save_slot:
-                            save_game(state, save_slot)
-                    elif event.key == pygame.K_n:
-                        paused = False
-                    elif event.key == pygame.K_ESCAPE:
+                            save_game({
+                                "player_row": state["player_row"],
+                                "player_col": state["player_col"],
+                                "Score": state["Score"],
+                                "level_num": state["level_num"],  # Save the level number
+                                "gems": state["gems"],
+                                "whips": state["whips"],
+                                "teleports": state["teleports"],
+                                "keys": state["keys"]
+                            }, save_slot)
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
                         paused = False
         print("\nGame RESUMED.\n")  # Output when the game resumes after saving
 
@@ -944,10 +946,22 @@ def levels(screen, mixUp=False):
                         paused = False
                         restore_slot = prompt_save_restore(screen, "RESTORE")
                         if restore_slot:
-                            return restore_game(restore_slot)
-                    elif event.key == pygame.K_n:
-                        paused = False
-                    elif event.key == pygame.K_ESCAPE:
+                            restored_state = restore_game(restore_slot)
+                            if restored_state:
+                                # Regenerate the grid based on the saved level number
+                                grid = generate_grid_for_level(restored_state["level_num"])
+                                return {
+                                    "grid": grid,  # Regenerated grid
+                                    "player_row": restored_state["player_row"],
+                                    "player_col": restored_state["player_col"],
+                                    "Score": restored_state["Score"],
+                                    "level_num": restored_state["level_num"],
+                                    "gems": restored_state["gems"],
+                                    "whips": restored_state["whips"],
+                                    "teleports": restored_state["teleports"],
+                                    "keys": restored_state["keys"]
+                                }
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
                         paused = False
         print("\nGame RESUMED.\n")  # Output when the game resumes after restoring
         return None
@@ -963,6 +977,14 @@ def levels(screen, mixUp=False):
                     if event.key in (pygame.K_a, pygame.K_b, pygame.K_c):
                         slot = chr(event.key).upper()
                         return slot
+                    
+    def generate_grid_for_level(level_num):
+        """Generate the grid for the given level number."""
+        # Ensure the level number is valid
+        if 1 <= level_num <= len(level_maps):
+            return [list(row) for row in level_maps[level_num - 1]]  # Convert strings to lists of characters
+        else:
+            raise ValueError(f"Level {level_num} is not defined in level_maps.")
 
     while running:
         # Handle events
@@ -981,7 +1003,6 @@ def levels(screen, mixUp=False):
                     change_level(current_level_index)
                 elif event.key == pygame.K_s:
                     handle_save(screen, {
-                        "grid": grid,
                         "player_row": player_row,
                         "player_col": player_col,
                         "Score": Score,
@@ -994,7 +1015,7 @@ def levels(screen, mixUp=False):
                 elif event.key == pygame.K_r:
                     restored_state = handle_restore(screen)
                     if restored_state:
-                        grid = restored_state["grid"]
+                        grid = generate_grid_for_level(restored_state["level_num"])  # Regenerate grid
                         player_row = restored_state["player_row"]
                         player_col = restored_state["player_col"]
                         Score = restored_state["Score"]
