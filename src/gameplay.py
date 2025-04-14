@@ -379,12 +379,12 @@ def levels(screen, difficulty_input, mixUp=False):
             pass
         else:
             """Move an enemy toward the player if they can see the player"""
-            nonlocal Score, gems  # Access Score and gems from the outer scope
+            nonlocal score, gems  # Access Score and gems from the outer scope
         
         row, col = enemy["row"], enemy["col"]
             
             # Check if enemy was removed
-            if grid[row][col] != enemy_type:
+        if grid[row][col] != enemy_type:
                 return True  # Remove enemy
             
         # Original game had different odds for different enemy types
@@ -449,9 +449,9 @@ def levels(screen, difficulty_input, mixUp=False):
             if grid[new_row][new_col] == "X":
                 grid[new_row][new_col] = " "  # Break the block
                 # Award points based on enemy type
-                if enemy_type == "1": Score += 1
-                elif enemy_type == "2": Score += 2
-                elif enemy_type == "3": Score += 3
+                if enemy_type == "1": score += 1
+                elif enemy_type == "2": score += 2
+                elif enemy_type == "3": score += 3
                 return True  # Enemy dies when breaking block
             
             # Handle collision with gems, whips, teleports
@@ -506,7 +506,7 @@ def levels(screen, difficulty_input, mixUp=False):
     def use_whip(screen, grid, player_row, player_col, whips, slow_enemies, medium_enemies, fast_enemies, images, tile_mapping, TILE_WIDTH, TILE_HEIGHT):
         """Handle the whip animation and enemy interactions"""
         # Access game state variables from enclosing scope
-        nonlocal Score, level_num, gems, teleports, keys, WIDTH, HEIGHT
+        nonlocal score, level_num, gems, teleports, keys, WIDTH, HEIGHT
         
         # Check if player has whips
         if whips <= 0:
@@ -579,7 +579,7 @@ def levels(screen, difficulty_input, mixUp=False):
         for r, c, enemy_type in enemies_hit:
             grid[r][c] = " "  # Clear enemy from grid
             # Add points based on enemy type (1, 2, or 3 points)
-            Score += int(enemy_type)
+            score += int(enemy_type)
             kills += 1
             
         # Rebuild enemy lists excluding the killed ones
@@ -712,7 +712,7 @@ def levels(screen, difficulty_input, mixUp=False):
 
     def player_input():
         """Handle player movement with consistent rate and momentum"""
-        nonlocal player_row, player_col, Score, gems, whips, teleports, keys
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys
         nonlocal slow_enemies, medium_enemies, fast_enemies, last_move_time, cloaks, is_cloaked
         
         current_time = pygame.time.get_ticks()
@@ -730,7 +730,7 @@ def levels(screen, difficulty_input, mixUp=False):
                         TILE_WIDTH, TILE_HEIGHT
                     )
                     whips -= 1
-                    Score += kills * 150  # Award points for kills
+                    score += kills * 150  # Award points for kills
                     action_performed = True
         else:
             keys_pressed[pygame.K_w] = False
@@ -820,7 +820,7 @@ def levels(screen, difficulty_input, mixUp=False):
     
     def process_move(new_row, new_col):
         """Process a player movement to a new position"""
-        nonlocal player_row, player_col, Score, gems, whips, teleports, keys, level_num, cloaks
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks
         
         # Check if position is valid
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
@@ -831,35 +831,35 @@ def levels(screen, difficulty_input, mixUp=False):
             # Collect items
             if grid[new_row][new_col] == "+":  # Gem
                 gems += 1
-                Score += 1  # Original game awards 1 point per gem
+                score += 1  # Original game awards 1 point per gem
             elif grid[new_row][new_col] == "W":  # Whip
                 whips += 1
-                Score += 1  # Original game awards 1 point per whip
+                score += 1  # Original game awards 1 point per whip
             elif grid[new_row][new_col] == "T":  # Teleport
                 teleports += 1
-                Score += 1  # Original game awards 1 point per teleport
+                score += 1  # Original game awards 1 point per teleport
             elif grid[new_row][new_col] == "K":  # Key
                 keys += 1
-                Score += 1  # Original game doesn't specify key points explicitly
+                score += 1  # Original game doesn't specify key points explicitly
             elif grid[new_row][new_col] == "L":  # Stairs to next level
                 level_num += 1
-                Score += level_num  # Original game awards points equal to the level number
+                score += level_num  # Original game awards points equal to the level number
             elif grid[new_row][new_col] == "_":  # Cloak
                 cloaks += 1
                 score += 60  # optional, just for fun
                 # Could add level change logic here
             elif grid[new_row][new_col] == "*":  # Nugget
-                Score += 50  # Gold nuggets are worth 50 points
+                score += 50  # Gold nuggets are worth 50 points
             elif grid[new_row][new_col] == "S":  # SlowTime
-                Score += 5  # SlowTime bonus
+                score += 5  # SlowTime bonus
             elif grid[new_row][new_col] == "I":  # Invisible
-                Score += 10  # Invisible bonus
+                score += 10  # Invisible bonus
             elif grid[new_row][new_col] == "F":  # SpeedTime
-                Score += 2  # SpeedTime bonus
+                score += 2  # SpeedTime bonus
             elif grid[new_row][new_col] == "C":  # Chest
-                Score += 5  # Chest bonus
+                score += 5  # Chest bonus
             elif grid[new_row][new_col] == "!":  # Tablet
-                Score += level_num + 250  # Tablet bonus (level + fixed bonus)
+                score += level_num + 250  # Tablet bonus (level + fixed bonus)
             
             # Move player
             grid[player_row][player_col] = " "
@@ -869,8 +869,8 @@ def levels(screen, difficulty_input, mixUp=False):
         
         # Movement was blocked
         if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
-            if Score > 2:  # Only subtract if score is greater than 2
-                Score -= 2  # Original game deducts 2 points for hitting walls
+            if score > 2:  # Only subtract if score is greater than 2
+                score -= 2  # Original game deducts 2 points for hitting walls
         return False
     
     # Game constants
@@ -1037,7 +1037,7 @@ def levels(screen, difficulty_input, mixUp=False):
                     handle_save(screen, {
                         "player_row": player_row,
                         "player_col": player_col,
-                        "Score": Score,
+                        "Score": score,
                         "level_num": level_num,
                         "gems": gems,
                         "whips": whips,
@@ -1050,7 +1050,7 @@ def levels(screen, difficulty_input, mixUp=False):
                         grid = generate_grid_for_level(restored_state["level_num"])  # Regenerate grid
                         player_row = restored_state["player_row"]
                         player_col = restored_state["player_col"]
-                        Score = restored_state["Score"]
+                        score = restored_state["Score"]
                         level_num = restored_state["level_num"]
                         gems = restored_state["gems"]
                         whips = restored_state["whips"]
@@ -1080,7 +1080,7 @@ def levels(screen, difficulty_input, mixUp=False):
                     screen.blit(tile_mapping[char], (col_index * TILE_WIDTH, row_index * TILE_HEIGHT))
 
         # Update the item tracking UI with current values
-        values = [Score, level_num, gems, whips-1, teleports, keys, cloaks]
+        values = [score, level_num, gems, whips-1, teleports, keys, cloaks]
         hud(screen, WIDTH, HEIGHT, values)
         
         # Update spell effect timers
