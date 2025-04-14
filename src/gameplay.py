@@ -611,7 +611,7 @@ def levels(screen, difficulty_input, mixUp=False):
         cloaks -= 1
         print(f"{cloaks}")
 
-    def teleport2(grid, player_row, player_col, tile_mapping, screen):  
+    def teleport(grid, player_row, player_col, tile_mapping, screen):  
         """Teleports the player to a random empty space on the grid with a flickering effect before and after teleporting."""
     
         if teleports <= 0:
@@ -740,7 +740,7 @@ def levels(screen, difficulty_input, mixUp=False):
             if not keys_pressed[pygame.K_t]:
                 keys_pressed[pygame.K_t] = True
                 if teleports > 0:
-                    player_row, player_col = teleport2(grid, player_row, player_col, tile_mapping, screen)
+                    player_row, player_col = teleport(grid, player_row, player_col, tile_mapping, screen)
                     teleports -= 1
                 action_performed = True
         else:
@@ -846,8 +846,7 @@ def levels(screen, difficulty_input, mixUp=False):
                 score += level_num  # Original game awards points equal to the level number
             elif grid[new_row][new_col] == "_":  # Cloak
                 cloaks += 1
-                score += 60  # optional, just for fun
-                # Could add level change logic here
+                score += 60  # optional value
             elif grid[new_row][new_col] == "*":  # Nugget
                 score += 50  # Gold nuggets are worth 50 points
             elif grid[new_row][new_col] == "S":  # SlowTime
