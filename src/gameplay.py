@@ -45,6 +45,35 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     paused = False  # Resume game
                     
     return False  # User didn't quit
+
+def player_death(screen):
+    """Handle player death when out of gems"""
+    print("you have died")
+    
+    pygame.event.clear()  # Clear any pending events
+    
+    # Display death message on screen
+    draw_text(1, "YOU HAVE DIED!!!", BLACK, True, True, LIGHT_GRAY)
+    draw_text(16, "Press any key to continue...", WHITE, False, True, None) # Add prompt
+    pygame.display.flip()
+    
+    pygame.time.delay(500)  # Pause for 2 seconds to show message
+    
+    # Wait for user input
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                waiting_for_input = False # Exit loop on any key press
+                
+    # Go to sign-off screen
+    from screens import sign_off
+    sign_off(screen)
+    pygame.quit()
+    exit()
                     
 def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
     
@@ -461,8 +490,7 @@ def levels(screen, difficulty_input, mixUp=False):
                 elif enemy_type == "3": gems -= 3
                 
                 if gems < 0:
-                    # Ideally call a death function here
-                    return True
+                    player_death(screen)  # Call player_death when out of gems
                 
                 # Update display
                 enemy["row"], enemy["col"] = new_row, new_col
@@ -490,8 +518,7 @@ def levels(screen, difficulty_input, mixUp=False):
                 elif enemy_type == "3": gems -= 3
                 
                 if gems < 0:
-                    # Ideally call a death function here
-                    pass
+                    player_death(screen)  # Call player_death when out of gems
                     
                 return True  # Enemy dies
                 
