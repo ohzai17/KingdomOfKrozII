@@ -44,7 +44,8 @@ difficulty_subtext_3 = "deep in the vast and dangerous underground kingdom.   Yo
 difficulty_subtext_4 = "through a secret tunnel and ignite your brass lantern. Your only protection"
 difficulty_subtext_5 = "is a worn leather whip and your ingenuity.  Sweat beading on your forehead,"
 difficulty_subtext_6 = "              you embark on a journey that may be your last...             "
-difficulty_subtext_7 = "Use the cursor keys to move yourself (  ) through the kingdom."
+difficulty_subtext_7 = "Use the cursor keys to move yourself ( ) through the kingdom."
+difficulty_subtext_7a ="                                      >                      "
 difficulty_subtext_8 = "Use your whip (press W) to destroy all nearby creatures."
 difficulty_subtext_9 = "You are on your own to discover what other mysteries await--some"
 difficulty_subtext_10 = "helpful, others deadly..."
@@ -141,19 +142,19 @@ instruction3_paragraphs = [
     "   Here are some brief descriptions of the most common objects that you are",
     " likely to find in the Kingdom of Kroz:",
     "",
-    "        - this is you, a dauntless archaeologist without peer",
-    "        - red creatures move slow and only knock off 1 gem when touched",
-    "        - green creatures move faster and knock off 2 gems when touched",
-    "        - blue creatures move fastest and knock off 3 gems when touched",
-    "        - collect all the gems you can to survive creature attacks",
-    "        - whips are used to wipe out creatures and smash certain walls",
-    "        - teleport spells will magically transport you to a random place",
-    "        - chests contain a random number of gems and whips",
-    "        - collect keys to go through doors ( )",
-    "        - collect these power rings to make your whips more powerful",
-    "        - these tablets will give you clues, advice and warnings",
-    "        - this might be anything, including a big pouch of gems!",
-    "        - stairs take you to the next level deeper in Kroz",
+    "      > - this is you, a dauntless archaeologist without peer",
+    "      { - red creatures move slow and only knock off 1 gem when touched",
+    "      } - green creatures move faster and knock off 2 gems when touched",
+    "      [ - blue creatures move fastest and knock off 3 gems when touched",
+    "      ] - collect all the gems you can to survive creature attacks",
+    "      ~ - whips are used to wipe out creatures and smash certain walls",
+    "      ; - teleport spells will magically transport you to a random place",
+    "      * - chests contain a random number of gems and whips",
+    "      ^ - collect keys to go through doors ( )",
+    "      < - collect these power rings to make your whips more powerful",
+    "      @ - these tablets will give you clues, advice and warnings",
+    "      & - this might be anything, including a big pouch of gems!",
+    "      | - stairs take you to the next level deeper in Kroz",
     "",
     "   There are dozens and dozens of other objects to discover. The best way",
     " to learn the usefulness of any new object is to touch it and read the brief",

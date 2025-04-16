@@ -139,6 +139,7 @@ def difficulty(screen, BACKGROUND): # From KINGDOM3.INC (line 86)
         draw_text(13, difficulty_subtext_5, AQUA)
         draw_text(14, difficulty_subtext_6, AQUA)
         draw_text(17, difficulty_subtext_7, LIGHT_GREEN)
+        draw_text(17, difficulty_subtext_7a)
         draw_text(18, difficulty_subtext_8, LIGHT_GREEN)
         draw_text(19, difficulty_subtext_9, LIGHT_GREEN)
         draw_text(20, difficulty_subtext_10, LIGHT_GREEN)
@@ -589,7 +590,7 @@ def run_all_screens(screen):
             case "b":
                 print(f"Choice: B")
                 descent()                
-                levels(screen, difficulty_input)
+                #levels(screen, difficulty_input)
                 startGame = False
             case "i":
                 print(f"Choice: I")

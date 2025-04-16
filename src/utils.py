@@ -9,13 +9,13 @@ import numpy as np
 pygame.init()
 pygame.mixer.init()
 # 16:9
-WIDTH, HEIGHT = 1200, 1
+WIDTH, HEIGHT = 1254, 1
 HEIGHT = int(WIDTH * 9 / 16)
 resolution = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
 GRID_WIDTH, GRID_HEIGHT = 80, 25
 TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
-CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25 - 0.1 # Fix cutoff text
+CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
 difficulty_input = "place_holder" # Initialized to be used in levels
@@ -49,8 +49,6 @@ LIGHT_PURPLE = rgb(221, 160, 221)
 LIGHT_YELLOW = rgb(255, 255, 224)
 DARK_RED = rgb(140, 0, 0)
 BACKGROUND = BLUE
-
-TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
 
 WIDTH, HEIGHT = screen.get_size()
 
@@ -136,53 +134,6 @@ def change_title_color(time, color_user_input):
     else:
         color_index = (time // 150) % len(blinking_text_color_list)
         return blinking_text_color_list[color_index]
-
-# Load Tiles, loading extra icons that are not in levels.gameplay
-enemy3 = pygame.image.load(os.path.join(assets_dir, "enemy3.png"))
-keys = pygame.image.load(os.path.join(assets_dir, "keys.png"))
-power = pygame.image.load(os.path.join(assets_dir, "power.png"))
-clues = pygame.image.load(os.path.join(assets_dir, "clues.png"))
-surprise = pygame.image.load(os.path.join(assets_dir, "surprise.png"))
-
-# Scale tiles
-enemy3 = pygame.transform.scale(enemy3, (15, 15))
-keys = pygame.transform.scale(keys, (15, 15))
-power = pygame.transform.scale(power, (15, 15))
-clues = pygame.transform.scale(clues, (15, 15))
-surprise = pygame.transform.scale(surprise, (15, 15))
-
-# Load tiles
-block = pygame.image.load(os.path.join(assets_dir, "block.png"))
-chest = pygame.image.load(os.path.join(assets_dir, "chest.png"))
-enemy1 = pygame.image.load(os.path.join(assets_dir, "enemy1.png"))
-enemy2 = pygame.image.load(os.path.join(assets_dir, "enemy2.png"))
-gem = pygame.image.load(os.path.join(assets_dir, "gem.png"))
-player = pygame.image.load(os.path.join(assets_dir, "player.png"))
-stairs = pygame.image.load(os.path.join(assets_dir, "stairs.png"))
-teleport = pygame.image.load(os.path.join(assets_dir, "teleport.png"))
-trap = pygame.image.load(os.path.join(assets_dir, "trap.png"))
-wall = pygame.image.load(os.path.join(assets_dir, "wall.png"))
-whip = pygame.image.load(os.path.join(assets_dir, "whip.png"))
-
-# Scale tiles
-block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
-chest    = pygame.transform.scale(chest,    (TILE_WIDTH, TILE_HEIGHT))
-enemy1   = pygame.transform.scale(enemy1,   (TILE_WIDTH, TILE_HEIGHT))
-enemy2   = pygame.transform.scale(enemy2,   (TILE_WIDTH, TILE_HEIGHT))
-gem      = pygame.transform.scale(gem,      (TILE_WIDTH, TILE_HEIGHT))
-player   = pygame.transform.scale(player,   (TILE_WIDTH, TILE_HEIGHT))
-stairs   = pygame.transform.scale(stairs,   (TILE_WIDTH, TILE_HEIGHT))
-teleport = pygame.transform.scale(teleport, (TILE_WIDTH, TILE_HEIGHT))
-trap     = pygame.transform.scale(trap,     (TILE_WIDTH, TILE_HEIGHT))
-wall     = pygame.transform.scale(wall,     (TILE_WIDTH, TILE_HEIGHT))
-whip     = pygame.transform.scale(whip,     (TILE_WIDTH, TILE_HEIGHT))
-
-def display_icons(screen):
-    icons = [player, enemy1, enemy2, enemy3, gem, whip, teleport, chest, keys, power, clues, surprise, stairs]
-    blit_y = 163
-    for i, icon in enumerate(icons):
-        icon = pygame.transform.scale(icon, (15, 15))
-        screen.blit(icon, (40, blit_y + (i * 23)))
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
