@@ -478,9 +478,9 @@ def levels(screen, difficulty_input, mixUp=False):
             if grid[new_row][new_col] == "X":
                 grid[new_row][new_col] = " "  # Break the block
                 # Award points based on enemy type
-                if enemy_type == "1": score += 1
-                elif enemy_type == "2": score += 2
-                elif enemy_type == "3": score += 3
+                if enemy_type == "1": score += 10
+                elif enemy_type == "2": score += 20
+                elif enemy_type == "3": score += 30
                 return True  # Enemy dies when breaking block
             
             # Handle collision with gems, whips, teleports
@@ -858,16 +858,16 @@ def levels(screen, difficulty_input, mixUp=False):
             # Collect items
             if grid[new_row][new_col] == "+":  # Gem
                 gems += 1
-                score += 1  # Original game awards 1 point per gem
+                score += 10  # Original game awards 1 point per gem
             elif grid[new_row][new_col] == "W":  # Whip
                 whips += 1
-                score += 1  # Original game awards 1 point per whip
+                score += 10  # Original game awards 1 point per whip
             elif grid[new_row][new_col] == "T":  # Teleport
                 teleports += 1
-                score += 1  # Original game awards 1 point per teleport
+                score += 10  # Original game awards 1 point per teleport
             elif grid[new_row][new_col] == "K":  # Key
                 keys += 1
-                score += 1  # Original game doesn't specify key points explicitly
+                score += 10  # Original game doesn't specify key points explicitly
             elif grid[new_row][new_col] == "L":  # Stairs to next level
                 level_num += 1
                 score += level_num  # Original game awards points equal to the level number
@@ -881,9 +881,9 @@ def levels(screen, difficulty_input, mixUp=False):
             elif grid[new_row][new_col] == "I":  # Invisible
                 score += 10  # Invisible bonus
             elif grid[new_row][new_col] == "F":  # SpeedTime
-                score += 2  # SpeedTime bonus
+                score += 20  # SpeedTime bonus
             elif grid[new_row][new_col] == "C":  # Chest
-                score += 5  # Chest bonus
+                score += 50  # Chest bonus
             elif grid[new_row][new_col] == "!":  # Tablet
                 score += level_num + 250  # Tablet bonus (level + fixed bonus)
             
@@ -895,8 +895,8 @@ def levels(screen, difficulty_input, mixUp=False):
         
         # Movement was blocked
         if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
-            if score > 2:  # Only subtract if score is greater than 2
-                score -= 2  # Original game deducts 2 points for hitting walls
+            if score > 20:  # Only subtract if score is greater than 2
+                score -= 20  # Original game deducts 2 points for hitting walls
         return False
     
     # Game constants

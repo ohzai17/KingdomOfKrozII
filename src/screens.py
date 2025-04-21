@@ -590,7 +590,7 @@ def run_all_screens(screen):
             case "b":
                 print(f"Choice: B")
                 descent()                
-                #levels(screen, difficulty_input)
+                levels(screen, difficulty_input, mixUp = False)
                 startGame = False
             case "i":
                 print(f"Choice: I")
