@@ -371,3 +371,9 @@ load_choice_list2 = [
 load_selector = "                        Your choice (B/I/M/S/O/A)? B"
 load_cursor =   "                                                   █"
 load_pad = "████████████████████████"
+
+leaderboard_headers = "    NAME             HIGH SCORE      LEVEL"
+leaderboard_cursor = "█"
+leaderboard_pad = "█████████████"
+leaderboard_prompt = "Enter your name then press enter."
+leaderboard_transtion = "Do you want to play another game (Y/N)?"

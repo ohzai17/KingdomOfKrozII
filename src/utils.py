@@ -7,7 +7,6 @@ import sys
 import numpy as np
 
 pygame.init()
-pygame.mixer.init()
 # 16:9
 WIDTH, HEIGHT = 1254, 1
 HEIGHT = int(WIDTH * 9 / 16)
@@ -48,6 +47,9 @@ LIGHT_RED = rgb(255, 182, 193)
 LIGHT_PURPLE = rgb(221, 160, 221)
 LIGHT_YELLOW = rgb(255, 255, 224)
 DARK_RED = rgb(140, 0, 0)
+PERSIMMON = rgb(255, 86, 85)
+SALMON = rgb(255, 86, 255)
+BRIGHT_RED = rgb(170, 1, 0)
 BACKGROUND = BLUE
 
 WIDTH, HEIGHT = screen.get_size()
@@ -74,6 +76,7 @@ screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 logo_path = os.path.join(assets_dir, "kroz_logo.png")
+leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
 
 def set_monochrome_palette():
     global BACKGROUND, BLUE, DARK_BLUE, OLD_BLUE, CYAN, GREEN, AQUA, RED, PURPLE, ORANGE, BROWN, YELLOW, WHITE, GRAY, MAGENTA, LIGHT_GRAY, LIGHT_BLUE,LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, DARK_RED
@@ -128,12 +131,12 @@ def change_logo_color(image, time, color_user_input):
         colorized_image.blit(color_filter, (0, 0), special_flags=pygame.BLEND_RGB_MULT) # Apply color filter
         return colorized_image
 
-def change_title_color(time, color_user_input):
-    if color_user_input == "M":
-        return BLACK
-    else:
-        color_index = (time // 150) % len(blinking_text_color_list)
-        return blinking_text_color_list[color_index]
+# def change_title_color(time, color_user_input):
+#     if color_user_input == "M":
+#         return BLACK
+#     else:
+#         color_index = (time // 150) % len(blinking_text_color_list)
+#         return blinking_text_color_list[color_index]
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
@@ -147,38 +150,6 @@ def flash_c(screen, message):
     text_surface = font.render(message, True, color)  # Render text with current color
     text_rect = text_surface.get_rect(midbottom=(screen.get_width() // 2, screen.get_height() - 190))
     screen.blit(text_surface, text_rect)
-
-def play_sound(frequency, duration, amplitude=4096):
-    sample_rate = 44100
-    n_samples = int(sample_rate * duration / 1000)
-    t = np.linspace(0, duration / 1000, n_samples, False)
-    wave = amplitude * np.sign(np.sin(2 * np.pi * frequency * t))
-    stereo_wave = np.column_stack((wave, wave))
-    sound = pygame.sndarray.make_sound(stereo_wave.astype(np.int16))
-    sound.play()
-    time.sleep(duration / 1000)
-    sound.stop()
-        
-def play_wav(file_name):
-    file_path = os.path.join(audio_dir, file_name)
-    sound = pygame.mixer.Sound(file_path)
-    sound.play()
-    while pygame.mixer.get_busy():
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-        pygame.time.delay(100)              
-
-def descent():
-    play_wav('beginDescent.wav')
-    
-def footStep():
-    sound_file = random.choice(['footStep_1.wav', 'footStep_2.wav'])
-    play_wav(sound_file)
-    
-def enemyCollision():
-    play_wav('enemyCollision.wav')    
        
 def wait_input(screen):
     paused = True

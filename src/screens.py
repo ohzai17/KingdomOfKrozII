@@ -1,5 +1,6 @@
 from utils import *
 from texts import *
+from audio import *
 from draw_text import draw_text
 from gameplay import levels
 
@@ -574,23 +575,139 @@ def load(screen): # From KINGDOM3.INC (lines 141-495) includes other screens
         pygame.display.update()
 # END of load                
 
-def run_all_screens(screen):
-    #color_user_input = "C"
-    color_user_input = color(screen)
-    speed_user_input = speed(screen, color_user_input)
-    title(screen, color_user_input)
-    difficulty(screen, BACKGROUND)
-    shareware(screen, BACKGROUND)
-    user_choice = load(screen)
-    
-    # This runs and proccess the loading screen along with screens in load()
+############################################################################################################################################################################################################################
+
+def leaderboard_screen(screen, score, level_num):
+    """Displays the leaderboard screen."""
+    leaderboard = load_leaderboard()
+    user_input = ""  # Initialize user input
+    leaderboard_pad = "█████████████"  # Initial pad
+    backspace_held = False  # Track if backspace is held
+    backspace_timer = 0  # Timer for backspace hold
+    running = True
+
+    # Determine the position of the current run
+    current_run_position = None
+    for i, entry in enumerate(leaderboard):
+        if entry["name"] == "Adventurer" and entry["score"] == score and entry["level"] == level_num:
+            current_run_position = i + 1  # 1-based index
+            break
+
+    while running:
+        screen.fill(BLACK)
+
+        draw_text(2, game_title, BLUE)  # Display the game title
+        draw_text(4, leaderboard_headers, CYAN)
+        draw_text(22, leaderboard_prompt, BRIGHT_RED, False, True, GRAY)
+
+        # Draw leaderboard entries with aligned numbers
+        for i, entry in enumerate(leaderboard):
+            row = 6 + i
+            color = PERSIMMON if i % 2 == 0 else SALMON
+            number = f"{i + 1:>2}"  # Right-align numbers to ensure proper spacing
+            draw_text(row, f"{number} {entry['name']:<20}{entry['score']:<15}{entry['level']:<5}", color)
+
+            # Adjust the pad position based on the current run position
+            if current_run_position:
+                if current_run_position <= 6 and i == 5:  # Move pad below the 6th player
+                    draw_text(row + 1, 21 * " " + leaderboard_pad, BRIGHT_RED, False, False, None)
+                elif current_run_position > 6 and i == current_run_position - 1:  # Move pad above the current run
+                    draw_text(row - 1, 21 * " " + leaderboard_pad, BRIGHT_RED, False, False, None)
+
+        # Adjust cursor position based on user input length
+        cursor_position = 21 + len(user_input)
+        draw_text(11, 21 * " " + leaderboard_pad, BRIGHT_RED, False, False, None)
+        draw_text(11, cursor_position * " " + leaderboard_cursor, PERSIMMON, True, False, None)
+        
+        # Display user input and dynamic pad
+        if len(user_input) > 13:
+            leaderboard_pad = "█" * (len(user_input) + 1)
+        draw_text(11, 21 * " " + user_input, WHITE, False, False, None)
+
+        pygame.display.flip()
+
+        # Event handling
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                case pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # Exit on Enter key
+                        running = False
+                    elif event.key == pygame.K_BACKSPACE:  # Handle backspace
+                        backspace_held = True
+                        backspace_timer = pygame.time.get_ticks()
+                        user_input = user_input[:-1]
+                    else:
+                        user_input += event.unicode  # Append typed character
+                case pygame.KEYUP:
+                    if event.key == pygame.K_BACKSPACE:
+                        backspace_held = False
+
+        # Handle continuous backspace when held
+        if backspace_held and pygame.time.get_ticks() - backspace_timer > 100:
+            user_input = user_input[:-1]
+            backspace_timer = pygame.time.get_ticks()
+
+    # Update leaderboard with the new score
+    leaderboard = update_leaderboard(leaderboard, user_input.strip() or "Adventurer", score, level_num)
+    save_leaderboard(leaderboard)
+
+    # Blinking popup for another game at the bottom of the leaderboard
+    popup_running = True
+    while popup_running:
+        draw_text(24, leaderboard_transtion, WHITE, True, True)  # Bottom message
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                case pygame.KEYDOWN:
+                    if event.key == pygame.K_y:  # User wants to play again
+                        popup_running = False
+                        user_choice = load(screen)  # Return to load screen
+                        process_user_choice(screen, user_choice)  # Reuse the function
+                    elif event.key == pygame.K_n:  # User does not want to play again
+                        popup_running = False
+                        sign_off(screen) 
+                    
+                    
+def load_leaderboard():
+    """Load the leaderboard from a file."""
+    if os.path.exists(leaderboard_path):
+        with open(leaderboard_path, "r") as file:
+            return json.load(file)
+    return [{"name": "Scott Miller", "score": 136400, "level": 16},
+            {"name": "I. Jones", "score": 85740, "level": 14},
+            {"name": "Terry Nagy", "score": 69950, "level": 11},
+            {"name": "Neil Peart", "score": 35010, "level": 8},
+            {"name": "Banzai Boyd", "score": 12280, "level": 5}] + [{"name": "Adventurer", "score": 0, "level": 0} for _ in range(10)]
+
+def save_leaderboard(leaderboard):
+    """Save the leaderboard to a file."""
+    with open(leaderboard_path, "w") as file:
+        json.dump(leaderboard, file, indent=1)  # Compact format
+
+def update_leaderboard(leaderboard, name, score, level):
+    """Update the leaderboard with the player's score."""
+    leaderboard.append({"name": name, "score": score, "level": level})
+    leaderboard.sort(key=lambda x: x["score"], reverse=True)  # Sort by score descending
+    return leaderboard[:15]  # Keep only the top 15 entries
+
+############################################################################################################################################################################################################################                    
+
+def process_user_choice(screen, user_choice):
+    """Handle user choices and navigate through the game screens."""
     startGame = True
-    while startGame: 
-        match(user_choice): 
+    while startGame:
+        match user_choice:
             case "b":
                 print(f"Choice: B")
-                descent()                
-                levels(screen, difficulty_input, mixUp = False)
+                descent()
+                levels(screen, difficulty_input, mixUp=False)
                 startGame = False
             case "i":
                 print(f"Choice: I")
@@ -598,16 +715,16 @@ def run_all_screens(screen):
                 instructions_2(screen, BACKGROUND)
                 instructions_3(screen, BACKGROUND)
                 instructions_4(screen, BACKGROUND)
-                user_choice = load(screen) # return to load() until "b" is pressed
+                user_choice = load(screen)  # Return to load() until "b" is pressed
             case "m":
                 print(f"Choice: M")
                 marketing(screen, BACKGROUND)
-                user_choice = load(screen) 
+                user_choice = load(screen)
             case "s":
                 print(f"Choice: S")
                 story_1(screen, BACKGROUND)
                 story_2(screen, BACKGROUND)
-                user_choice = load(screen) 
+                user_choice = load(screen)
             case "o":
                 print(f"Choice: O")
                 original(screen, BACKGROUND)
@@ -618,7 +735,16 @@ def run_all_screens(screen):
                 user_choice = load(screen)
             case "r":
                 print(f"Choice: R")
-                descent()                
+                descent()
                 levels(screen, difficulty_input, mixUp=True)
                 startGame = False
     sign_off(screen)
+
+def run_all_screens(screen):
+    color_user_input = color(screen)
+    speed_user_input = speed(screen, color_user_input)
+    title(screen, color_user_input)
+    difficulty(screen, BACKGROUND)
+    shareware(screen, BACKGROUND)
+    user_choice = load(screen)
+    process_user_choice(screen, user_choice)

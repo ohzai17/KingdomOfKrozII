@@ -46,7 +46,7 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     
     return False  # User didn't quit
 
-def player_death(screen):
+def player_death(screen, score, level_num):
     """Handle player death when out of gems"""
     print("you have died")
     
@@ -67,11 +67,11 @@ def player_death(screen):
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
-                waiting_for_input = False # Exit loop on any key press
-                
-    # Go to sign-off screen
-    from screens import sign_off
-    sign_off(screen)
+                waiting_for_input = False  # Exit loop on any key press
+    
+    # Go to leaderboard screen with score and level
+    from screens import leaderboard_screen
+    leaderboard_screen(screen, score, level_num)
     pygame.quit()
     exit()
                     
@@ -490,7 +490,7 @@ def levels(screen, difficulty_input, mixUp=False):
                 elif enemy_type == "3": gems -= 3
                 
                 if gems < 0:
-                    player_death(screen)  # Call player_death when out of gems
+                    player_death(screen, score, level_num)  # Call player_death when out of gems
                 
                 # Update display
                 enemy["row"], enemy["col"] = new_row, new_col
@@ -518,7 +518,7 @@ def levels(screen, difficulty_input, mixUp=False):
                 elif enemy_type == "3": gems -= 3
                 
                 if gems < 0:
-                    player_death(screen)  # Call player_death when out of gems
+                    player_death(screen, score, level_num)  # Call player_death when out of gems
                     
                 return True  # Enemy dies
                 
