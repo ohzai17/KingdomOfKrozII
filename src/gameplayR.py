@@ -1,14 +1,13 @@
-import pygame
-import os
-import random
-from utilsRight import *
+from maps import *
+from utils import *
+from draw_text import draw_text
 
 def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
     paused = True
 
     while paused:
         message = "Are you sure you want to quit (Y/N)?" if quitting else "Press any key to Resume"
-        flash_c(screen, message)
+        draw_text(screen, 16, message, "CHANGING")
         pygame.display.flip()
         
         for event in pygame.event.get():
@@ -18,8 +17,8 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
             elif event.type == pygame.KEYDOWN:
                 if quitting:
                     if event.key == pygame.K_y:
-                        from screens import Sign_Off 
-                        Sign_Off(screen)
+                        from screens import sign_off 
+                        sign_off(screen)
                         return True
                     else:
                         paused = False
@@ -28,53 +27,76 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     
     return False  # User didn't quit
                     
-def hud(screen, WIDTH, HEIGHT, values=None):  # From KINGDOM4.INC (lines 96-183)
+def hud(screen, WIDTH, HEIGHT, color, values=None):  # From KINGDOM4.PAS (lines 96-183)
+    is_monochrome = True if color == "M" else False
+
     hud_width = 130
     hud_x = WIDTH - hud_width  # Right-hand side
-    pygame.draw.rect(screen, BLUE, (hud_x, 0, hud_width, HEIGHT))  # Sidebar
+
+    # Create sidebar surface with monochrome handling
+    hud_surface = pygame.Surface((hud_width, HEIGHT))
+    hud_surface.fill(BLUE)
+    if is_monochrome:
+        hud_surface = apply_grayscale_f(hud_surface)
+    screen.blit(hud_surface, (hud_x, 0))  # Apply sidebar
 
     item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloak", "Options"]
     option_list = ["Cloak", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
 
     font = load_font(11)
 
-    word_x = hud_x + 35  # Padding from the left edge of sidebar
-    word_y = 5  # Top padding
+    word_x = hud_x + 35
+    word_y = 5
 
     rect_width = 88
     rect_height = 25
 
     for i, word in enumerate(item_tracker):
-        if word == "Options":
-            word_y += group_height - 43  
-
-            word_surface = font.render(word, True, CYAN)
-            pygame.draw.rect(screen, DARK_RED, (word_x - 12, word_y + 7, word_surface.get_width() + 6, 30))
-            screen.blit(word_surface, (word_x - 8, word_y + 15))
-            word_y += word_surface.get_height() + 15  # Smaller gap (no rect below)
+        # Color logic (monochrome-aware)
+        if is_monochrome:
+            label_color = GRAY
+            value_color = GRAY
+            box_color = SILVER
+            options_box_color = SILVER
         else:
-            render_x = word_x - 25 if word == "Teleports" else word_x  # Center "Teleports"
-            word_surface = font.render(word, True, YELLOW)
+            label_color = CYAN if word == "Options" else YELLOW
+            value_color = DARK_RED
+            box_color = LIGHT_GRAY
+            options_box_color = DARK_RED
+
+        if word == "Options":
+            word_y += group_height - 43
+            word_surface = font.render(word, True, label_color)
+
+            pygame.draw.rect(screen, options_box_color, (word_x - 12, word_y + 7, word_surface.get_width() + 6, 30))
+            screen.blit(word_surface, (word_x - 8, word_y + 15))
+
+            word_y += word_surface.get_height() + 15
+        else:
+            render_x = word_x - 25 if word == "Teleports" else word_x
+            word_surface = font.render(word, True, label_color)
             screen.blit(word_surface, (render_x, word_y))
 
         if i < len(values):
-            value_surface = font.render(str(values[i]), True, DARK_RED)
+            value_surface = font.render(str(values[i]), True, value_color)
             box_x = word_x - 12
-            box_w = rect_width
-
             box_y = word_y + word_surface.get_height() + 5
-            value_x = box_x + (box_w - value_surface.get_width()) // 2
-            pygame.draw.rect(screen, LIGHT_GRAY, (box_x, box_y, box_w, rect_height))
+
+            pygame.draw.rect(screen, box_color, (box_x, box_y, rect_width, rect_height))
+            value_x = box_x + (rect_width - value_surface.get_width()) // 2
             screen.blit(value_surface, (value_x, box_y + 5))
 
         group_height = word_surface.get_height() + rect_height
-        word_y += group_height + 15  # Wider gap *after* each label+value pair
+        word_y += group_height + 15
 
-    # Option list below stat items
+    # Draw options list below stats
     y_offset = word_y - 40
     for choice in option_list:
-        first_letter_surface = font.render(choice[0], True, WHITE)
-        rest_surface = font.render(choice[1:], True, GRAY)
+        first_color = GRAY if is_monochrome else WHITE
+        rest_color = GRAY
+
+        first_letter_surface = font.render(choice[0], True, first_color)
+        rest_surface = font.render(choice[1:], True, rest_color)
 
         first_rect = first_letter_surface.get_rect(topleft=(word_x - 10, y_offset))
         rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
@@ -84,7 +106,7 @@ def hud(screen, WIDTH, HEIGHT, values=None):  # From KINGDOM4.INC (lines 96-183)
 
         y_offset += 14
 
-def levels(screen, difficulty_input, mixUp=False):
+def levels_r(screen, difficulty_input, color="C", mixUp=False):
 
     WIDTH, HEIGHT = screen.get_size()
     
@@ -118,6 +140,11 @@ def levels(screen, difficulty_input, mixUp=False):
 
         img = pygame.image.load(full_path)
         images[sprite] = pygame.transform.scale(img, (TILE_WIDTH, TILE_HEIGHT))
+    
+    if color == "M":
+        for sprite in sprites:
+            images[sprite] = apply_grayscale_f(images[sprite])
+            images[sprite] = pygame.transform.scale(images[sprite], (TILE_WIDTH, TILE_HEIGHT))
 
     tile_mapping = {
         "X": images["block"],
@@ -220,356 +247,6 @@ def levels(screen, difficulty_input, mixUp=False):
         "whip4": images["whip4"]
     }
 
-    level1_map = [
-        "W W W W             2 2 2 2 2  C  2 2 2 2 2              W W W W",
-        "XXXXXXXXXXXXXXXXXXX###########   ###########XXXXXXXXXXXXXXXXXXXX",
-        " 1           1                               1                  ",
-        "                                    1            XX         1   ",
-        "       1            1                           XXXX            ",
-        "#        XX                    +                 XX            #",
-        "##      XXXX  1                +          1          1        ##",
-        "T##      XX               2    +    2                        ##T",
-        "T1##                       W   +   W                        ##1T",
-        "T########X                 WX     XW             1    X########T",
-        ".        X                2WX  P  XW2                 X        .",
-        "T########X         1       WX     XW                  X########T",
-        "T1##                       W   +   W         1              ##1T",
-        "T##                       2    +    2                        ##T",
-        "##   1                         +                      XX      ##",
-        "#       XX      1      _       +                 1   XXXX     1#",
-        "       XXXX                 ##   ##                   XX        ",
-        "1       XX                 ##     ##     1        1           1 ",
-        "                    1#######       ########                     ",
-        "    1         ########11111  +++++  111111########              ",
-        "WW     ########+++++        #######         WWWWW########1    WW",
-        "########»                    2 2 2                     C########",
-        "L2  +  X      ####################################      X  +  2L",
-    ]
-    level2_map = [
-        "Æ                                                           .   ",
-        "  2#############################K############################   ",
-        "   ##æ  2    2   2 2    2   2  ###  2  2   2    2    2    2##   ",
-        "  2##+#2   2   2    2  2 2   2  2 2  2   2 2   2   2    2  ##   ",
-        "   ##+#   2  2    2   2   2   2    2    2  2    2    2   2 ##   ",
-        "  2##+# 2    2  2   2  2 2 2 2  2 2  2 2 2   2    2   2   2##   ",
-        "   ##+#2   2  2   2                            2   2   2   ## W ",
-        "  2##+#  2   2   2   XXXXXXXXXXXXXXXXXXXXXXX  2    2  2   2##@@@",
-        "   ##+#2   2  2   2  XXXXXXXXXXXXXXXXXXXXXXX    2   2  2   ##   ",
-        "  2##+# 2   2  2 2   XXXXXXXXXXXXXXXXXXXXXXX   2  2   2  2 ##   ",
-        "   ##+#   2 2 2   2  XXXXXX    -+-    XXXXXX  2 2    2  2  ##   ",
-        "  2##+#2   2   2 2   XXXXXX1   -P-   1XXXXXX  2  2 2   2 2 ##   ",
-        "   ##+#  2  2  2  2  XXXXXX    -+-    XXXXXX   2  2 2     2##   ",
-        "  2##+# 2 2  2  2    XXXXXXXXXXXXXXXXXXXXXXX  2   2   2 2  ##   ",
-        "   ##+#2 2    2   2  XXXXXXXXXXXXXXXXXXXXXXX    2  2   2 2 ##   ",
-        "  2##+# 2  2  2  2   XXXXXXXXXXXXXXXXXXXXXXX   2    2 2 2  ##   ",
-        "   ##+#  2  2 2   2                           2  2   2   2 ##   ",
-        "  2##+#2   2    2   2 2  2  2  2 2  2 2  2  2   2   2  2  2##   ",
-        "   ##+# 2    2  2  2 2  2   2   2   2  2  2    2    2   2  ##   ",
-        "  2##3#   2   2   2   2   2   2   2   2 2    2    2   2   2##@@@",
-        "   ##T#2   2     2  2  2 2   2 ###   2   2 2  2    2   2   ##222",
-        "   #############################S#######################XXX##@@@",
-        "                                                          I##LLL",
-    ]
-    level4_map = [
-        "-..............................3#1#2#3##------;------------;----",
-        "-##############################-##1#2#3#-######################-",
-        "-#.....----......- I#S###### ##K###1#2#3-#///////1///////////1//",
-        "-#.-..-....-....-.# # I####1# ######1#2#-#J1JJJJJJJJJJJJJ1JJJJJJ",
-        "-#-.-..-..-.....-.# # # ### ## ##1###1#2-#/////1////////////////",
-        "-#-.-.-..-..---..-# # ## # ##1## # ###1#-#CCCJJJJJJJJJ1JJJJJJ1JJ",
-        "-#-.-..-.-.-..-..-# # ### ####  ### K##1-#CCC/////1//////1/////K",
-        "-#-..--...-....--.# # ##################-#######################",
-        "-#-################                                           α ",
-        "---3333333333-CC### #F######################XXXXXXXX###α####-##+",
-        "################## ###------------------«###############2###-##+",
-        "big#######     ## ####22222222222222222#-##-----------###2##-##K",
-        "trouble## RRRRR  #######################-##-####U####-####2####+",
-        "######## RRRKRRRR #########$;$$$$$$3$T##-##-----------#####2###3",
-        "+++++### RR 2 2 RR ####Z###$############-############æ##Q###2###",
-        "++T++## RR 2 P  2RR ### #-U--------------###TT.TT####----####2##",
-        "+++++## RR2   2 RR ####1#-####################;###############2#",
-        "#O#O#### RR 2  2RR #3## #C####3#3#3#3#3#3#3#3#3#3#3#3#3#3#3#3##D",
-        "#X#X##### RRR2CRR ##3## # ###@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@###D",
-        "#X#X###### RRRRRR ##3## #3##@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@##K#D",
-        "-----; #### RRR  ### ## ###@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#D",
-        "-----# #####   # ##W W# ##@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@##@#D",
-        "22222#      #####       @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#L",
-    ]
-    level6_map = [
-        "---###########RRRRR##W        ############W////1/C//J//JJJJJJJJJ",
-        "-U---------Z###RRRRR##7######   ##KK⌠   Z##-//////J///1/JJJJJJUJ",
-        "---###########RRRRR##7####### P ######## ###-////////J///JJ1JJJJ",
-        "@#############RRRRR#7####                ####-///J/////////JJJJJ",
-        "@2#------.###RRRRR##7#W3; ############## #####-////1//J//1///JJJ",
-        "@##;-;###.##RRRRR##7##W3; #WWWWWWWWWWW## #2####--//////////J///J",
-        "@2#-;;##..##RRRRR##7##W3; ######-####### ##2#####-/////J/////1//",
-        "@##;-;##..-##RRRRR##7#### #11111111111## ###2##2##-/////1/////J/",
-        "@2#;;-##..#D##RRRRR##7##T #11111111111## #2##2##2##--///////J///",
-        "@##;;;##..#D###RRRRR##7####11111111111## ##2##2##2###---///////1",
-        "@2#-;;##..#KK###RRRRR##7###11111B11111----)))))))))))#####---///",
-        "@##-;;##..#KK##RRRRRRR#7###11111111111##############)########--/",
-        "@2#;;;##22####RRRR#RRR##7##11111111111#?#ò#---#*YYYY-63333####D#",
-        "@##;;-##22###RRRR###RRR##7#11111111111#O#T#-#-#*YYYY-63333---#D#",
-        "@2#;-;##22##RRRR##L##RRR#7#11111111111#O#-4-#-#*YYYY-63333-#-4-#",
-        "@##;;;##22#RRRR##DD##RRR#7#11111111111#O#-#-#-#*YYYY-63333-#-#-#",
-        "@2#;-;##-##RRRR#DDD#RRR##7###########-#O#-#-#-#*YYYY-63333-#-#-#",
-        "@##;;-##C#RRRR##DDD##RRR##7###+++++##-#O#-#-#-#*YYYY-63333-#-#-#",
-        "@2#;;;##H##RRRR#DDDD##RRR##7##+++++##-#O#-#-#-#*YYYY-63333-#-#-#",
-        "@##;-;####RRRR##44444##RRR##7###.####-#O#-#-#-#*YYYY-63333-#-#-#",
-        "@2#-;;###RRRR##±±±±±±±##RRR#7###.#K-#-#O#-#-#-#*YYYY-63333-#-#-#",
-        "@###-###RRRR##X--------#RRR##⌠##.#--#-#-#---#-######-#####-#---#",
-        "-----##RRRR##%X---U----##RRR#K##--------#111#--------------#111#",
-    ]
-    level8_map = [
-        "-------┘--------44---¿¿¿¿¿¿¿¿¿¿¿¿│---│¿¿¿¿¿¿¿¿¿¿¿------K---┤;-U-",
-        "XXXXXXX-XXX-----44---      -----------------    ----#######-;---",
-        "--------------71#####       ---------------      #####┤-----;;;;",
-        "K------------71###           -------------          #####¿##; P ",
-        "#17---------71####****        -----------       ****##----æW;   ",
-        "##17-------71#####*###         ----K----        ###*##¿#####;   ",
-        "###17-----71######*#             #####            #*## 1   7;   ",
-        "####17---71#######*;     W    W    W    W    W    :*#######¿;   ",
-        "#####17-71########*#444444444444444444444444444444#*##±     ;   ",
-        "######---#########*#                              #*##444¿##;   ",
-        "#######∑##########U#                              #!##æ     ;   ",
-        "----------------####                              ######¿###;   ",
-        "----------------##VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV## ò    ;   ",
-        "----------------##VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV###¿####;   ",
-        "┐∑-------------≥######################################      ;   ",
-        "5555555555555555#############the#lava#pit#################¿#;   ",
-        "            -------         ------------***********-##+Æ   C;   ",
-        "              000            ---┐######-###########-####¿###;   ",
-        "                                ------7æ##LL-D-D-D-¿##      ;   ",
-        "                                     ##-###########¿#######¿;   ",
-        "                                     ##-7  1   TTT7¿##     æ;   ",
-        "┘       1 1 1 1 1 1 1 1 1 1 1 1 1 1 1##--#########æ¿###¿####;   ",
-        "###this#is#the#first#sideways#level####111111111  ∑C##ò       æ ",
-    ]
-    level10_map = [
-        "!+-----+----+------+##%VVOOOOO44U44OOOOVV%##3333333333333333333K",
-        "-----+--+-----+-----##VVVOOOOO44444OOOOVVV##66666666666666666663",
-        "+--+------+--------+##OOOOOOOO##5##OOOOOOO##                  63",
-        "-----+-------+----+-##OOOOOOOO##?##OOOOOOO##                  63",
-        "---+-----+------+---##VVVOOOOOO###OOOOOVVV##XXXXX             63",
-        "-+----+-------+-----##CVVOOOOOOO#OOOOOOVVC##XXXXX             63",
-        "+-------+--------+-U##CVVOOOOOOOOOOOOOOVVC##UXXXX             63",
-        "###############################OOO##############################",
-        "MMMMMMMMMMMMMMMMMMMM##S                  S##11111111111111111111",
-        "MMMMMMMMMMMMMMMMMMMM##                    ##11111111111111111111",
-        "@@@@@@@@@@@@@@@@@@@@##         000        ##11111111111111111111",
-        "K@@@@@@@@@@@@W                 0P0        HB11111111111B1111111±",
-        "@@@@@@@@@@@@@@@@@@@@##         000        ##11111111111111111111",
-        "MMMMMMMMMMMMMMMMMMMM##                    ##11111111111111111111",
-        "MMMMMMMMMMMMMMMMMMMM##S                  S##11111111111111111111",
-        "###############################~~~##############################",
-        "111111111111111111-U##C00000000---0-000---##U-))I)))))))333))))-",
-        "1(((((((((((((((((--##-0000H---0000---0-0-##--)I)))))))333))))-*",
-        "1(((((((TTT((((((((1##00000000 00000000000##))I)))))))333))))-*I",
-        "1(((((((TTT((((((((1##-0-00000000000000-00##)I)))))))333))))-*I*",
-        "1(((((((TTT((((((((1##00-0-----0000000<[|,##I)))))))333))))-*I*I",
-        "1((((((((((((((((((1##-#####################)))))))333))))-*I*I*",
-        "≤1111111111111111111##C-------D-D-D]]E≥&LL##K)))))333))))-*I*I*C",
-    ]
-    level12_map = [
-        "LLL##U##@@@@@@@@@@@|000---0000000000000000-0--00000000VVV000Y-0V",
-        "```##-##@00000000000000---0000222222220---0000-00000000000--Y-0V",
-        "```##K##@@022222222K000---0000-0000000000-0000-0)))))YYYW-W0Y-0V",
-        "```##6##@@@222222222000---000U*******00000000000)))0000000000-00",
-        "```##6##@@@222222222000---000000000000000000000000222222--000---",
-        "```##6##@@0222222222000---(((((((((((((((±(((((000222222-C00000-",
-        "333##6##@00000000000000---00004444444444444444(0000000000000000-",
-        "333##6##3CCC....0---------00022222222222222222(K(---------------",
-        "$$$##6##000000000000000---00000000000000000000000000000000000000",
-        "   0--00000000000000000---000000000000000000000===============--",
-        " P 00-00+02222222220--------------------------0=,===-=--===-==-=",
-        "$$$00-00+02222222220-00---0000000000000000000-0==I=-=-==-=-=-==-",
-        " ! 00-00+02222222220-00-Z-0000000000000000000-0=H==-===T==-==--=",
-        "00000-00[02222B22220-00---00----03333333CC----0==I==-===-==-====",
-        "0--00-00+02222222220-00---00-0000000000000000-0===--==-==-==--==",
-        "-0000-00+02222222220-00---00-0000000000000000-0==-===-=-=-====-=",
-        "00000-00+02222222220W00---00-----0--------000-0=-==--==-=-=--=T=",
-        "0--00-00000000000000000---000000000001110-000-0==T-===-===-==-==",
-        "00000-00000000000000000---000000000001110-00000=======-=========",
-        "--000----------------- ---0WWWWWWWWK01110-000-000000000000000000",
-        "00000-000000~~~0000000#---#00-00000001110-000K--<000OO000OOOOO≤*",
-        "00C000000********3000##VVV##0-------------00000000boulderville├0", # INVESTIGATE ├ symbol
-    ]
-    level14_map = [
-        "###<@@@@@@@@@@@@@@@@@@@@@@@@@#one#@@@@@@@@@@@@@@@@@@@@@@@@@FK###",
-        "K÷###@@@@@@@@@@@@@@@@@@@@@@@@@;!:@@@@@@@@@@@@@@@@@@@@@@@@@@###$[",
-        "÷÷((###@@@@@@@@@@@@@@@@@@@@@@@:::@@@@@@@@@@@@@@@@@@@@@@@@###$$$$",
-        "((((((###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@###$$$$$$",
-        "(((((((2###222222222222222222222222222222222222222222###2$$$$$$$",
-        "(((((((2((###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@###$$2$$$$$$$",
-        "(((((((2((((###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@###$$$$2$$$$$$$",
-        "(((((((2((((((###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@###$$$$$$2$$$$$$$",
-        "DD##(((2((((((((###@@@@@@@@@@@@@@@@@@@@@@@@@@###$$$$$$$$2$$$####",
-        "DD#f(((2(((((((((##############77##############$$$$$$$$$2$$$##CC",
-        "DD#o(((2((((((((÷##2------------------------2##⌠$$$$$$$$2$$$t#αα",
-        "DD#u(((2((((((((÷----------F---P----S--------88⌠$$$$$$$$2$$$w#MM",
-        "&&#r(((2((((((((÷##2------------------------2##⌠$$$$$$$$2$$$o#MM",
-        "LL##(((2(((((((((##############99##############$$$$$$$$$2$$$##MM",
-        "####(((2((((((((###)))))))))))⌡⌡⌡⌡)))))))))))###$$$$$$$$2$$$##αα",
-        "(((((((2((((((###))))))))))))))))))))))))))))))###$$$$$$2$$$$$$$",
-        "(((((((2((((###))))))))))))))))))))))))))))))))))###$$$$2$$$$$$$",
-        "(((((((2((###))))))))))))))))))))))))))))))))))))))###$$2$$$$$$$",
-        "(((((((2###))))))))))))))))))))))))))))))))))))))))))###2$$$$$$$",
-        "((((((###2222222222222222222222222222222222222222222222###$$$$$$",
-        "((((###))))))))))))))))))))))))))))))))))))))))))))))))))###$$⌠⌠",
-        ",(###))))))))))))))))))))))))))))))))))))))))))))))))))))))###⌠K",
-        "###K⌡)))))))))))))))))))))))#three#))))))))))))))))))))))))F|###",
-    ]
-    level16_map = [
-        "##tunnels#of#kroz###########-P--################################",
-        "########################X###----######X##-------æ--------##X####",
-        "############################----#########----------------#######",
-        "L---N----H######≥  ≥ ≥######-----------------########----#######",
-        "L---N-----##X###  CC  555555-----------------#####X##1111#######",
-        "######----######≥ ≥  ≥###############################----#####X#",
-        "######1111###########################################1111#######",
-        "#X####----##############X#######magic#####X##########----#######",
-        "######1111####################ô-ò-û-ò-ô##############----N-----#",
-        "######----####################----K----##############----N-----#",
-        "######1111#######X############æ-æ-æ-æ-æ#########X##########----#",
-        "######----########################-########################1111#",
-        "######1111################X#######-########################----#",
-        "######----########################---------N-------------------#",
-        "###X##----##########################################-----------#",
-        "######---------------7±########################X####----########",
-        "######---------------7-444444444444444444###########1111########",
-        "#####O#############--77##################444########----#####X##",
-        "####O##############1111#############X#######4⌠%-####1111########",
-        "###O#####XXX#######----#############################----########",
-        "##O#####X###Q######-------N------`----------------------########",
-        "##O##OOO###########-------N------`--------æ-------------##X#####",
-        "###OO###########################################################",
-    ]
-    level18_map = [
-        "###########klose#enkounters#of#the#krazy#kubikal#kind├##########",
-        "3                               P                              3",
-        "##-##############:########:#######:###########:##############:##",
-        "XXXXXXXXX##~W~W~W~W~##æ-M----M.--$$$$$$$$$-9/-/J--J-|##---Æ≥Æ---",
-        "---------##*~*~*~*~*##-æ.-öM-ö-##$$$$$$$$$##J--/-J-/J##YYYYYYYYY",
-        "MMMMMMMMM##~W~W~W~W~##M--æ-.-M-##111111111##-/-J/--/-##(((((((((",
-        ")))))))))##*~*~*~*~*##.ö-.-ö-.ö##222222222##/J--J-J-/##(((((((((",
-        "C))))))))--~W~W~W~W~##≤.-ö--æ-M##333333333##ⁿ-//-J-/-9-(((((((((",
-        "###################-################################9##55555555-",
-        "ô-ô-ô-ô-ô##YYYYYYYYY##222222222------0---W##RRRRRRRRR##MMMMMMMMM",
-        "-----------YYYYYYYYY##@@@@@@@@@##---000---##RXXXXXXXR##MMMMMMMMM",
-        "XXXXXXXXX##YYYYYYYYY##@@@@@@@@@##--00G00--##RXXXKXXXR##MMMMMMMMM",
-        "---------##YYYYYYYYY##@@XXX@@@@##---000---##RXXXXXXXR##MMMMMMMMM",
-        "ÆÆÆÆÆÆÆÆÆ##YYYYYYYYK##@@XZX@@@@##----0---W##RRRRRRRRR##MMMMMMMMK",
-        "-#####################-##########⌠##################H##Z########",
-        "~-~[~-~-~##WWW......α1:1:1:1:1:##-773C7--7##=--=I==-=##ββββββY0,",
-        "-~-~-~-~-##WWW......##1:1:1:1:1##7-777-77-##!==-=--==##ββββββY00",
-        "~-~-~-~-~##.........##:1:1:1:1:##-77--77-7##=======-=##ββββββYYY",
-        "-~-~-~-~-##.........##1:1:1:1:1##7-7-77-77##-==-=-==I##βββββββββ",
-        "K-~-~-~-~-α..<......##:1:1:1:1±##77-7777---I=--=-=--=##222222222", # INVESTIGATE < SYMBOL
-        "############################################################44##",
-        "LL---V--V-VV-V--VV---D-----D--Æ--D--ö--D--66333333333333333-WWWW",
-        "LL--V-VV-V--V-VV--V--D-----D--ö--D--Æ--D--66YYYYYYYYYYYYYYYYYYYY",
-    ]
-    level20_map = [
-        "###key#shop###MTMMMMMMMMMMMMMMMMMMMMM-----MMMMMMMMMMMM-MM--!##LL",
-        "##Kβα44@@@@@##MMMMMMMMMMMMMMMMMMMMMM-MMMMM-MMMMMMMMMM-M-M-P-##LL",
-        "##Kβ3##@@@@@@DMMMMMMCMMMMMMMMMMMMMM-MMMMMMM-MMM<MMMM-MMM----##DD",
-        "##Kβα##@@@@@##M-MMMMMMMMMMMMMMMM---MMMMMMMM-MMMMMMM-MMMMMMMM##DD",
-        "#######X######MM-MMMMMMMMMMM----MMMMMMMMMMMM-MMMMM-MMMMMMMMM##DD",
-        "##±-----##MMMMMMM-MMMMM-----MMMMMMMMMMMKMMMMM-MMM-MMMMMMMMMM##DD",
-        "##########MMMMMMTMMMMM-MMMMMMMMMMMMMMMMMMMMMMM-M-MMMMMMMMMMMMMMM",
-        "MMMMMMMMMMMMMMMMMMMMM-MMMMMMMMMMMMMMMMMMMMMMMMM-MMMMMMCMMMMMM-MM",
-        "MMMMMMMM-----MMMM----MMMMMMMM[MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-MMM",
-        "MMMM----MMMMM----MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMTMMMMMMMMMMM-MMMM",
-        "MMM-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-MMM",
-        "MM-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-MM",
-        "MM-MMMMMMCMMMMMMMMMMMMMMMBWWWWWWWWWW-------------------------MMM",
-        "MM-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-MM",
-        "MM-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMTMMMMMMMMMMMMMMM-M",
-        "MMM-------MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-MM",
-        "MMMMMMMMMM-----MMMMMMMMMMMMMMMM]MMMMMMMMM-M-MMMMMMMMMMMMMMMM-MMM",
-        ")))))))))MMMMMM-MMMMMMMMMMMMMMMMMMMMMM-M-M-M-MMMMMMMMCMMMMM-MMMM",
-        "22222222)MMTMMM-MMMMMCMMMMMMMMMMMMMMM-M-MMMMM-MMM-MMMMMMMM-MMMMM",
-        "22222222)MMMMMM-MMMMMMMMMMMMMMM------MMMMMMM-MMM-M-MMMMMM-MMMMMM",
-        "22222222)MMMMMM-MMMMMMMMMM-----MMMMMMMMMMMM-MMM-MM-MMMMM-MMMMMMM",
-        "--222222)MMMMMM-----------MMMMMMMMMMMMMMMM-MM-M-MMM-M-M-MMMMM,MM",
-        "K-222222)MMMMMMMMMMMMMMMMMMMMMMMMMM|MMMMMMM--M-MMMMM-M-MMMMMMMMM",
-    ]
-    level22_map = [
-        "1111144       ##C######locksmith#shoppe######C##         RRRRRRR",
-        "1111144       ##]##K#K#K#K#K#-3-3#K#K#K#K#K##]##        RRRRRRRv",
-        "1111144          ##:::::::::######::::::::;##         RRRRRRRCYY",
-        "1111144          ##------------------------##     666RRRRRRRR66 ",
-        "1111144          #############--#############     6666666666666 ",
-        "1111144                                           HOOOOOOOOH    ",
-        "1111144                                        6666666666666    ",
-        "1111144                                        66RRRRRRR6666    ",
-        "1111144                                        RRRRRRR          ",
-        "1111144                                      RRRRRR           YY",
-        "1111144               P                    RRRRRR             YZ",
-        "1111144                                 RRRRRRRRRR            YY",
-        "1111144                              RRRRR333RRRRR              ",
-        "1111144                             RRR3333333RRRRR             ",
-        "@@@@@##                           RRR3333333333RRRRR            ",
-        "MMMMM##                           RRR333333333RRRRR             ",
-        "))))##                          RRR33333333RRRRR               ",
-        "MMMMM##                        RRRR333333RRRRRRR        DDDDDDDD",
-        "(((((##                       RRRR3LL3RRRRRRRR          DDDDDDDD",
-        "MMMMM##                      RRRRRRRRRRRRRR             DDDDDDDD",
-        "$$$$$##                     RRRRRRRRRRRR                DDDD7777",
-        "MMMMM##                     RRRRRRRR                    DDDD77⌠⌠",
-        "]]K]]##ô                   RRRRRRK]                     DDDD77⌠!",
-    ]
-    level24_map = [
-        "T    P  #the#step#of#faith#-----Æ-~K±-------U-----#---D-D-D-D-LL",
-        "######----------------------│44444444-------┐-KÆ--#┘############",
-        "-----------------------------#       ------#####┐-#-----¿-------",
-        "-----------------------------#        -----:------#----¿-¿------",
-        "------###--------------------#        -----:------#--¿¿---¿-----",
-        "--------#--------------------#        -----:------#-#------┘----",
-        "--------#--------------------#        -----#####--#-#-----------",
-        "--------#--------------------#        -----#---;--#-#------┘----",
-        "--------#--------------------#        -----#<###--#-#-----------",
-        "--------#---------⌡---------¿#         ----#[#----#-#-----¿-----",
-        "--K-----#┤########88888888888#         ----#|#----#-#----¿--W---",
-        "-XXX----#      #             #         ----#,#----#-#-------W---",
-        "        #      #             #          ---#-#----#-#---¿---W---",
-        "        # ô    #             #          ----------#-##-¿----W---",
-        "        #      #             #             ;;;;;- #┘K#¿-----W---",
-        "        #      #             #                 +-+####------W---",
-        "        #      #             #                 +-+----¿-----W---",
-        "    XXXX#      #             #                 +-+---¿------W---",
-        "         ┤     #             #                 +-+###-----------",
-        "       ###     #             #    U            +-+#--------7----",
-        "               #             #                 + +#   ##C.!.C## ",
-        "               #             #                 + +#   ######### ",
-        "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",
-    ]
-    level25_map = [
-        "K»    -++++++++++++++++#the#sacred#temple#+++++++++++++++-    «K",
-        " VVVVVV11111111111111111111111111111111111111111111111111JJJJJJ ",
-        " VVVV;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;JJJJ ",
-        " VV1111111111;:::-:::111111111#####111111111::-:::::111111111JJ ",
-        " V11         :-:-:-::        ###A###        :-:-:--:        11J ",
-        "X 1          ::-:::B:        RR#`#RR        :B::-::;         1 X",
-        "X  22####-####-------------RRRR#D#RRRR-------------####-####22 X",
-        "X  22##3@-@3##;3;3;3;3;3;3RRRRR#`#RRRRR3;3;3;3;3;3;##~~~~~##22 X",
-        "X  22##3@-@3##3;3;3;3;3;3RR1ÆC##D##CÆ1RR3;3;3;3;3;3##~~~~~##22 X",
-        "X  22##3@-@3##;3;3;3;3;3RR11ÆÆ##`##ÆÆ11RR3;3;3;3;3;##~~~~~##22 X",
-        "X--####3@-@3####3;3;3;3RR11#####D#####11RR3;3;3;3####~~~~~####-X",
-        "X   U##3@@@3##U ;3;3;3RRB11-+T1   1T+-11BRR3;3;3; U##~~~~~##U  X",
-        "X--####3@@@3####3;3;3;3RR11#####P#####11RR3;3;3;3####~~~~~####-X",
-        "X  22##3@@@3##;3;3;3;3;3RR1111##U##1111RR3;3;3;3;3;##~~~~~##22 X",
-        "X  22##3@@@3##3;3;3;3;3;3RR111#####111RR3;3;3;3;3;3##~~~~~##22 X",
-        "X  22##3@K@3##;3;3;3;3;3;3RR111∑∑∑111RR3;3;3;3;3;3;##~~K~~##22 X",
-        "X  22#########-----B-------RRRR∑C∑RRRR-------B-----#########22 X",
-        "X 1  ##|0<0                   RRRRR                   0[0,## 1 X",
-        " R11 #######  11111111111111;--->---;11111111111111  #######11= ",
-        " RR111111111111-VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-11111111111== ",
-        " RRRR111111111-V V V-V V V-2-V*VCV*V-2-V V-V-V V V-11111111==== ",
-        "βRRRRRR111111-V V V-2-V V V-V*V*V*V*V-V V V-2-V V V-11111======┌",
-        "KββββββββββββVGVæV V V V VæV*V*V*V*V*VæV V V V VæVGV┌┌┌┌┌┌┌┌┌┌┌K",
-    ]
-
     level_maps = [level1_map, level2_map, level4_map, level6_map, level8_map, level10_map,
                   level12_map, level14_map, level16_map, level18_map, level20_map, level22_map,
                   level24_map, level25_map]
@@ -608,7 +285,7 @@ def levels(screen, difficulty_input, mixUp=False):
         case "N", " ":
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
         case "X":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 1
         case _:
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
         
@@ -616,7 +293,7 @@ def levels(screen, difficulty_input, mixUp=False):
         score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, 2
     
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
-    hud(screen, WIDTH, HEIGHT, values)
+    hud(screen, WIDTH, HEIGHT, color, values)
         
     # Function to change to the next level
     def change_level(next_level_index):
@@ -809,7 +486,7 @@ def levels(screen, difficulty_input, mixUp=False):
             grid[whip_row][whip_col] = original_tile
 
             # Draw HUD with updated whip count (show whip being used)
-            hud(screen, WIDTH, HEIGHT, values)
+            hud(screen, WIDTH, HEIGHT, color, values)
         
         # Process enemy hits and update game state
         kills = 0
@@ -832,10 +509,9 @@ def levels(screen, difficulty_input, mixUp=False):
         
         return kills, new_slow_enemies, new_medium_enemies
     
-    cloaks = 0
     is_cloaked = False
     cloak_start_time = 0
-    CLOAK_DURATION = 5000
+    CLOAK_DURATION = 3000
 
     def cloak(): 
         """ Handles cloak pickup, activation, and duration. """
@@ -1132,7 +808,7 @@ def levels(screen, difficulty_input, mixUp=False):
 
         # Update the item tracking UI with current values
         values = [score, level_num, gems, whips-1, teleports, keys, cloaks]
-        hud(screen, WIDTH, HEIGHT, values)
+        hud(screen, WIDTH, HEIGHT, color, values)
         
         # Update game state
         tick_counter += 1
@@ -1155,4 +831,3 @@ def levels(screen, difficulty_input, mixUp=False):
             wait = False
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-levels(screen, difficulty_input, mixUp = False)

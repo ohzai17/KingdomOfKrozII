@@ -78,11 +78,103 @@ def hud(values=None): # From KINGDOM4.INC (lines 96-183)
     game_text(34, "*" * 28 + format_centered_int(values[5], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
     game_text(34, "*" * 38 + format_centered_int(values[6], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
 
-def levels(screen, difficulty_input, mixUp=False):
+def hud_right(screen, WIDTH, HEIGHT, color="C", values=None):  # From KINGDOM4.PAS (lines 96-183)
+    is_monochrome = True if color == "M" else False
 
+    hud_width = 130
+    hud_x = WIDTH - hud_width  # Right-hand side
+
+    # Create sidebar surface with monochrome handling
+    hud_surface = pygame.Surface((hud_width, HEIGHT))
+    hud_surface.fill(BLUE)
+    if is_monochrome:
+        hud_surface = apply_grayscale_f(hud_surface)
+    screen.blit(hud_surface, (hud_x, 0))  # Apply sidebar
+
+    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloak", "Options"]
+    option_list = ["Cloak", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
+
+    font = load_font(11)
+
+    word_x = hud_x + 35
+    word_y = 5
+
+    rect_width = 88
+    rect_height = 25
+
+    for i, word in enumerate(item_tracker):
+        # Color logic (monochrome-aware)
+        if is_monochrome:
+            label_color = GRAY
+            value_color = GRAY
+            box_color = SILVER
+            options_box_color = SILVER
+        else:
+            label_color = CYAN if word == "Options" else YELLOW
+            value_color = DARK_RED
+            box_color = LIGHT_GRAY
+            options_box_color = DARK_RED
+
+        if word == "Options":
+            word_y += group_height - 43
+            word_surface = font.render(word, True, label_color)
+
+            pygame.draw.rect(screen, options_box_color, (word_x - 12, word_y + 7, word_surface.get_width() + 6, 30))
+            screen.blit(word_surface, (word_x - 8, word_y + 15))
+
+            word_y += word_surface.get_height() + 15
+        else:
+            render_x = word_x - 25 if word == "Teleports" else word_x
+            word_surface = font.render(word, True, label_color)
+            screen.blit(word_surface, (render_x, word_y))
+
+        if i < len(values):
+            value_surface = font.render(str(values[i]), True, value_color)
+            box_x = word_x - 12
+            box_y = word_y + word_surface.get_height() + 5
+
+            pygame.draw.rect(screen, box_color, (box_x, box_y, rect_width, rect_height))
+            value_x = box_x + (rect_width - value_surface.get_width()) // 2
+            screen.blit(value_surface, (value_x, box_y + 5))
+
+        group_height = word_surface.get_height() + rect_height
+        word_y += group_height + 15
+
+    # Draw options list below stats
+    y_offset = word_y - 40
+    for choice in option_list:
+        first_color = GRAY if is_monochrome else WHITE
+        rest_color = GRAY
+
+        first_letter_surface = font.render(choice[0], True, first_color)
+        rest_surface = font.render(choice[1:], True, rest_color)
+
+        first_rect = first_letter_surface.get_rect(topleft=(word_x - 10, y_offset))
+        rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
+
+        screen.blit(first_letter_surface, first_rect)
+        screen.blit(rest_surface, rest_rect)
+
+        y_offset += 14
+
+def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
     WIDTH, HEIGHT = screen.get_size()
     
     screen.fill(BLACK)
+
+    huds = {
+        "R": hud_right,
+        "O": hud_original,
+        "": hud_original  # fallback default
+    }
+    main_hud = huds.get(hud, hud_original)
+
+    """ huds = {
+        "R": hud_right,
+        "O": hud_original,
+        "": hud_original  # fallback default
+    }
+    main_hud = huds.get(hud, hud_original) """
 
     sprites = ["border", "block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport", 
                "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river", 
@@ -110,6 +202,12 @@ def levels(screen, difficulty_input, mixUp=False):
 
         img = pygame.image.load(full_path)
         images[sprite] = pygame.transform.scale(img, (TILE_WIDTH, TILE_HEIGHT))
+    
+            
+    if color == "M":
+        for sprite in sprites:
+            images[sprite] = apply_grayscale_f(images[sprite])
+            images[sprite] = pygame.transform.scale(images[sprite], (TILE_WIDTH, TILE_HEIGHT))
 
     tile_mapping = {
         "^": images["border"], # Add border mapping
@@ -227,29 +325,9 @@ def levels(screen, difficulty_input, mixUp=False):
     collidable_tiles = {"X", "#"}
     slow_enemies = []
     medium_enemies = []
-    fast_enemies = []
     keys_pressed = {pygame.K_UP: False, pygame.K_DOWN: False, 
                     pygame.K_LEFT: False, pygame.K_RIGHT: False,
-                    pygame.K_w: False,
-                    pygame.K_u: False, pygame.K_i: False, pygame.K_o: False,
-                    pygame.K_j: False, pygame.K_l: False, 
-                    pygame.K_n: False, pygame.K_m: False, pygame.K_COMMA: False}
-    
-    # Add key hold time tracking for new keys
-    keys_held_time = {
-        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
-    }
-    
-    # Add momentum tracking for new keys
-    momentum = {
-        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
-    }
+                    pygame.K_w: False}
     
     # Find player and enemies
     player_row, player_col = 0, 0
@@ -261,8 +339,6 @@ def levels(screen, difficulty_input, mixUp=False):
                 slow_enemies.append({"row": r, "col": c})
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})  # Fixed: added colon after "col"
-            elif tile == "3":
-                fast_enemies.append({"row": r, "col": c})
 
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
@@ -273,7 +349,7 @@ def levels(screen, difficulty_input, mixUp=False):
         case "N", " ":
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
         case "X":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 10
         case _:
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 50, 50, 10, 0, 5
         
@@ -300,7 +376,6 @@ def levels(screen, difficulty_input, mixUp=False):
         # Reset enemies
         slow_enemies = []
         medium_enemies = []
-        fast_enemies = []
         
         # Find new player position and enemies
         for r, row in enumerate(grid):
@@ -308,11 +383,9 @@ def levels(screen, difficulty_input, mixUp=False):
                 if tile == "P":
                     player_row, player_col = r, c
                 elif tile == "1":
-                    slow_enemies.append({"row": r, "col":c})
+                    slow_enemies.append({"row": r, "col": c})
                 elif tile == "2":
                     medium_enemies.append({"row": r, "col": c})
-                elif tile == "3":
-                    fast_enemies.append({"row": r, "col": c})
 
         # Reset the flag when changing levels
         waiting_for_start_key = True
@@ -352,48 +425,34 @@ def levels(screen, difficulty_input, mixUp=False):
             pass
         else:
             """Move an enemy toward the player if they can see the player"""
-            nonlocal score, gems  # Access Score and gems from the outer scope
-        
-        row, col = enemy["row"], enemy["col"]
+            row, col = enemy["row"], enemy["col"]
             
             # Check if enemy was removed
-        if grid[row][col] != enemy_type:
+            if grid[row][col] != enemy_type:
                 return True  # Remove enemy
             
-        # Original game had different odds for different enemy types
-        # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
-        # Only give player a move chance if the player can see the enemy
-        if has_line_of_sight(row, col, player_row, player_col):
+            # Random chance for player move
             if random.randint(0, move_prob-1) == 0:
                 player_input()
-        
-        # Check if enemy can see player
-        if not has_line_of_sight(row, col, player_row, player_col):
-            return False  # Stay still if can't see player
-        
-        # Clear current position
-        grid[row][col] = " "
-        
-        # Calculate move direction toward player
-        new_row, new_col = row, col
-        x_dir, y_dir = 0, 0
-        
-        # Try to move closer to the player along optimal axis first
-        x_dist = abs(player_col - col)
-        y_dist = abs(player_row - row)
-        
-        # Move along the axis with greater distance first
-        # This makes enemies try to minimize the longest dimension first
-        if x_dist > y_dist:
-            # Move horizontally first
+            
+            # Check if enemy can see player
+            if not has_line_of_sight(row, col, player_row, player_col):
+                return False  # Stay still if can't see player
+            
+            # Clear current position
+            grid[row][col] = " "
+            
+            # Calculate move direction toward player
+            new_row, new_col = row, col
+            x_dir, y_dir = 0, 0
+            
             if player_col < col:
                 new_col -= 1
                 x_dir = 1
             elif player_col > col:
                 new_col += 1
                 x_dir = -1
-        else:
-            # Move vertically first
+            
             if player_row < row:
                 new_row -= 1
                 y_dir = 1
@@ -602,7 +661,7 @@ def levels(screen, difficulty_input, mixUp=False):
 
     is_cloaked = False
     cloak_start_time = 0
-    CLOAK_DURATION = 8000
+    CLOAK_DURATION = 3000
 
     def cloak(): 
         """ Handles cloak pickup, activation, and duration. """
@@ -720,18 +779,15 @@ def levels(screen, difficulty_input, mixUp=False):
     last_move_time = 0
     keys_held_time = {
         pygame.K_UP: 0,
-        pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+        pygame.K_DOWN: 0, 
+        pygame.K_LEFT: 0,
+        pygame.K_RIGHT: 0
     }
     momentum = {
         pygame.K_UP: 0,
         pygame.K_DOWN: 0, 
         pygame.K_LEFT: 0,
-        pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0, 
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
+        pygame.K_RIGHT: 0
     }
     
     # How long a key needs to be held to generate momentum (in ms)
@@ -803,7 +859,6 @@ def levels(screen, difficulty_input, mixUp=False):
 
         # Define all direction keys with their movement vectors (delta_row, delta_col)
         direction_keys = [
-            # Arrow keys
             (pygame.K_UP, (-1, 0)),
             (pygame.K_DOWN, (1, 0)),
             (pygame.K_LEFT, (0, -1)),
@@ -870,19 +925,19 @@ def levels(screen, difficulty_input, mixUp=False):
             # Collect items
             if grid[new_row][new_col] == "+":  # Gem
                 gems += 1
-                score += 10  # Original game awards 1 point per gem
+                score += 1  # Original game awards 1 point per gem
             elif grid[new_row][new_col] == "W":  # Whip
                 whips += 1
-                score += 10  # Original game awards 1 point per whip
+                score += 1  # Original game awards 1 point per whip
             elif grid[new_row][new_col] == "T":  # Teleport
                 teleports += 1
-                score += 10  # Original game awards 1 point per teleport
+                score += 1  # Original game awards 1 point per teleport
             elif grid[new_row][new_col] == "K":  # Key
                 keys += 1
                 score += 10  # Original game doesn't specify key points explicitly
             elif grid[new_row][new_col] == "L":  # Stairs to next level
                 level_num += 1
-                score += level_num  # Original game awards points equal to the level number
+                score += 1000
             elif grid[new_row][new_col] == "_":  # Cloak
                 cloaks += 1
                 score += 60  # optional value
@@ -907,52 +962,20 @@ def levels(screen, difficulty_input, mixUp=False):
         
         # Movement was blocked
         if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
-            if score > 20:  # Only subtract if score is greater than 2
-                score -= 20  # Original game deducts 2 points for hitting walls
+            if score > 2:  # Only subtract if score is greater than 2
+                score -= 2  # Original game deducts 2 points for hitting walls
         return False
     
     # Game constants
-    FAST_PC = True  # Modern computers are "fast" compared to original era
+    SLOW_TIMER = 5
+    MEDIUM_TIMER = 6
+    GAME_TICK_RATE = 12.0
     
-    # Timer initialization (from KINGDOM4.INC lines 61-63)
-    if FAST_PC:
-        BASE_SLOW_TIMER = 10
-        BASE_MEDIUM_TIMER = 8
-        BASE_FAST_TIMER = 6
-    else:
-        BASE_SLOW_TIMER = 3
-        BASE_MEDIUM_TIMER = 2
-        BASE_FAST_TIMER = 1
-    
-    # Current timer values
-    SLOW_TIMER = BASE_SLOW_TIMER
-    MEDIUM_TIMER = BASE_MEDIUM_TIMER
-    FAST_TIMER = BASE_FAST_TIMER
-    
-    # Spell effect timers
-    slow_time_effect = 0  # T[4] in original
-    invisible_effect = 0  # T[5] in original
-    speed_time_effect = 0 # T[6] in original
-    freeze_effect = 0     # T[7] in original
-    
-    # Higher rate faster enemies move
-    GAME_TICK_RATE = 16.0
-    
-    # Game loop
+     # Game loop
     running = True
     clock = pygame.time.Clock()
     tick_counter = 0
-    
-    # Individual enemy movement counters - separate timing for each enemy type
-    slow_counter = 0
-    medium_counter = 0
-    fast_counter = 0
 
-    # How many ticks to wait between enemy movements (higher = slower)
-    slow_threshold = 4  # Slowest enemy (type 1)
-    medium_threshold = 2  # Medium speed enemy (type 2)
-    fast_threshold = 1  # Fastest enemy (type 3)
-    
     wait = True
 
     # Ensure the "saves" directory exists

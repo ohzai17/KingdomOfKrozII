@@ -7,7 +7,6 @@ import sys
 import numpy as np
 
 pygame.init()
-pygame.mixer.init()
 # 16:9
 WIDTH, HEIGHT = 1254, 1
 HEIGHT = int(WIDTH * 9 / 16)
@@ -19,13 +18,10 @@ TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
 CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
-difficulty_input = "place_holder" # Initialized to be used in levels
-
 def rgb(r, g, b):
     return (r, g, b)
 
 # Colors used in the game
-
 BLACK = rgb(0, 0, 0)
 BLUE = rgb(8,4,180)
 DARK_BLUE = rgb(3, 3, 178)
@@ -40,6 +36,7 @@ BROWN  = rgb(170, 85, 0)
 YELLOW = rgb(254, 254, 6)
 WHITE = rgb(255, 255, 255)
 GRAY = rgb(128, 128, 128)
+SILVER = rgb(192, 192, 192)
 MAGENTA = rgb(255, 0, 255)
 LIGHT_GRAY = rgb(150, 150, 150)
 LIGHT_BLUE = rgb(173, 216, 230)
@@ -49,6 +46,9 @@ LIGHT_RED = rgb(255, 182, 193)
 LIGHT_PURPLE = rgb(221, 160, 221)
 LIGHT_YELLOW = rgb(255, 255, 224)
 DARK_RED = rgb(140, 0, 0)
+PERSIMMON = rgb(255, 86, 85)
+SALMON = rgb(255, 86, 255)
+BRIGHT_RED = rgb(170, 1, 0)
 BACKGROUND = BLUE
 
 WIDTH, HEIGHT = screen.get_size()
@@ -76,6 +76,7 @@ screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 logo_path = os.path.join(assets_dir, "kroz_logo.png")
+leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
 
 def set_monochrome_palette():
     global BACKGROUND, BLUE, DARK_BLUE, OLD_BLUE, CYAN, GREEN, AQUA, RED, PURPLE, ORANGE, BROWN, YELLOW, WHITE, GRAY, MAGENTA, LIGHT_GRAY, LIGHT_BLUE,LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, DARK_RED
@@ -117,6 +118,26 @@ def apply_grayscale(image):
             grayscale_image.set_at((x, y), (gray, gray, gray, a))
     return grayscale_image
 
+def apply_grayscale_f(surface):
+    surface = surface.convert()  # Ensures it's in the RGB format (or RGBA)
+    
+    arr_rgb = pygame.surfarray.pixels3d(surface).copy()
+    arr_alpha = pygame.surfarray.pixels_alpha(surface).copy() if surface.get_flags() & pygame.SRCALPHA else None
+
+    # Apply grayscale formula
+    gray = (0.3 * arr_rgb[:, :, 0] + 0.59 * arr_rgb[:, :, 1] + 0.11 * arr_rgb[:, :, 2]).astype("uint8")
+    gray_3ch = np.stack((gray,)*3, axis=-1)
+
+    # Create a new surface with the same size as the original surface and with alpha support
+    gray_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+    pygame.surfarray.blit_array(gray_surface, gray_3ch)
+
+    # If the original surface had an alpha channel, restore it
+    if arr_alpha is not None:
+        pygame.surfarray.pixels_alpha(gray_surface)[:, :] = arr_alpha
+
+    return gray_surface
+
 def change_logo_color(image, time, color_user_input):
     if color_user_input == "M":
         return apply_grayscale(image)
@@ -130,12 +151,12 @@ def change_logo_color(image, time, color_user_input):
         colorized_image.blit(color_filter, (0, 0), special_flags=pygame.BLEND_RGB_MULT) # Apply color filter
         return colorized_image
 
-def change_title_color(time, color_user_input):
-    if color_user_input == "M":
-        return BLACK
-    else:
-        color_index = (time // 150) % len(blinking_text_color_list)
-        return blinking_text_color_list[color_index]
+# def change_title_color(time, color_user_input):
+#     if color_user_input == "M":
+#         return BLACK
+#     else:
+#         color_index = (time // 150) % len(blinking_text_color_list)
+#         return blinking_text_color_list[color_index]
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
@@ -149,38 +170,6 @@ def flash_c(screen, message):
     text_surface = font.render(message, True, color)  # Render text with current color
     text_rect = text_surface.get_rect(midbottom=(screen.get_width() // 2, screen.get_height() - 190))
     screen.blit(text_surface, text_rect)
-
-def play_sound(frequency, duration, amplitude=4096):
-    sample_rate = 44100
-    n_samples = int(sample_rate * duration / 1000)
-    t = np.linspace(0, duration / 1000, n_samples, False)
-    wave = amplitude * np.sign(np.sin(2 * np.pi * frequency * t))
-    stereo_wave = np.column_stack((wave, wave))
-    sound = pygame.sndarray.make_sound(stereo_wave.astype(np.int16))
-    sound.play()
-    time.sleep(duration / 1000)
-    sound.stop()
-        
-def play_wav(file_name):
-    file_path = os.path.join(audio_dir, file_name)
-    sound = pygame.mixer.Sound(file_path)
-    sound.play()
-    while pygame.mixer.get_busy():
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-        pygame.time.delay(100)              
-
-def descent():
-    play_wav('beginDescent.wav')
-    
-def footStep():
-    sound_file = random.choice(['footStep_1.wav', 'footStep_2.wav'])
-    play_wav(sound_file)
-    
-def enemyCollision():
-    play_wav('enemyCollision.wav')    
        
 def wait_input(screen):
     paused = True
