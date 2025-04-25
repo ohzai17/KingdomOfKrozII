@@ -18,13 +18,10 @@ TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
 CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25 - 0.1 # Fix cutoff text
 pygame.display.set_caption("Kingdom of Kroz II")
 
-difficulty_input = "place_holder" # Initialized to be used in levels
-
 def rgb(r, g, b):
     return (r, g, b)
 
 # Colors used in the game
-
 BLACK = rgb(0, 0, 0)
 BLUE = rgb(8,4,180)
 DARK_BLUE = rgb(3, 3, 178)
@@ -39,6 +36,7 @@ BROWN  = rgb(170, 85, 0)
 YELLOW = rgb(254, 254, 6)
 WHITE = rgb(255, 255, 255)
 GRAY = rgb(128, 128, 128)
+SILVER = rgb(192, 192, 192)
 MAGENTA = rgb(255, 0, 255)
 LIGHT_GRAY = rgb(150, 150, 150)
 LIGHT_BLUE = rgb(173, 216, 230)
@@ -116,6 +114,26 @@ def apply_grayscale(image):
             gray = min(255, gray_formula + 70) # Increase brightness
             grayscale_image.set_at((x, y), (gray, gray, gray, a))
     return grayscale_image
+
+def apply_grayscale_f(surface):
+    surface = surface.convert()  # Ensures it's in the RGB format (or RGBA)
+    
+    arr_rgb = pygame.surfarray.pixels3d(surface).copy()
+    arr_alpha = pygame.surfarray.pixels_alpha(surface).copy() if surface.get_flags() & pygame.SRCALPHA else None
+
+    # Apply grayscale formula
+    gray = (0.3 * arr_rgb[:, :, 0] + 0.59 * arr_rgb[:, :, 1] + 0.11 * arr_rgb[:, :, 2]).astype("uint8")
+    gray_3ch = np.stack((gray,)*3, axis=-1)
+
+    # Create a new surface with the same size as the original surface and with alpha support
+    gray_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+    pygame.surfarray.blit_array(gray_surface, gray_3ch)
+
+    # If the original surface had an alpha channel, restore it
+    if arr_alpha is not None:
+        pygame.surfarray.pixels_alpha(gray_surface)[:, :] = arr_alpha
+
+    return gray_surface
 
 def change_logo_color(image, time, color_user_input):
     if color_user_input == "M":
@@ -228,7 +246,8 @@ def footStep():
     
 def enemyCollision():
     play_wav('enemyCollision.wav')    
-       
+
+
 def wait_input(screen):
     paused = True
 

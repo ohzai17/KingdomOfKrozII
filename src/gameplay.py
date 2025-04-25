@@ -26,7 +26,7 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
 
     while paused:
         message = "Are you sure you want to quit (Y/N)?" if quitting else "Press any key to Resume"
-        flash_c(screen, message)
+        draw_text(screen, 16, message, "CHANGING")
         pygame.display.flip()
         
         for event in pygame.event.get():
@@ -45,72 +45,172 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     paused = False  # Resume game
                     
     return False  # User didn't quit
-                    
-def hud(screen, WIDTH, HEIGHT, values=None): # From KINGDOM4.INC (lines 96-183)
-    
-    pygame.draw.rect(screen, BLUE, (0, (TILE_HEIGHT * 23) + 20, WIDTH, HEIGHT - (TILE_HEIGHT * 23)))
 
+def hud_original(screen, WIDTH, HEIGHT, color="C", values=None):  # From KINGDOM4.PAS (lines 96-183)
+
+    is_monochrome = True if color == "M" else False
+
+    # Background rectangle
+    rect_surface = pygame.Surface((WIDTH, HEIGHT - (TILE_HEIGHT * 23) - 20))
+    rect_surface.fill(BLUE)
+    if is_monochrome:
+        rect_surface = apply_grayscale_f(rect_surface)
+    screen.blit(rect_surface, (0, (TILE_HEIGHT * 23) + 20))
 
     item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloaks", "Options"]
     option_list = ["Cloaks", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
 
-    font = load_font(13)  
-    
-    word_x = 5  # Starting X coordinate of words
-    word_y = (TILE_HEIGHT * 23) + 30  # Y coordinate
+    font = load_font(13)
+    word_x = 5
+    word_y = (TILE_HEIGHT * 23) + 30
 
-    rect_width = 78  # Width of gray rec
-    rect_height = 30  # Height of gray re
+    rect_width = 78
+    rect_height = 30
 
     for i, word in enumerate(item_tracker):
-        
-        match(word): # Display items
-            case ("Options"): # Rendered differently
-                word_x += 5
-                word_surface = font.render(word, True, CYAN)
-                pygame.draw.rect(screen, DARK_RED, (word_x - 1, word_y - 8, word_surface.get_width() + 1, 30))
-                screen.blit(word_surface, (word_x, word_y)) 
-            case _: 
+        if is_monochrome:
+            label_color = GRAY
+            value_color = GRAY
+            box_color = SILVER
+        else:
+            label_color = CYAN if word == "Options" else YELLOW
+            value_color = DARK_RED
+            box_color = LIGHT_GRAY
 
-                word_surface = font.render(word, True, (YELLOW))
-                screen.blit(word_surface, (word_x, word_y))
+        # Draw label
+        word_surface = font.render(word, True, label_color)
 
-        if i < len(values): # Values and gray box
-            if item_tracker[i] == "Teleports":  # handled differently due to placement issues
-                value_surface = font.render(str(values[i]), True, DARK_RED)
-                box_x = word_x + ((word_surface.get_width() // 2) - (rect_width // 2) - 18)
-                value_x = (box_x + ((rect_width - value_surface.get_width()) // 2) + 16)
-                pygame.draw.rect(screen, LIGHT_GRAY, (box_x, word_y + word_surface.get_height() + 10, rect_width + 35, rect_height))
-                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17))
-            else:
-                value_surface = font.render(str(values[i]), True, DARK_RED)
-                box_x = (word_x + (word_surface.get_width() // 2) - (rect_width // 2) + 5)
-                value_x = box_x + (rect_width - value_surface.get_width()) // 2
-                pygame.draw.rect(screen, LIGHT_GRAY, (box_x, word_y + word_surface.get_height() + 10, rect_width, rect_height))
-                screen.blit(value_surface, (value_x, word_y + word_surface.get_height() + 17))
+        if word == "Options" and not is_monochrome:
+            pygame.draw.rect(screen, DARK_RED, (word_x - 5, word_y, word_surface.get_width() + 10, word_surface.get_height() + 6))
+            screen.blit(word_surface, (word_x, word_y + 3))  # slight padding inside the box
+        else:
+            screen.blit(word_surface, (word_x, word_y))
 
-        # Update word_x based on word width
+        # Draw value box + value
+        if i < len(values):
+            value_surface = font.render(str(values[i]), True, value_color)
+            value_x = word_x + (word_surface.get_width() // 2) - (rect_width // 2)
+            box_y = word_y + word_surface.get_height() + 10
+
+            pygame.draw.rect(screen, box_color, (value_x, box_y, rect_width, rect_height))
+            screen.blit(value_surface, (
+                value_x + (rect_width - value_surface.get_width()) // 2,
+                box_y + 5
+            ))
+
         word_x += word_surface.get_width() + 30
 
-    y_offset = word_y + 30  # Start position of the options_list (below "Options")
+    # Draw option list below
+    y_offset = word_y + 30
     for choice in option_list:
-        first_letter_surface = font.render(choice[0], True, WHITE)
-        rest_surface = font.render(choice[1:], True, GRAY)
+        if is_monochrome:
+            first_letter_color = GRAY
+            rest_color = GRAY
+        else:
+            first_letter_color = WHITE
+            rest_color = GRAY
+
+        first_letter_surface = font.render(choice[0], True, first_letter_color)
+        rest_surface = font.render(choice[1:], True, rest_color)
 
         first_rect = first_letter_surface.get_rect(topleft=(word_x - 120, y_offset))
         rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
 
         screen.blit(first_letter_surface, first_rect)
         screen.blit(rest_surface, rest_rect)
-        
-        # Move the y_offset down
+
         y_offset += 20
 
-def levels(screen, difficulty_input, mixUp=False):
+def hud_right(screen, WIDTH, HEIGHT, color="C", values=None):  # From KINGDOM4.PAS (lines 96-183)
+    is_monochrome = True if color == "M" else False
 
+    hud_width = 130
+    hud_x = WIDTH - hud_width  # Right-hand side
+
+    # Create sidebar surface with monochrome handling
+    hud_surface = pygame.Surface((hud_width, HEIGHT))
+    hud_surface.fill(BLUE)
+    if is_monochrome:
+        hud_surface = apply_grayscale_f(hud_surface)
+    screen.blit(hud_surface, (hud_x, 0))  # Apply sidebar
+
+    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloak", "Options"]
+    option_list = ["Cloak", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
+
+    font = load_font(11)
+
+    word_x = hud_x + 35
+    word_y = 5
+
+    rect_width = 88
+    rect_height = 25
+
+    for i, word in enumerate(item_tracker):
+        # Color logic (monochrome-aware)
+        if is_monochrome:
+            label_color = GRAY
+            value_color = GRAY
+            box_color = SILVER
+            options_box_color = SILVER
+        else:
+            label_color = CYAN if word == "Options" else YELLOW
+            value_color = DARK_RED
+            box_color = LIGHT_GRAY
+            options_box_color = DARK_RED
+
+        if word == "Options":
+            word_y += group_height - 43
+            word_surface = font.render(word, True, label_color)
+
+            pygame.draw.rect(screen, options_box_color, (word_x - 12, word_y + 7, word_surface.get_width() + 6, 30))
+            screen.blit(word_surface, (word_x - 8, word_y + 15))
+
+            word_y += word_surface.get_height() + 15
+        else:
+            render_x = word_x - 25 if word == "Teleports" else word_x
+            word_surface = font.render(word, True, label_color)
+            screen.blit(word_surface, (render_x, word_y))
+
+        if i < len(values):
+            value_surface = font.render(str(values[i]), True, value_color)
+            box_x = word_x - 12
+            box_y = word_y + word_surface.get_height() + 5
+
+            pygame.draw.rect(screen, box_color, (box_x, box_y, rect_width, rect_height))
+            value_x = box_x + (rect_width - value_surface.get_width()) // 2
+            screen.blit(value_surface, (value_x, box_y + 5))
+
+        group_height = word_surface.get_height() + rect_height
+        word_y += group_height + 15
+
+    # Draw options list below stats
+    y_offset = word_y - 40
+    for choice in option_list:
+        first_color = GRAY if is_monochrome else WHITE
+        rest_color = GRAY
+
+        first_letter_surface = font.render(choice[0], True, first_color)
+        rest_surface = font.render(choice[1:], True, rest_color)
+
+        first_rect = first_letter_surface.get_rect(topleft=(word_x - 10, y_offset))
+        rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
+
+        screen.blit(first_letter_surface, first_rect)
+        screen.blit(rest_surface, rest_rect)
+
+        y_offset += 14
+
+def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
     WIDTH, HEIGHT = screen.get_size()
     
     screen.fill(BLACK)
+
+    huds = {
+        "R": hud_right,
+        "O": hud_original,
+        "": hud_original  # fallback default
+    }
+    main_hud = huds.get(hud, hud_original)
 
     sprites = ["block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport", 
                "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river", 
@@ -140,6 +240,12 @@ def levels(screen, difficulty_input, mixUp=False):
 
         img = pygame.image.load(full_path)
         images[sprite] = pygame.transform.scale(img, (TILE_WIDTH, TILE_HEIGHT))
+    
+            
+    if color == "M":
+        for sprite in sprites:
+            images[sprite] = apply_grayscale_f(images[sprite])
+            images[sprite] = pygame.transform.scale(images[sprite], (TILE_WIDTH, TILE_HEIGHT))
 
     tile_mapping = {
         "X": images["block"],
@@ -288,7 +394,7 @@ def levels(screen, difficulty_input, mixUp=False):
         score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, 2
     
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
-    hud(screen, WIDTH, HEIGHT, values)
+    main_hud(screen, WIDTH, HEIGHT, color, values)
         
     # Function to change to the next level
     def change_level(next_level_index):
@@ -481,7 +587,7 @@ def levels(screen, difficulty_input, mixUp=False):
             grid[whip_row][whip_col] = original_tile
 
             # Draw HUD with updated whip count (show whip being used)
-            hud(screen, WIDTH, HEIGHT, values)
+            main_hud(screen, WIDTH, HEIGHT, values)
         
         # Process enemy hits and update game state
         kills = 0
@@ -506,7 +612,7 @@ def levels(screen, difficulty_input, mixUp=False):
     
     is_cloaked = False
     cloak_start_time = 0
-    CLOAK_DURATION = 8000
+    CLOAK_DURATION = 3000
 
     def cloak(): 
         """ Handles cloak pickup, activation, and duration. """
@@ -814,7 +920,7 @@ def levels(screen, difficulty_input, mixUp=False):
 
         # Update the item tracking UI with current values
         values = [score, level_num, gems, whips, teleports, keys, cloaks]
-        hud(screen, WIDTH, HEIGHT, values)
+        main_hud(screen, WIDTH, HEIGHT, color, values)
         
         # Update game state
         tick_counter += 1
@@ -837,4 +943,3 @@ def levels(screen, difficulty_input, mixUp=False):
             wait = False
         pygame.display.flip()
         clock.tick(GAME_TICK_RATE)
-levels(screen, difficulty_input, mixUp = False)

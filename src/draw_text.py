@@ -54,7 +54,7 @@ for name in special_char_names:
     else:
         print(f"Warning: No symbol mapping found for special character name: '{name}'")
 
-def draw_text(row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False):
+def draw_text(screen, row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False):
     """
     Draws a single row of text using character sprites onto the screen.
 
