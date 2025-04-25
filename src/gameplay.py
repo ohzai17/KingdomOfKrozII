@@ -46,6 +46,35 @@ def pause_quit(screen, quitting=False): # From KINGDOM.PAS (lines 49-69)
                     
     return False  # User didn't quit
 
+def player_death(screen, score, level_num):
+    """Handle player death when out of gems"""
+    print("you have died")
+    
+    pygame.event.clear()  # Clear any pending events
+    
+    # Display death message on screen
+    draw_text(1, "YOU HAVE DIED!!!", BLACK, True, True, LIGHT_GRAY)
+    draw_text(16, "Press any key to continue...", WHITE, False, True, None) # Add prompt
+    pygame.display.flip()
+    
+    pygame.time.delay(500)  # Pause for 2 seconds to show message
+    
+    # Wait for user input
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                waiting_for_input = False  # Exit loop on any key press
+    
+    # Go to leaderboard screen with score and level
+    from screens import leaderboard_screen
+    leaderboard_screen(screen, score, level_num)
+    pygame.quit()
+    exit()
+                    
 def hud_original(screen, WIDTH, HEIGHT, color="C", values=None):  # From KINGDOM4.PAS (lines 96-183)
 
     is_monochrome = True if color == "M" else False
@@ -494,31 +523,73 @@ def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
             elif player_row > row:
                 new_row += 1
                 y_dir = -1
+        
+        # If no movement was determined, try the other axis
+        if new_row == row and new_col == col:
+            if player_col < col:
+                new_col -= 1
+                x_dir = 1
+            elif player_col > col:
+                new_col += 1
+                x_dir = -1
+            elif player_row < row:
+                new_row -= 1
+                y_dir = 1
+            elif player_row > row:
+                new_row += 1
+                y_dir = -1
+        
+        # Handle movement and collisions
+        if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
+            # Breaking X blocks
+            if grid[new_row][new_col] == "X":
+                grid[new_row][new_col] = " "  # Break the block
+                # Award points based on enemy type
+                if enemy_type == "1": score += 10
+                elif enemy_type == "2": score += 20
+                elif enemy_type == "3": score += 30
+                return True  # Enemy dies when breaking block
             
-            # Handle movement and collisions
-            if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
-                # Breaking X blocks
-                if grid[new_row][new_col] == "X":
-                    grid[new_row][new_col] = " "  # Break the block
-                    return True  # Enemy dies when breaking block
+            # Handle collision with gems, whips, teleports
+            elif grid[new_row][new_col] == "+":  # Gem
+                if enemy_type == "1": gems -= 1
+                elif enemy_type == "2": gems -= 2
+                elif enemy_type == "3": gems -= 3
                 
-                # Collide with an item
-                elif grid[new_row][new_col] in {"W", "+", "T"}:
-                    # Destroy the item and move the enemy
-                    grid[new_row][new_col] = enemy_type
-                    enemy["row"], enemy["col"] = new_row, new_col
-                # Empty space - move there
-                elif grid[new_row][new_col] == " ":
-                    enemy["row"], enemy["col"] = new_row, new_col
-                    grid[new_row][new_col] = enemy_type
+                if gems < 0:
+                    player_death(screen, score, level_num)  # Call player_death when out of gems
                 
-                # Hit player
-                elif grid[new_row][new_col] == "P":
-                    return True  # Enemy dies
+                # Update display
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy_type
+                return False
                 
-                # Blocked - try to find another way
-                else:
-                    grid[row][col] = enemy_type  # Stay in place
+            # Collide with an item (whip, teleport)
+            elif grid[new_row][new_col] in {"W", "T"}:
+                # Destroy the item and move the enemy
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy_type
+                return False
+                
+            # Empty space - move there
+            elif grid[new_row][new_col] == " ":
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy_type
+                return False
+
+            # Hit player
+            elif grid[new_row][new_col] == "P":
+                # Attack player by taking gems
+                if enemy_type == "1": gems -= 1
+                elif enemy_type == "2": gems -= 2
+                elif enemy_type == "3": gems -= 3
+                
+                if gems < 0:
+                    player_death(screen, score, level_num)  # Call player_death when out of gems
+                    
+                return True  # Enemy dies
+                
+            # Blocked - try to find another way
             else:
                 grid[row][col] = enemy_type  # Stay in place
     
@@ -530,7 +601,6 @@ def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
         # Check if player has whips
         if whips <= 0:
             return 0, [], []  # No whips to use
-        whips -= 1
         
         # Define the whip animation positions (counter-clockwise)
         whip_positions = [
@@ -831,16 +901,16 @@ def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
             # Collect items
             if grid[new_row][new_col] == "+":  # Gem
                 gems += 1
-                score += 100
+                score += 1  # Original game awards 1 point per gem
             elif grid[new_row][new_col] == "W":  # Whip
                 whips += 1
-                score += 50
+                score += 1  # Original game awards 1 point per whip
             elif grid[new_row][new_col] == "T":  # Teleport
                 teleports += 1
-                score += 75
+                score += 1  # Original game awards 1 point per teleport
             elif grid[new_row][new_col] == "K":  # Key
                 keys += 1
-                score += 125
+                score += 10  # Original game doesn't specify key points explicitly
             elif grid[new_row][new_col] == "L":  # Stairs to next level
                 level_num += 1
                 score += 1000
@@ -854,9 +924,9 @@ def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
             elif grid[new_row][new_col] == "I":  # Invisible
                 score += 10  # Invisible bonus
             elif grid[new_row][new_col] == "F":  # SpeedTime
-                score += 2  # SpeedTime bonus
+                score += 20  # SpeedTime bonus
             elif grid[new_row][new_col] == "C":  # Chest
-                score += 5  # Chest bonus
+                score += 50  # Chest bonus
             elif grid[new_row][new_col] == "!":  # Tablet
                 score += level_num + 250  # Tablet bonus (level + fixed bonus)
             
@@ -867,6 +937,9 @@ def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
             return True
         
         # Movement was blocked
+        if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
+            if score > 2:  # Only subtract if score is greater than 2
+                score -= 2  # Original game deducts 2 points for hitting walls
         return False
     
     # Game constants
@@ -880,6 +953,113 @@ def levels(screen, difficulty_input, color="C", mixUp=False, hud=""):
     tick_counter = 0
 
     wait = True
+
+    # Ensure the "saves" directory exists
+    saves_dir = os.path.join("src", "saves")
+    if not os.path.exists(saves_dir):
+        os.makedirs(saves_dir)
+
+    def save_game(state, slot):
+        """Save the game state to a JSON file."""
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
+        with open(save_path, "w") as save_file:
+            json.dump(state, save_file, indent=4)  # Save only the player state
+        print(f"Saving to file {slot}...")
+        pygame.time.wait(2000)  # Wait for 2 seconds
+
+    def restore_game(slot):
+        """Restore the game state from a JSON file."""
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")  # Use saves_dir from utils
+        if os.path.exists(save_path):
+            with open(save_path, "r") as save_file:
+                state = json.load(save_file)
+            print(f"Restoring from file {slot}...")
+            pygame.time.wait(2000)  # Wait for 2 seconds
+            return state  # Return the restored state
+        else:
+            print(f"No save file found for slot {slot}.")
+            return None
+
+    def handle_save(screen, state):
+        """Handle the save process."""
+        paused = True
+        print("\nGame is PAUSED.\n")  # Output when the game is paused for saving
+        print("Are you sure you want to SAVE (Y/N)?")
+        while paused:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        paused = False
+                        save_slot = prompt_save_restore(screen, "SAVE")
+                        if save_slot:
+                            save_game({
+                                "player_row": state["player_row"],
+                                "player_col": state["player_col"],
+                                "Score": state["Score"],
+                                "level_num": state["level_num"],  # Save the level number
+                                "gems": state["gems"],
+                                "whips": state["whips"],
+                                "teleports": state["teleports"],
+                                "keys": state["keys"]
+                            }, save_slot)
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
+                        paused = False
+        print("\nGame RESUMED.\n")  # Output when the game resumes after saving
+
+    def handle_restore(screen):
+        """Handle the restore process."""
+        paused = True
+        print("\nGame is PAUSED.\n")  # Output when the game is paused for restoring
+        print("Are you sure you want to RESTORE (Y/N)?")
+        while paused:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        paused = False
+                        restore_slot = prompt_save_restore(screen, "RESTORE")
+                        if restore_slot:
+                            restored_state = restore_game(restore_slot)
+                            if restored_state:
+                                # Regenerate the grid based on the saved level number
+                                grid = generate_grid_for_level(restored_state["level_num"])
+                                return {
+                                    "grid": grid,  # Regenerated grid
+                                    "player_row": restored_state["player_row"],
+                                    "player_col": restored_state["player_col"],
+                                    "Score": restored_state["Score"],
+                                    "level_num": restored_state["level_num"],
+                                    "gems": restored_state["gems"],
+                                    "whips": restored_state["whips"],
+                                    "teleports": restored_state["teleports"],
+                                    "keys": restored_state["keys"]
+                                }
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
+                        paused = False
+        print("\nGame RESUMED.\n")  # Output when the game resumes after restoring
+        return None
+
+    def prompt_save_restore(screen, action):
+        """Prompt the user to pick a save/restore slot."""
+        slot = None
+        print(f"Pick which letter to {action} to/from: A, B, or C? A")  # Print the prompt once
+        while slot not in {"A", "B", "C"}:
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_a, pygame.K_b, pygame.K_c):
+                        slot = chr(event.key).upper()
+                        return slot
+                    
+    def generate_grid_for_level(level_num):
+        """Generate the grid for the given level number."""
+        # Ensure the level number is valid
+        if 1 <= level_num <= len(level_maps):
+            return [list(row) for row in level_maps[level_num - 1]]  # Convert strings to lists of characters
+        else:
+            raise ValueError(f"Level {level_num} is not defined in level_maps.")
+
     while running:
         # Handle events
         for event in pygame.event.get():

@@ -7,15 +7,14 @@ import sys
 import numpy as np
 
 pygame.init()
-pygame.mixer.init()
 # 16:9
-WIDTH, HEIGHT = 1200, 1
+WIDTH, HEIGHT = 1254, 1
 HEIGHT = int(WIDTH * 9 / 16)
 resolution = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
 GRID_WIDTH, GRID_HEIGHT = 80, 25
 TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
-CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25 - 0.1 # Fix cutoff text
+CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
 def rgb(r, g, b):
@@ -46,9 +45,10 @@ LIGHT_RED = rgb(255, 182, 193)
 LIGHT_PURPLE = rgb(221, 160, 221)
 LIGHT_YELLOW = rgb(255, 255, 224)
 DARK_RED = rgb(140, 0, 0)
+PERSIMMON = rgb(255, 86, 85)
+SALMON = rgb(255, 86, 255)
+BRIGHT_RED = rgb(170, 1, 0)
 BACKGROUND = BLUE
-
-TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
 
 WIDTH, HEIGHT = screen.get_size()
 
@@ -74,6 +74,7 @@ screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 logo_path = os.path.join(assets_dir, "kroz_logo.png")
+leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
 
 def set_monochrome_palette():
     global BACKGROUND, BLUE, DARK_BLUE, OLD_BLUE, CYAN, GREEN, AQUA, RED, PURPLE, ORANGE, BROWN, YELLOW, WHITE, GRAY, MAGENTA, LIGHT_GRAY, LIGHT_BLUE,LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, DARK_RED
@@ -148,59 +149,12 @@ def change_logo_color(image, time, color_user_input):
         colorized_image.blit(color_filter, (0, 0), special_flags=pygame.BLEND_RGB_MULT) # Apply color filter
         return colorized_image
 
-def change_title_color(time, color_user_input):
-    if color_user_input == "M":
-        return BLACK
-    else:
-        color_index = (time // 150) % len(blinking_text_color_list)
-        return blinking_text_color_list[color_index]
-
-# Load Tiles, loading extra icons that are not in levels.gameplay
-enemy3 = pygame.image.load(os.path.join(assets_dir, "enemy3.png"))
-keys = pygame.image.load(os.path.join(assets_dir, "keys.png"))
-power = pygame.image.load(os.path.join(assets_dir, "power.png"))
-clues = pygame.image.load(os.path.join(assets_dir, "clues.png"))
-surprise = pygame.image.load(os.path.join(assets_dir, "surprise.png"))
-
-# Scale tiles
-enemy3 = pygame.transform.scale(enemy3, (15, 15))
-keys = pygame.transform.scale(keys, (15, 15))
-power = pygame.transform.scale(power, (15, 15))
-clues = pygame.transform.scale(clues, (15, 15))
-surprise = pygame.transform.scale(surprise, (15, 15))
-
-# Load tiles
-block = pygame.image.load(os.path.join(assets_dir, "block.png"))
-chest = pygame.image.load(os.path.join(assets_dir, "chest.png"))
-enemy1 = pygame.image.load(os.path.join(assets_dir, "enemy1.png"))
-enemy2 = pygame.image.load(os.path.join(assets_dir, "enemy2.png"))
-gem = pygame.image.load(os.path.join(assets_dir, "gem.png"))
-player = pygame.image.load(os.path.join(assets_dir, "player.png"))
-stairs = pygame.image.load(os.path.join(assets_dir, "stairs.png"))
-teleport = pygame.image.load(os.path.join(assets_dir, "teleport.png"))
-trap = pygame.image.load(os.path.join(assets_dir, "trap.png"))
-wall = pygame.image.load(os.path.join(assets_dir, "wall.png"))
-whip = pygame.image.load(os.path.join(assets_dir, "whip.png"))
-
-# Scale tiles
-block    = pygame.transform.scale(block,    (TILE_WIDTH, TILE_HEIGHT))
-chest    = pygame.transform.scale(chest,    (TILE_WIDTH, TILE_HEIGHT))
-enemy1   = pygame.transform.scale(enemy1,   (TILE_WIDTH, TILE_HEIGHT))
-enemy2   = pygame.transform.scale(enemy2,   (TILE_WIDTH, TILE_HEIGHT))
-gem      = pygame.transform.scale(gem,      (TILE_WIDTH, TILE_HEIGHT))
-player   = pygame.transform.scale(player,   (TILE_WIDTH, TILE_HEIGHT))
-stairs   = pygame.transform.scale(stairs,   (TILE_WIDTH, TILE_HEIGHT))
-teleport = pygame.transform.scale(teleport, (TILE_WIDTH, TILE_HEIGHT))
-trap     = pygame.transform.scale(trap,     (TILE_WIDTH, TILE_HEIGHT))
-wall     = pygame.transform.scale(wall,     (TILE_WIDTH, TILE_HEIGHT))
-whip     = pygame.transform.scale(whip,     (TILE_WIDTH, TILE_HEIGHT))
-
-def display_icons(screen):
-    icons = [player, enemy1, enemy2, enemy3, gem, whip, teleport, chest, keys, power, clues, surprise, stairs]
-    blit_y = 163
-    for i, icon in enumerate(icons):
-        icon = pygame.transform.scale(icon, (15, 15))
-        screen.blit(icon, (40, blit_y + (i * 23)))
+# def change_title_color(time, color_user_input):
+#     if color_user_input == "M":
+#         return BLACK
+#     else:
+#         color_index = (time // 150) % len(blinking_text_color_list)
+#         return blinking_text_color_list[color_index]
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
@@ -214,40 +168,7 @@ def flash_c(screen, message):
     text_surface = font.render(message, True, color)  # Render text with current color
     text_rect = text_surface.get_rect(midbottom=(screen.get_width() // 2, screen.get_height() - 190))
     screen.blit(text_surface, text_rect)
-
-def play_sound(frequency, duration, amplitude=4096):
-    sample_rate = 44100
-    n_samples = int(sample_rate * duration / 1000)
-    t = np.linspace(0, duration / 1000, n_samples, False)
-    wave = amplitude * np.sign(np.sin(2 * np.pi * frequency * t))
-    stereo_wave = np.column_stack((wave, wave))
-    sound = pygame.sndarray.make_sound(stereo_wave.astype(np.int16))
-    sound.play()
-    time.sleep(duration / 1000)
-    sound.stop()
-        
-def play_wav(file_name):
-    file_path = os.path.join(audio_dir, file_name)
-    sound = pygame.mixer.Sound(file_path)
-    sound.play()
-    while pygame.mixer.get_busy():
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-        pygame.time.delay(100)              
-
-def descent():
-    play_wav('beginDescent.wav')
-    
-def footStep():
-    sound_file = random.choice(['footStep_1.wav', 'footStep_2.wav'])
-    play_wav(sound_file)
-    
-def enemyCollision():
-    play_wav('enemyCollision.wav')    
-
-
+       
 def wait_input(screen):
     paused = True
 

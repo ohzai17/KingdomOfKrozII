@@ -8,22 +8,20 @@ uppercase_letters = string.ascii_uppercase
 lowercase_letters = string.ascii_lowercase
 digits = string.digits
 special_char_names = [
-    "ampersand", "asterisk", "at", "backslash", "brace_close", "brace_open",
-    "bracket_closed", "bracket_open", "bullet", "caret", "colon", "comma", "cursor",
-    "dash", "dollar", "doublequote", "equals", "exclamation", "greater",
-    "less", "minus", "paren_close", "paren_open", "percent", "period", "pipe",
-    "question", "semicolon", "shade", "singlequote", "slash", "space", "tilde", "underscore"
+    "bullet", "colon", "comma", "cursor", "dash", "dollar", "doublequote", "equals", "exclamation",
+    "minus", "paren_close", "paren_open", "percent", "period",
+    "question", "shade", "singlequote", "slash", "space", "underscore",
+    "chance", "chest", "clues", "enemy1a", "enemy2a", "enemy3", "gem", "key", "player", "power", "stairs", "teleport", "whip"
 ]
 # Map special character names to their symbols
 special_char_symbols = {
-    "ampersand": "&", "asterisk": "*", "at": "@", "backslash": "\\",
-    "brace_close": "}", "brace_open": "{", "bracket_closed": "]",
-    "bracket_open": "[", "bullet": "•", "caret": "^", "colon": ":", "comma": ",",
+    "bullet": "•", "colon": ":", "comma": ",",
     "cursor": "█", "dash": "—", "dollar": "$", "doublequote": '"',
-    "equals": "=", "exclamation": "!", "greater": ">",
-    "less": "<", "minus": "-", "paren_close": ")", "paren_open": "(",
-    "percent": "%", "period": ".", "pipe": "|", "question": "?", "semicolon": ";",
-    "shade": "#", "singlequote": "'", "slash": "/", "space": " ", "tilde": "~", "underscore": "_"
+    "equals": "=", "exclamation": "!", "minus": "-", "paren_close": ")", "paren_open": "(",
+    "percent": "%", "period": ".", "question": "?",
+    "shade": "#", "singlequote": "'", "slash": "/", "space": " ", "underscore": "_",
+    "chance": "&", "chest": "*", "clues": "@", "enemy1a": "{", "enemy2a": "}", "enemy3": "[", "gem": "]",
+    "key": "^", "player": ">", "power": "<", "stairs": "|", "teleport": ";", "whip": "~"
 }
 
 def load_sprite(char_key, filename_base):
@@ -31,7 +29,9 @@ def load_sprite(char_key, filename_base):
     full_path = os.path.join(screen_assets_dir, filename)
     try:
         sprite = pygame.image.load(full_path).convert_alpha()
-        char_map[char_key] = sprite
+        # Resize the sprite to CHAR_WIDTH x CHAR_HEIGHT
+        resized_sprite = pygame.transform.scale(sprite, (CHAR_WIDTH, CHAR_HEIGHT))
+        char_map[char_key] = resized_sprite
     except pygame.error as e:
         print(f"Warning: Could not load image '{filename}': {e}")
     except FileNotFoundError:
