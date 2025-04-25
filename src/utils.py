@@ -13,7 +13,8 @@ WIDTH, HEIGHT = 1254, 1
 HEIGHT = int(WIDTH * 9 / 16)
 resolution = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
-GRID_WIDTH, GRID_HEIGHT = 80, 25
+GRID_WIDTH = 80
+GAME_WIDTH = 66
 TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
 CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
@@ -61,6 +62,7 @@ blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, BLUE, GREEN, RED, PURPLE
 rect_colors_list = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
 flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
+whip_cycle_colors = [RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, MAGENTA, WHITE, GRAY]
 
 # Random rectangle Colors to cycle through 
 rect_colors_cycle = rect_colors_list
