@@ -1,7 +1,7 @@
-from maps import * 
+from maps import *
 from utils import *
 from game_text import game_text
-
+GP_TILE_WIDTH, GP_TILE_HEIGHT = 0, 0
 """
 game_text(row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False)
 Draws a single row of text using character sprites onto the screen.
@@ -16,10 +16,100 @@ Args:
         Defaults to False.
     center (bool, optional): If True, center the text horizontally on the grid row.
         Defaults to True.
-    text_background (tuple, optional): RGB color tuple for the background behind each char.
-        Defaults to None.
-    title_box (bool, optional): For special title screen background.
+    text_background (tuple | str | None, optional): Background color specification.
+            - None: No background.
+            - (R, G, B): A tuple specifying the background color for all characters.
+            - ("ONLY_TEXT", (R, G, B)): A tuple specifying the background color, drawn only behind non-space characters.
+            Defaults to None.
+    title_box (bool, optional): For special title screen background (uses the color from text_background).
 """
+
+# Global dictionaries for sprite management
+original_images = {}
+tile_mapping = {}
+
+def load_gameplay_sprites():
+    """Loads original, unscaled gameplay sprites."""
+    global original_images
+    sprites = ["border", "block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport",
+               "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river",
+               "power", "forest", "tree", "bomb", "lava", "pit", "tome", "tunnel", "freeze", "nugget",
+               "quake", "iBlock", "iWall", "iDoor", "stop", "trap2", "zap", "create", "generator",
+               "trap3", "mBlock", "trap4", "showGems", "tablet", "zBlock", "blockSpell", "chance",
+               "statue", "wallVanish", "krozK", "krozR", "krozO", "krozZ", "oWall1", "oWall2", "oWall3",
+               "cWall1", "cWall2", "cWall3", "oSpell1", "oSpell2", "oSpell3", "cSpell1", "cSpell2",
+               "cSpell3", "gBlock", "rock", "eWall", "trap5", "tBlock", "tRock", "tGem", "tBlind",
+               "tWhip", "tGold", "tTree", "rope", "dropRope1", "dropRope2", "dropRope3", "dropRope4",
+               "dropRope5", "amulet", "shootRight", "shootLeft", "trap6", "trap7", "trap8", "trap9",
+               "trap10", "trap11", "trap12", "trap13", "message", "whip1", "whip2", "whip3", "whip4"]
+
+    special_cases = {
+        "enemy1": "enemy1a",
+        "enemy2": "enemy2a"
+    }
+
+    for sprite_name in sprites:
+        filename = special_cases.get(sprite_name, sprite_name) + ".png"
+        full_path = os.path.join(assets_dir, filename) # Use assets_dir from utils
+        try:
+            img = pygame.image.load(full_path).convert_alpha() # Use convert_alpha() for potential transparency
+            original_images[sprite_name] = img
+        except pygame.error as e:
+            print(f"Warning: Could not load image '{filename}' for sprite '{sprite_name}': {e}")
+        except FileNotFoundError:
+            print(f"Warning: Image file not found: '{full_path}' for sprite '{sprite_name}'")
+
+# Call this function once when the module loads
+load_gameplay_sprites()
+
+def scale_gameplay_sprites(dimensions, color_input):
+    """
+    Scales sprites from original_images, applies grayscale if needed,
+    and populates the global tile_mapping dictionary.
+    """
+    global tile_mapping
+    tile_mapping.clear() # Clear existing scaled sprites
+
+    tile_width, tile_height = dimensions
+
+    # Define the mapping from characters to sprite names here
+    char_to_sprite_map = {
+        "^": "border", "X": "block", "#": "wall", "C": "chest", "W": "whip",
+        "1": "enemy1", "2": "enemy2", "3": "enemy3", "+": "gem", "T": "teleport",
+        "_": "teleport_player", ".": "trap", "L": "stairs", "P": "player",
+        "TP": "teleport_player",
+        "S": "slowTime", "I": "invisible", "K": "key", "D": "door", "F": "speedTime",
+        "R": "river", "Q": "power", "/": "forest", "J": "tree", "B": "bomb",
+        "V": "lava", "=": "pit", "A": "tome", "U": "tunnel", "Z": "freeze",
+        "*": "nugget", "E": "quake", ";": "iBlock", ":": "iWall", "`": "iDoor",
+        "-": "stop", "@": "trap2", "%": "zap", "]": "create", "G": "generator",
+        ")": "trap3", "M": "mBlock", "(": "trap4", "&": "showGems", "!": "tablet",
+        "O": "zBlock", "H": "blockSpell", "?": "chance", ">": "statue", "N": "wallVanish",
+        "<": "krozK", "[": "krozR", "|": "krozO", ",": "krozZ", "4": "oWall1",
+        "5": "oWall2", "6": "oWall3", "7": "cWall1", "8": "cWall2", "9": "cWall3",
+        "±": "oSpell1", "≥": "oSpell2", "≤": "oSpell3", "⌠": "cSpell1", "⌡": "cSpell2",
+        "÷": "cSpell3", "Y": "gBlock", "0": "rock", "~": "eWall", "$": "trap5",
+        "æ": "tBlock", "Æ": "tRock", "ô": "tGem", "ö": "tBlind", "ò": "tWhip",
+        "û": "tGold", "ù": "tTree", "¿": "rope", "┤": "dropRope1", "│": "dropRope2",
+        "┐": "dropRope3", "┘": "dropRope4", "╜": "dropRope5", "â": "amulet",
+        "»": "shootRight", "«": "shootLeft", "α": "trap6", "β": "trap7", "┌": "trap8",
+        "π": "trap9", "∑": "trap10", "σ": "trap11", "μ": "trap12", "τ": "trap13",
+        "ⁿ": "message",
+        "whip1": "whip1", "whip2": "whip2", "whip3": "whip3", "whip4": "whip4"
+    }
+
+    for char, sprite_name in char_to_sprite_map.items():
+        if sprite_name in original_images:
+            original_img = original_images[sprite_name]
+            scaled_img = pygame.transform.scale(original_img, (tile_width, tile_height))
+
+            if color_input == "M":
+                # Apply grayscale using the function from utils
+                scaled_img = apply_grayscale_f(scaled_img)
+
+            tile_mapping[char] = scaled_img
+        else:
+            print(f"Warning: Original image for sprite '{sprite_name}' (char '{char}') not found in original_images.")
 
 def pause_quit(quitting=False): # From KINGDOM.PAS (lines 49-69)
     paused = True
@@ -54,9 +144,8 @@ def player_death(score, level_num):
     pygame.event.clear()  # Clear any pending events
 
     # Display death message on screen
-    # Assuming game_text exists and works similarly to draw_text from old file
     game_text(1, "YOU HAVE DIED!!!", BLACK, True, True, LIGHT_GRAY)
-    game_text(16, "Press any key to continue...", WHITE, False, True, None) # Add prompt [cite: 8]
+    game_text(16, "Press any key to continue...", WHITE, False, True, None)
     pygame.display.flip()
 
     pygame.time.delay(500)  # Pause to show message
@@ -67,7 +156,7 @@ def player_death(score, level_num):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit() # [cite: 9]
+                exit()
             elif event.type == pygame.KEYDOWN:
                 waiting_for_input = False  # Exit loop on any key press
 
@@ -77,263 +166,89 @@ def player_death(score, level_num):
     pygame.quit()
     exit()
 
-def hud_original(values=None, color="C"): # From KINGDOM4.INC (lines 96-183)
+def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (lines 96-183)
+    BACKGROUND = BLUE
+    TEXT = YELLOW
+    VALUE_TEXT = DARK_RED
+    TEXT_BOX = LIGHT_GRAY
+    OPTIONS_TEXT = LIGHT_AQUA
+    OPTIONS_BOX = DARK_RED
 
-    is_monochrome = True if color == "M" else False
+    option_list = ["Whip", "Teleport", "Cloak", "Pause", "Quit", "Save", "Restore"]
 
-    option_list = ["Cloak", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
+    is_monochrome = True if color_input == "M" else False
 
-    pygame.draw.rect(screen, BLUE, (0, (TILE_HEIGHT * 25), WIDTH, HEIGHT - (TILE_HEIGHT * 25)))
-    game_text(29, "         Level", YELLOW, False, False)
-    game_text(27, "  Score     Gems      Whips     ", YELLOW)
-    game_text(32, "Teleports   Keys      Cloaks    ", YELLOW)
-    game_text(27, "*" * 48 + "Options", LIGHT_AQUA, False, False, ("ONLY_TEXT", RED))
-
-    for i, word in enumerate(option_list):
-        game_text(29+i, " " * 48 + word[0], None, False, False)
-        game_text(29+i, " " * 49 + word[1:], LIGHT_GRAY, False, False)
-
-    def format_centered_int(value, width) -> str:
-      s_value = str(value)
-      padding = width - len(s_value)
-      if padding < 0:
-        return s_value
-      left_padding = padding // 2
-      right_padding = (padding + 1) // 2
-      return ' ' * left_padding + s_value + ' ' * right_padding
-
-    game_text(29, "*" * 18 + format_centered_int(values[0], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-    game_text(31, "*" * 8  + format_centered_int(values[1], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-    game_text(29, "*" * 28 + format_centered_int(values[2], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-    game_text(29, "*" * 38 + format_centered_int(values[3], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-    game_text(34, "*" * 18 + format_centered_int(values[4], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-    game_text(34, "*" * 28 + format_centered_int(values[5], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-    game_text(34, "*" * 38 + format_centered_int(values[6], 7), DARK_RED, False, False, ("ONLY_TEXT", LIGHT_GRAY), True)
-
-def hud_right(WIDTH, HEIGHT, color="C", values=None):  # From KINGDOM4.PAS (lines 96-183)
-    is_monochrome = True if color == "M" else False
-
-    hud_width = 130
-    hud_x = WIDTH - hud_width  # Right-hand side
-
-    # Create sidebar surface with monochrome handling
-    hud_surface = pygame.Surface((hud_width, HEIGHT))
-    hud_surface.fill(BLUE)
     if is_monochrome:
-        hud_surface = apply_grayscale_f(hud_surface)
-    screen.blit(hud_surface, (hud_x, 0))  # Apply sidebar
+        BACKGROUND = BLACK
+        TEXT = GRAY
+        VALUE_TEXT = GRAY
+        TEXT_BOX = BLACK
+        OPTIONS_TEXT = GRAY
+        OPTIONS_BOX = BLACK
 
-    item_tracker = ["Score", "Level", "Gems", "Whips", "Teleports", "Keys", "Cloak", "Options"]
-    option_list = ["Cloak", "Whip", "Teleport", "Pause", "Quit", "Save", "Restore"]
+    if hud_input == "O":
+        pygame.draw.rect(screen, BACKGROUND, (0, (GP_TILE_HEIGHT * 25), WIDTH, HEIGHT - (GP_TILE_HEIGHT * 25)))
+        game_text(29, "         Level", TEXT, False, False)
+        game_text(27, "  Score     Gems      Whips     ", TEXT)
+        game_text(32, "Teleports   Keys      Cloaks    ", TEXT)
+        game_text(27, "*" * 48 + "Options", OPTIONS_TEXT, False, False, ("ONLY_TEXT", OPTIONS_BOX))
 
-    font = load_font(11)
+        for i, word in enumerate(option_list):
+            game_text(29+i, " " * 48 + word[0], None, False, False)
+            game_text(29+i, " " * 49 + word[1:], LIGHT_GRAY, False, False)
 
-    word_x = hud_x + 35
-    word_y = 5
+        # Ensure values list has enough elements before accessing
+        if values and len(values) >= 7:
+             game_text(29, "*" * 18 + format_centered_int(values[0], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Score
+             game_text(31, "*" * 8  + format_centered_int(values[1], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Level
+             game_text(29, "*" * 28 + format_centered_int(values[2], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Gems
+             game_text(29, "*" * 38 + format_centered_int(values[3], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Whips
+             game_text(34, "*" * 18 + format_centered_int(values[4], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Teleports
+             game_text(34, "*" * 28 + format_centered_int(values[5], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Keys
+             game_text(34, "*" * 38 + format_centered_int(values[6], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Cloaks
 
-    rect_width = 88
-    rect_height = 25
+    else: # hud_input == "R" (Right sidebar)
+        hud_width = WIDTH - (GP_TILE_WIDTH * GAME_WIDTH) # Adjust width calculation if GAME_WIDTH is not the game area width
+        hud_x = WIDTH - hud_width  # Right-hand side
 
-    for i, word in enumerate(item_tracker):
-        # Color logic (monochrome-aware)
+        # Create sidebar surface with monochrome handling
+        hud_surface = pygame.Surface((hud_width, HEIGHT))
+        hud_surface.fill(BACKGROUND)
+        # apply_grayscale_f should be available from utils
         if is_monochrome:
-            label_color = GRAY
-            value_color = GRAY
-            box_color = SILVER
-            options_box_color = SILVER
+            hud_surface = apply_grayscale_f(hud_surface)
+        screen.blit(hud_surface, (hud_x, 0))  # Apply sidebar
+
+        game_text(2, " " * 70 + "Score", TEXT)
+        game_text(4, " " * 70 + "Level", TEXT)
+        game_text(6, " " * 70 + "Gems", TEXT)
+        game_text(8, " " * 70 + "Whips", TEXT)
+        game_text(10, " " * (70 - 2) + "Teleports", TEXT) # Adjust spacing for longer word
+        game_text(12, " " * 70 + "Keys", TEXT)
+        game_text(14, " " * 70 + "Cloaks", TEXT)
+        game_text(17, "*" * (70-1) + "OPTIONS", OPTIONS_TEXT, False, False, ("ONLY_TEXT", OPTIONS_BOX))
+
+        for i, word in enumerate(option_list):
+            game_text(18+i, " " * 69 + word[0], None, False, False)
+            game_text(18+i, " " * 70 + word[1:], LIGHT_GRAY, False, False)
+
+        # Ensure values list has enough elements
+        if values and len(values) >= 7:
+            for i in range(7):
+                 game_text(3+(i*2), "*" * (70-1) + format_centered_int(values[i], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX))
         else:
-            label_color = CYAN if word == "Options" else YELLOW
-            value_color = DARK_RED
-            box_color = LIGHT_GRAY
-            options_box_color = DARK_RED
+            for i in range(7):
+                 game_text(3+(i*2), "*" * (70-1) + "   0   ", VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX))
 
-        if word == "Options":
-            word_y += group_height - 43
-            word_surface = font.render(word, True, label_color)
 
-            pygame.draw.rect(options_box_color, (word_x - 12, word_y + 7, word_surface.get_width() + 6, 30))
-            screen.blit(word_surface, (word_x - 8, word_y + 15))
-
-            word_y += word_surface.get_height() + 15
-        else:
-            render_x = word_x - 25 if word == "Teleports" else word_x
-            word_surface = font.render(word, True, label_color)
-            screen.blit(word_surface, (render_x, word_y))
-
-        if i < len(values):
-            value_surface = font.render(str(values[i]), True, value_color)
-            box_x = word_x - 12
-            box_y = word_y + word_surface.get_height() + 5
-
-            pygame.draw.rect(box_color, (box_x, box_y, rect_width, rect_height))
-            value_x = box_x + (rect_width - value_surface.get_width()) // 2
-            screen.blit(value_surface, (value_x, box_y + 5))
-
-        group_height = word_surface.get_height() + rect_height
-        word_y += group_height + 15
-
-    # Draw options list below stats
-    y_offset = word_y - 40
-    for choice in option_list:
-        first_color = GRAY if is_monochrome else WHITE
-        rest_color = GRAY
-
-        first_letter_surface = font.render(choice[0], True, first_color)
-        rest_surface = font.render(choice[1:], True, rest_color)
-
-        first_rect = first_letter_surface.get_rect(topleft=(word_x - 10, y_offset))
-        rest_rect = rest_surface.get_rect(topleft=(first_rect.right, y_offset))
-
-        screen.blit(first_letter_surface, first_rect)
-        screen.blit(rest_surface, rest_rect)
-
-        y_offset += 14
-
-def levels(difficulty_input, color="C", mixUp=False, hud=""):
+def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
+    """Main gameplay loop for Kroz levels."""
+    global tile_mapping # Ensure we use the global tile_mapping
 
     screen.fill(BLACK)
 
-    huds = {
-        "R": hud_right,
-        "O": hud_original,
-        "": hud_original  # fallback default
-    }
-    main_hud = huds.get(hud, hud_original)
-
-    sprites = ["border", "block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport",
-               "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river",
-               "power", "forest", "tree", "bomb", "lava", "pit", "tome", "tunnel", "freeze", "nugget",
-               "quake", "iBlock", "iWall", "iDoor", "stop", "trap2", "zap", "create", "generator",
-               "trap3", "mBlock", "trap4", "showGems", "tablet", "zBlock", "blockSpell", "chance",
-               "statue", "wallVanish", "krozK", "krozR", "krozO", "krozZ", "oWall1", "oWall2", "oWall3",
-               "cWall1", "cWall2", "cWall3", "oSpell1", "oSpell2", "oSpell3", "cSpell1", "cSpell2",
-               "cSpell3", "gBlock", "rock", "eWall", "trap5", "tBlock", "tRock", "tGem", "tBlind",
-               "tWhip", "tGold", "tTree", "rope", "dropRope1", "dropRope2", "dropRope3", "dropRope4",
-               "dropRope5", "amulet", "shootRight", "shootLeft", "trap6", "trap7", "trap8", "trap9",
-               "trap10", "trap11", "trap12", "trap13", "message", "whip1", "whip2", "whip3", "whip4",]
-
-    assets_path = os.path.join("src", "assets")
-    images = {}
-
-    special_cases = {
-        "enemy1": "enemy1a",
-        "enemy2": "enemy2a"
-    }
-
-    for sprite in sprites:
-        filename = special_cases.get(sprite, sprite) + ".png"
-        full_path = os.path.join(assets_path, filename)
-
-        img = pygame.image.load(full_path)
-        images[sprite] = pygame.transform.scale(img, (TILE_WIDTH, TILE_HEIGHT))
-
-
-    if color == "M":
-        for sprite in sprites:
-            images[sprite] = apply_grayscale_f(images[sprite])
-            images[sprite] = pygame.transform.scale(images[sprite], (TILE_WIDTH, TILE_HEIGHT))
-
-    tile_mapping = {
-        "^": images["border"], # Add border mapping
-        "X": images["block"],
-        "#": images["wall"],
-        "C": images["chest"],
-        "W": images["whip"],
-        "1": images["enemy1"],
-        "2": images["enemy2"],
-        "3": images["enemy3"],
-        "+": images["gem"],
-        "T": images["teleport"],
-        "_": images["teleport_player"],
-        ".": images["trap"],
-        "L": images["stairs"],
-        "P": images["player"],
-        "TP": images["teleport_player"],
-        "S": images["slowTime"],
-        "I": images["invisible"],
-        "K": images["key"],
-        "D": images["door"],
-        "F": images["speedTime"],
-        "R": images["river"],
-        "Q": images["power"],
-        "/": images["forest"],
-        "J": images["tree"],
-        "B": images["bomb"],
-        "V": images["lava"],
-        "=": images["pit"],
-        "A": images["tome"],
-        "U": images["tunnel"],
-        "Z": images["freeze"],
-        "*": images["nugget"],
-        "E": images["quake"],
-        ";": images["iBlock"],
-        ":": images["iWall"],
-        "`": images["iDoor"],
-        "-": images["stop"],
-        "@": images["trap2"],
-        "%": images["zap"],
-        "]": images["create"],
-        "G": images["generator"],
-        ")": images["trap3"],
-        "M": images["mBlock"],
-        "(": images["trap4"],
-        "&": images["showGems"],
-        "!": images["tablet"],
-        "O": images["zBlock"],
-        "H": images["blockSpell"],
-        "?": images["chance"],
-        ">": images["statue"],
-        "N": images["wallVanish"],
-        "<": images["krozK"],
-        "[": images["krozR"],
-        "|": images["krozO"],
-        ",": images["krozZ"],
-        "4": images["oWall1"],
-        "5": images["oWall2"],
-        "6": images["oWall3"],
-        "7": images["cWall1"],
-        "8": images["cWall2"],
-        "9": images["cWall3"],
-        "±": images["oSpell1"],
-        "≥": images["oSpell2"],
-        "≤": images["oSpell3"],
-        "⌠": images["cSpell1"],
-        "⌡": images["cSpell2"],
-        "÷": images["cSpell3"],
-        "Y": images["gBlock"],
-        "0": images["rock"],
-        "~": images["eWall"],
-        "$": images["trap5"],
-        "æ": images["tBlock"],
-        "Æ": images["tRock"],
-        "ô": images["tGem"],
-        "ö": images["tBlind"],
-        "ò": images["tWhip"],
-        "û": images["tGold"],
-        "ù": images["tTree"],
-        "¿": images["rope"],
-        "┤": images["dropRope1"],
-        "│": images["dropRope2"],
-        "┐": images["dropRope3"],
-        "┘": images["dropRope4"],
-        "╜": images["dropRope5"],
-        "â": images["amulet"],
-        "»": images["shootRight"],
-        "«": images["shootLeft"],
-        "α": images["trap6"],
-        "β": images["trap7"],
-        "┌": images["trap8"],
-        "π": images["trap9"],
-        "∑": images["trap10"],
-        "σ": images["trap11"],
-        "μ": images["trap12"],
-        "τ": images["trap13"],
-        "ⁿ": images["message"],
-        "whip1": images["whip1"],
-        "whip2": images["whip2"],
-        "whip3": images["whip3"],
-        "whip4": images["whip4"]
-    }
+    # Scale sprites based on current dimensions and color setting
+    scale_gameplay_sprites((GP_TILE_WIDTH, GP_TILE_HEIGHT), color_input)
 
     level_maps = [level1_map, level2_map, level4_map, level6_map, level8_map, level10_map,
                   level12_map, level14_map, level16_map, level18_map, level20_map, level22_map,
@@ -341,21 +256,18 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
     current_level_index = 0
     grid = [list(row) for row in level_maps[current_level_index]]
 
-    collidable_tiles = {"X", "#", ";", "/", "J", "R", "4", "5", "6", "8", "9"} # [cite: 31]
+    collidable_tiles = {"X", "#", ";", "/", "J", "R", "4", "5", "6", "8", "9"} # Example, adjust as needed
 
-    dynamic_tiles = {"P", "1", "2", "3"}
     # Game state
-    grid = [list(row) for row in level1_map]
-    collidable_tiles = {"X", "#"}
     slow_enemies = []
     medium_enemies = []
-    fast_enemies = [] # Added fast_enemies list initialization
+    fast_enemies = []
     keys_pressed = {pygame.K_UP: False, pygame.K_DOWN: False,
                     pygame.K_LEFT: False, pygame.K_RIGHT: False,
-                    pygame.K_w: False, pygame.K_t: False, pygame.K_c: False, # Added T and C
+                    pygame.K_w: False, pygame.K_t: False, pygame.K_c: False,
                     pygame.K_u: False, pygame.K_i: False, pygame.K_o: False,
                     pygame.K_j: False, pygame.K_l: False,
-                    pygame.K_n: False, pygame.K_m: False, pygame.K_COMMA: False} # [cite: 32]
+                    pygame.K_n: False, pygame.K_m: False, pygame.K_COMMA: False}
 
 
     # Find player and enemies
@@ -363,37 +275,36 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
     for r, row in enumerate(grid):
         for c, tile in enumerate(row):
             if tile == "P":
-                player_row, player_col = r, c # [cite: 35]
+                player_row, player_col = r, c
             elif tile == "1":
                 slow_enemies.append({"row": r, "col": c})
             elif tile == "2":
                 medium_enemies.append({"row": r, "col": c})
-            elif tile == "3": # Added handling for fast enemies
-                fast_enemies.append({"row": r, "col": c}) # [cite: 36]
+            elif tile == "3":
+                fast_enemies.append({"row": r, "col": c})
 
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
         case "E":
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
         case "A":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 2, 0, 0, 0, 0 # [cite: 37]
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 2, 0, 0, 0, 0
         case "N", " ":
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
         case "X":
             score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 10 # Cloaks for X mode
         case _:
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 50, 50, 10, 0, 5 # Default/Other cloaks # [cite: 38]
+            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 50, 50, 10, 0, 5 # Default/Other cloaks
 
     if mixUp:
         score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, 2
 
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
-    hud_original(values) # Use hud_original
 
     # Function to change to the next level
     def change_level(next_level_index):
-        nonlocal grid, player_row, player_col, slow_enemies, medium_enemies, fast_enemies, level_num # [cite: 39]
-        nonlocal waiting_for_start_key # <<< Make sure to access the flag
+        nonlocal grid, player_row, player_col, slow_enemies, medium_enemies, fast_enemies, level_num
+        nonlocal waiting_for_start_key # Access the flag
         # Check if level index is valid
         if next_level_index >= len(level_maps):
             next_level_index = 0  # Loop back to first level
@@ -402,36 +313,36 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
         level_num = next_level_index + 1
 
         # Reset level grid
-        grid = [list(row) for row in level_maps[next_level_index]] # [cite: 40]
+        grid = [list(row) for row in level_maps[next_level_index]]
 
         # Reset enemies
         slow_enemies = []
         medium_enemies = []
-        fast_enemies = [] # Reset fast enemies too
+        fast_enemies = []
 
         # Find new player position and enemies
-        for r, row in enumerate(grid): # [cite: 41]
+        for r, row in enumerate(grid):
             for c, tile in enumerate(row):
                 if tile == "P":
                     player_row, player_col = r, c
                 elif tile == "1":
-                    slow_enemies.append({"row": r, "col": c}) # [cite: 42]
+                    slow_enemies.append({"row": r, "col": c})
                 elif tile == "2":
                     medium_enemies.append({"row": r, "col": c})
-                elif tile == "3": # Find fast enemies on level change
-                    fast_enemies.append({"row": r, "col": c}) # [cite: 42]
+                elif tile == "3":
+                    fast_enemies.append({"row": r, "col": c})
 
         # Reset the flag when changing levels
         waiting_for_start_key = True
 
     # --- Start of Enemy Movement Code from gameplayOLD.py.txt ---
-    def has_line_of_sight(from_row, from_col, to_row, to_col): # [cite: 43]
+    def has_line_of_sight(from_row, from_col, to_row, to_col):
         """Check if there's a direct line of sight between two positions"""
         # Bresenham's line algorithm for line of sight
         points = []
         dx, dy = abs(to_col - from_col), abs(to_row - from_row)
         sx = 1 if from_col < to_col else -1
-        sy = 1 if from_row < to_row else -1 # [cite: 44]
+        sy = 1 if from_row < to_row else -1
         err = dx - dy
 
         x, y = from_col, from_row
@@ -439,47 +350,51 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
             points.append((x, y))
             if x == to_col and y == to_row:
                 break
-            e2 = 2 * err # [cite: 45]
+            e2 = 2 * err
             if e2 > -dy:
                 err -= dy
                 x += sx
             if e2 < dx:
                 err += dx
-                y += sy # [cite: 46]
+                y += sy
 
         # Check if any solid walls block the line of sight
         # Enemies can now see through breakable blocks ("X")
         for col, row in points[1:-1]:  # Skip start and end points
-            if 0 <= row < len(grid) and 0 <= col < len(grid[0]): # [cite: 47]
+            if 0 <= row < len(grid) and 0 <= col < len(grid[0]):
                 if grid[row][col] == "#":  # Only solid walls block vision
                     return False
         return True
 
-    def move_enemy(enemy, enemy_type, move_prob): # [cite: 47]
-        if is_cloaked:
-            pass
+    def move_enemy(enemy, enemy_type, move_prob):
+        if is_cloaked: # Enemies don't move if player is cloaked
+            return False # Indicate enemy did not move (or die)
         else:
-            """Move an enemy toward the player if they can see the player""" # [cite: 48]
+            """Move an enemy toward the player if they can see the player"""
             nonlocal score, gems  # Access Score and gems from the outer scope
 
             row, col = enemy["row"], enemy["col"]
 
-            # Check if enemy was removed
-            if grid[row][col] != enemy_type:
-                return True  # Remove enemy # [cite: 49]
+            # Check if enemy was removed (e.g., by whip) before its turn
+            if not (0 <= row < len(grid) and 0 <= col < len(grid[0])) or grid[row][col] != enemy_type:
+                return True  # Signal to remove enemy from list if it no longer exists at its position
 
             # Original game had different odds for different enemy types
             # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
             # Only give player a move chance if the player can see the enemy
             if has_line_of_sight(row, col, player_row, player_col):
-                if random.randint(0, move_prob-1) == 0: # [cite: 50]
-                    player_input()
+                if random.randint(0, move_prob-1) == 0:
+                     # Allow player input during enemy turn only if enemy can see player
+                    action_made = player_input()
+                    # If player moved or acted, the grid might have changed, re-check enemy position
+                    if not (0 <= row < len(grid) and 0 <= col < len(grid[0])) or grid[row][col] != enemy_type:
+                         return True # Enemy might have been affected by player action (e.g., whip)
 
-            # Check if enemy can see player
+            # Check again if enemy can see player (player might have moved or cloaked)
             if not has_line_of_sight(row, col, player_row, player_col):
                 return False  # Stay still if can't see player
 
-            # Clear current position # [cite: 51]
+            # Clear current position
             grid[row][col] = " "
 
             # Calculate move direction toward player
@@ -487,121 +402,127 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
             x_dir, y_dir = 0, 0
 
             # Try to move closer to the player along optimal axis first
-            x_dist = abs(player_col - col) # [cite: 52]
+            x_dist = abs(player_col - col)
             y_dist = abs(player_row - row)
 
             # Move along the axis with greater distance first
-            # This makes enemies try to minimize the longest dimension first
             if x_dist > y_dist:
                 # Move horizontally first
                 if player_col < col:
-                    new_col -= 1 # [cite: 53]
-                    x_dir = 1
+                    new_col -= 1
+                    x_dir = -1 # Corrected direction indication
                 elif player_col > col:
                     new_col += 1
-                    x_dir = -1
-            else:
-                # Move vertically first # [cite: 54]
+                    x_dir = 1 # Corrected direction indication
+                # If horizontal move is blocked, try vertical
+                if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]) and grid[new_row][new_col] != " ":
+                    new_col = col # Reset horizontal attempt
+                    if player_row < row:
+                        new_row -= 1
+                        y_dir = -1
+                    elif player_row > row:
+                        new_row += 1
+                        y_dir = 1
+            else: # y_dist >= x_dist
+                # Move vertically first
                 if player_row < row:
                     new_row -= 1
-                    y_dir = 1
-                elif player_row > row:
-                    new_row += 1
-                    y_dir = -1 # [cite: 55]
-
-            # If no movement was determined, try the other axis
-            if new_row == row and new_col == col:
-                if player_col < col:
-                    new_col -= 1
-                    x_dir = 1
-                elif player_col > col: # [cite: 56]
-                    new_col += 1
-                    x_dir = -1
-                elif player_row < row:
-                    new_row -= 1
-                    y_dir = 1 # [cite: 57]
-                elif player_row > row:
-                    new_row += 1
                     y_dir = -1
+                elif player_row > row:
+                    new_row += 1
+                    y_dir = 1
+                 # If vertical move is blocked, try horizontal
+                if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]) and grid[new_row][new_col] != " ":
+                    new_row = row # Reset vertical attempt
+                    if player_col < col:
+                        new_col -= 1
+                        x_dir = -1
+                    elif player_col > col:
+                        new_col += 1
+                        x_dir = 1
 
-            # Handle movement and collisions
+            # Final check if any move was determined
+            if new_row == row and new_col == col:
+                 # If still no move, it might be blocked in both primary directions or already adjacent
+                 # Revert to original position and return false (stay still)
+                 grid[row][col] = enemy_type
+                 return False
+
+
+            # Handle movement and collisions based on target tile (new_row, new_col)
             if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
-                # Breaking X blocks # [cite: 58]
-                if grid[new_row][new_col] == "X":
+                target_tile = grid[new_row][new_col]
+
+                if target_tile == "X": # Breaking X blocks
                     grid[new_row][new_col] = " "  # Break the block
                     # Award points based on enemy type
                     if enemy_type == "1": score += 10
-                    elif enemy_type == "2": score += 20 # [cite: 59]
+                    elif enemy_type == "2": score += 20
                     elif enemy_type == "3": score += 30
                     return True  # Enemy dies when breaking block
 
-                # Handle collision with gems, whips, teleports
-                elif grid[new_row][new_col] == "+":  # Gem # [cite: 60]
+                elif target_tile == "+":  # Gem Collision
                     if enemy_type == "1": gems -= 1
                     elif enemy_type == "2": gems -= 2
                     elif enemy_type == "3": gems -= 3
 
-                    if gems < 0: # [cite: 61]
-                        player_death(score, level_num)  # Call player_death when out of gems
+                    if gems < 0:
+                        player_death(score, level_num) # End game if gems depleted
+                        return True # Enemy technically 'dies' as game ends
 
-                    # Update display
+                    # Move enemy onto the gem space (destroying the gem)
                     enemy["row"], enemy["col"] = new_row, new_col
-                    grid[new_row][new_col] = enemy_type # [cite: 62]
-                    return False
+                    grid[new_row][new_col] = enemy_type
+                    return False # Enemy survives, gem is gone
 
-                # Collide with an item (whip, teleport)
-                elif grid[new_row][new_col] in {"W", "T"}:
+                elif target_tile in {"W", "T", "_", "K", "S", "I", "F", "Q", "*", "A", "?", "<", "[", "|", ",", "±", "≥", "≤", "⌠", "⌡", "÷", "ô", "ö", "ò", "û", "ù", "¿", "â"}: # Other Items
                     # Destroy the item and move the enemy
-                    enemy["row"], enemy["col"] = new_row, new_col # [cite: 63]
-                    grid[new_row][new_col] = enemy_type
-                    return False
-
-                # Empty space - move there
-                elif grid[new_row][new_col] == " ": # [cite: 64]
                     enemy["row"], enemy["col"] = new_row, new_col
                     grid[new_row][new_col] = enemy_type
-                    return False
+                    return False # Enemy survives, item destroyed
 
-                # Hit player
-                elif grid[new_row][new_col] == "P":
-                    # Attack player by taking gems # [cite: 65]
+                elif target_tile == " ": # Empty space
+                    enemy["row"], enemy["col"] = new_row, new_col
+                    grid[new_row][new_col] = enemy_type
+                    return False # Enemy survives
+
+                elif target_tile == "P": # Player Collision
+                    # Attack player by taking gems
                     if enemy_type == "1": gems -= 1
                     elif enemy_type == "2": gems -= 2
                     elif enemy_type == "3": gems -= 3
 
-                    if gems < 0: # [cite: 66]
-                        player_death(score, level_num)  # Call player_death when out of gems
+                    if gems < 0:
+                        player_death(score, level_num) # End game if gems depleted
 
-                    return True  # Enemy dies
+                    return True  # Enemy dies after attacking
 
-                # Blocked - stay in place # [cite: 67]
-                else:
-                    grid[row][col] = enemy_type
+                else: # Blocked by solid wall (#) or other non-passable object
+                    grid[row][col] = enemy_type # Stay in place
                     return False
-            else:
-                grid[row][col] = enemy_type  # Stay in place
+            else: # Moved outside grid boundaries (shouldn't normally happen with checks)
+                grid[row][col] = enemy_type # Stay in place
                 return False
-    # --- End of Enemy Movement Code from gameplayOLD.py.txt ---
+    # --- End of Enemy Movement Code ---
 
     def use_whip():
         """Handle the whip animation and enemy interactions, keeping HUD and border visible, with color cycling."""
-        # Access game state variables from enclosing scope
         nonlocal score, whips, slow_enemies, medium_enemies, fast_enemies, values # Keep score nonlocal if it's modified directly here
 
         # Check if player has whips
         if whips <= 0:
-            return [], [], []  # No whips to use, return empty lists # Adjusted return # [cite: 69]
+            return [], [], []  # No whips to use, return empty lists
 
         # Define the whip animation positions (counter-clockwise)
         whip_positions = [
-            {"row": -1, "col": -1, "sprite": "whip1"},  # Top-left
-            {"row": -1, "col":  0, "sprite": "whip3"},  # Top
-            {"row": -1, "col":  1, "sprite": "whip2"},  # Top-right # [cite: 70]
-            {"row":  0, "col":  1, "sprite": "whip4"},  # Right
-            {"row":  1, "col":  1, "sprite": "whip1"},  # Bottom-right
-            {"row":  1, "col":  0, "sprite": "whip3"},  # Bottom
-            {"row":  1, "col": -1, "sprite": "whip2"},  # Bottom-left
-            {"row":  0, "col": -1, "sprite": "whip4"},  # Left # [cite: 71]
+            {"row": -1, "col": -1, "sprite_char": "whip1"},  # Use char keys for lookup in tile_mapping
+            {"row": -1, "col":  0, "sprite_char": "whip3"},
+            {"row": -1, "col":  1, "sprite_char": "whip2"},
+            {"row":  0, "col":  1, "sprite_char": "whip4"},
+            {"row":  1, "col":  1, "sprite_char": "whip1"},
+            {"row":  1, "col":  0, "sprite_char": "whip3"},
+            {"row":  1, "col": -1, "sprite_char": "whip2"},
+            {"row":  0, "col": -1, "sprite_char": "whip4"},
         ]
 
         # Track affected enemies
@@ -611,84 +532,77 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
         delay = 25  # milliseconds per frame
 
         # Grid offsets
-        grid_offset_x = TILE_WIDTH
-        grid_offset_y = TILE_HEIGHT
+        grid_offset_x = GP_TILE_WIDTH
+        grid_offset_y = GP_TILE_HEIGHT
 
-        # Original grid state before whip animation (Not needed with direct drawing) # [cite: 72]
-
-        # Whip animation loop
+        # --- Whip animation loop ---
         for position in whip_positions:
             # Calculate target position
             whip_row = player_row + position["row"]
             whip_col = player_col + position["col"]
 
-            # Check if position is in bounds (relative to grid, not screen) # [cite: 73]
+            # Check if position is in bounds
             if not (0 <= whip_row < len(grid) and 0 <= whip_col < len(grid[0])):
                 continue
 
             # Original tile at this position (for collision logic)
-            original_tile = grid[whip_row][whip_col] # [cite: 74]
+            original_tile_char = grid[whip_row][whip_col]
 
             # Check for enemy hits at this position *before* visual overlay
-            if original_tile in ["1", "2", "3"]:
-                 # Only add if not already hit in this whip sequence
-                is_already_hit = False
-                for r, c, _ in enemies_hit:
-                    if r == whip_row and c == whip_col:
-                        is_already_hit = True
-                        break
+            if original_tile_char in ["1", "2", "3"]:
+                # Only add if not already hit in this whip sequence
+                is_already_hit = any(r == whip_row and c == whip_col for r, c, _ in enemies_hit)
                 if not is_already_hit:
-                    enemies_hit.append((whip_row, whip_col, original_tile))
+                    enemies_hit.append((whip_row, whip_col, original_tile_char)) # Store char '1', '2', or '3'
 
             # --- Color Cycling Logic ---
-            whip_sprite_key = position["sprite"] # [cite: 75]
+            whip_sprite_char = position["sprite_char"]
             colored_whip_image = None # Initialize
-            if whip_sprite_key in images: # Ensure the key exists
-                original_whip_image = images[whip_sprite_key]
+            if whip_sprite_char in tile_mapping: # Check if the char key exists in the current mapping
+                original_whip_image = tile_mapping[whip_sprite_char]
                 random_color = random.choice(whip_cycle_colors)
                 colored_whip_image = original_whip_image.copy()
                 colored_whip_image.fill(random_color, special_flags=pygame.BLEND_RGB_MULT)
-            # --- End Color Cycling Logic ---
+            else:
+                print(f"Warning: Whip sprite character '{whip_sprite_char}' not found in tile_mapping.")
+
 
             # --- Direct Drawing within Whip Loop ---
             screen.fill(BLACK) # Clear screen before redraw
 
-            # Draw the border
-            border_image = tile_mapping['^']
-            for r_idx, row_str in enumerate(level_border):
-                if r_idx * TILE_HEIGHT >= HEIGHT: continue
-                for c_idx, char in enumerate(row_str):
-                    if c_idx * TILE_WIDTH >= WIDTH: continue
-                    if char == '^':
-                        screen.blit(border_image, (c_idx * TILE_WIDTH, r_idx * TILE_HEIGHT))
+            # Draw the border and window border
+            draw_borders(tile_mapping)
 
             # Draw the main game grid (offset)
             for r_idx, row in enumerate(grid):
-                 screen_y = grid_offset_y + (r_idx * TILE_HEIGHT)
-                 if screen_y >= HEIGHT - TILE_HEIGHT: continue
+                 screen_y = grid_offset_y + (r_idx * GP_TILE_HEIGHT)
+                 if screen_y >= HEIGHT - GP_TILE_HEIGHT: continue
                  for c_idx, char in enumerate(row):
-                     screen_x = grid_offset_x + (c_idx * TILE_WIDTH)
-                     if screen_x >= WIDTH - TILE_WIDTH: continue
+                     screen_x = grid_offset_x + (c_idx * GP_TILE_WIDTH)
+                     if screen_x >= WIDTH - GP_TILE_WIDTH: continue
 
                      # Draw the colored whip sprite at the current animation position
                      if r_idx == whip_row and c_idx == whip_col and colored_whip_image:
-                          # Calculate screen coordinates for the whip with offset
-                          whip_screen_x = grid_offset_x + whip_col * TILE_WIDTH
-                          whip_screen_y = grid_offset_y + whip_row * TILE_HEIGHT
-                          # Ensure whip is within drawable area before blitting
-                          if whip_screen_x < WIDTH - TILE_WIDTH and whip_screen_y < HEIGHT - TILE_HEIGHT:
+                          whip_screen_x = grid_offset_x + whip_col * GP_TILE_WIDTH
+                          whip_screen_y = grid_offset_y + whip_row * GP_TILE_HEIGHT
+                          if whip_screen_x < WIDTH - GP_TILE_WIDTH and whip_screen_y < HEIGHT - GP_TILE_HEIGHT:
                               screen.blit(colored_whip_image, (whip_screen_x, whip_screen_y))
-                     # Otherwise, draw the normal tile from the map (unless it's the whip position being drawn)
-                     elif not (r_idx == whip_row and c_idx == whip_col):
-                         if r_idx == player_row and c_idx == player_col: # Draw player
-                             player_sprite = tile_mapping['TP'] if is_cloaked else tile_mapping['P']
-                             screen.blit(player_sprite, (screen_x, screen_y))
+                     # Otherwise, draw the normal tile from the map
+                     else:
+                         # Handle player drawing separately to show cloak state
+                         if r_idx == player_row and c_idx == player_col:
+                              player_char = 'TP' if is_cloaked else 'P'
+                              if player_char in tile_mapping:
+                                  screen.blit(tile_mapping[player_char], (screen_x, screen_y))
                          elif char in tile_mapping: # Draw other tiles
-                             screen.blit(tile_mapping[char], (screen_x, screen_y)) # [cite: 76]
+                             screen.blit(tile_mapping[char], (screen_x, screen_y))
+                         # Optionally handle characters not in mapping (e.g., draw placeholder or skip)
+                         # else: print(f"Warning: Character '{char}' at ({r_idx},{c_idx}) not in tile_mapping.")
+
 
             values = [score, level_num, gems, whips, teleports, keys, cloaks]
-            hud_original(values) # Redraw HUD # [cite: 77]
-            
+            draw_hud(values, color_input, hud_input) # Redraw HUD
+
             # Display level-specific messages
             if level_num == 1:
                 game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
@@ -705,588 +619,641 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
         enemy_scores = {"1": 10, "2": 20, "3": 30}
 
         # Clear enemies hit by whip from both grid and enemy lists
-        for r, c, enemy_type in enemies_hit:
-            if 0 <= r < len(grid) and 0 <= c < len(grid[0]) and grid[r][c] == enemy_type: # Check bounds and if enemy still exists
+        for r, c, enemy_char in enemies_hit:
+            if 0 <= r < len(grid) and 0 <= c < len(grid[0]) and grid[r][c] == enemy_char: # Check bounds and if enemy still exists
                 grid[r][c] = " "  # Clear enemy from grid
-                # Add score based on enemy type using the dictionary
-                score += enemy_scores.get(enemy_type, 0) # [cite: 79]
+                score += enemy_scores.get(enemy_char, 0)
 
         # Rebuild enemy lists excluding the killed ones
         for enemy in slow_enemies:
-            if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "1": # [cite: 80]
+            # Check if enemy still exists on the grid after whip
+            if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "1":
                 new_slow_enemies.append(enemy)
 
         for enemy in medium_enemies:
              if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "2":
                 new_medium_enemies.append(enemy)
 
-        for enemy in fast_enemies: # [cite: 81]
+        for enemy in fast_enemies:
              if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "3":
                 new_fast_enemies.append(enemy)
 
         return new_slow_enemies, new_medium_enemies, new_fast_enemies # Return updated lists
 
-
     is_cloaked = False
     cloak_start_time = 0
-    CLOAK_DURATION = 3000
+    CLOAK_DURATION = 3000 # Milliseconds cloak lasts
 
     def cloak():
-        """ Handles cloak pickup, activation, and duration. """ # [cite: 82]
-        nonlocal cloaks, is_cloaked, cloak_start_time, values, CLOAK_DURATION
-
+        """ Handles cloak activation. """
+        nonlocal is_cloaked, cloak_start_time
         cloak_start_time = pygame.time.get_ticks()
         is_cloaked = True
-        cloaks -= 1
-        print(f"{cloaks}")
+        # Note: Cloak decrement happens in player_input where the action is initiated
 
-    def teleport(grid, player_row, player_col, tile_mapping, screen): # [cite: 82]
-        """Teleports the player to a random empty space on the grid with a flickering effect before and after teleporting.""" # [cite: 83]
+    def teleport():
+        """Teleports the player to a random empty space on the grid with a flickering effect."""
+        nonlocal player_row, player_col # Modifies player position directly
 
-        # Define grid offsets (assuming they are defined in the outer scope, like in the main drawing loop)
-        grid_offset_x = TILE_WIDTH
-        grid_offset_y = TILE_HEIGHT
+        # Define grid offsets
+        grid_offset_x = GP_TILE_WIDTH
+        grid_offset_y = GP_TILE_HEIGHT
 
-        # Find all empty spaces
-        empty_spaces = [(r, c) for r in range(len(grid)) for c in range(len(grid[0])) if grid[r][c] == ' ']
+        # Find all empty spaces (' ') on the current grid
+        empty_spaces = []
+        for r, row_data in enumerate(grid):
+            for c, char in enumerate(row_data):
+                if char == ' ':
+                    empty_spaces.append((r, c))
 
         if not empty_spaces:
-            return player_row, player_col
+            print("No empty spaces to teleport to!")
+            return # Cannot teleport if no empty space
 
-        # Calculate screen coordinates for the original position with offset # [cite: 84]
-        original_screen_x = grid_offset_x + player_col * TILE_WIDTH
-        original_screen_y = grid_offset_y + player_row * TILE_HEIGHT
-        original_rect = pygame.Rect(original_screen_x, original_screen_y, TILE_WIDTH, TILE_HEIGHT)
+        # --- Flicker at the original position ---
+        original_screen_x = grid_offset_x + player_col * GP_TILE_WIDTH
+        original_screen_y = grid_offset_y + player_row * GP_TILE_HEIGHT
+        original_rect = pygame.Rect(original_screen_x, original_screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT)
+        player_sprite = tile_mapping.get('P')
+        if not player_sprite:
+             print("Warning: Player sprite 'P' not found in tile_mapping for teleport.")
+             return # Cannot proceed without player sprite
 
-        # Flicker at the original position
-        for _ in range(20):
+        for _ in range(10): # Reduced flicker count
             random_color = random.choice(blinking_text_color_list)
-
-            # Fill original position with random color (using offset)
-            screen.fill(random_color, original_rect)
-
-            # Draw the player sprite at the original location (using offset)
-            screen.blit(tile_mapping['P'], (original_screen_x, original_screen_y)) # [cite: 85]
-
+            screen.fill(random_color, original_rect) # Fill background
+            screen.blit(player_sprite, (original_screen_x, original_screen_y)) # Draw player on top
+            pygame.display.update(original_rect)
+            pygame.time.delay(40)
+            screen.fill(BLACK, original_rect) # Clear before next flicker or final clear
             pygame.display.update(original_rect)
             pygame.time.delay(40)
 
-        # Clear the player's original position (using offset)
-        screen.fill(BLACK, original_rect)
-        pygame.display.update(original_rect)
 
         # --- Intermediate Flicker Loop ---
-        last_intermediate_rect = None # To clear the last drawn TP icon
-        for _ in range(250): # [cite: 86]
-            # Select a random empty space
+        last_intermediate_rect = None
+        tp_sprite = tile_mapping.get('TP')
+        if not tp_sprite:
+             print("Warning: Teleport player sprite 'TP' not found.")
+             tp_sprite = player_sprite # Fallback to normal player sprite
+
+        intermediate_flicker_count = 50 # Reduced count
+        intermediate_delay = 10 # Slightly increased delay
+
+        for i in range(intermediate_flicker_count):
             new_row, new_col = random.choice(empty_spaces)
+            intermediate_screen_x = grid_offset_x + new_col * GP_TILE_WIDTH
+            intermediate_screen_y = grid_offset_y + new_row * GP_TILE_HEIGHT
+            intermediate_rect = pygame.Rect(intermediate_screen_x, intermediate_screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT)
 
-            # Calculate screen coordinates for the intermediate position with offset
-            intermediate_screen_x = grid_offset_x + new_col * TILE_WIDTH
-            intermediate_screen_y = grid_offset_y + new_row * TILE_HEIGHT
-            intermediate_rect = pygame.Rect(intermediate_screen_x, intermediate_screen_y, TILE_WIDTH, TILE_HEIGHT)
-
-            # Clear previous intermediate TP icon if it exists
             if last_intermediate_rect:
-                screen.fill(BLACK, last_intermediate_rect)
-                pygame.display.update(last_intermediate_rect)
+                screen.fill(BLACK, last_intermediate_rect) # Clear previous
+                # Optional: redraw original tile if needed
+                # prev_r, prev_c = # calculate from last_intermediate_rect
+                # if grid[prev_r][prev_c] in tile_mapping: screen.blit(tile_mapping[grid[prev_r][prev_c]], last_intermediate_rect.topleft)
 
-            # Draw the TP icon at the new location (using offset)
-            screen.blit(tile_mapping['TP'], (intermediate_screen_x, intermediate_screen_y)) # [cite: 87]
-            pygame.display.update(intermediate_rect)
-            last_intermediate_rect = intermediate_rect # Store current rect for next clear
+            screen.blit(tp_sprite, (intermediate_screen_x, intermediate_screen_y)) # Draw TP icon
+            pygame.display.update([last_intermediate_rect, intermediate_rect] if last_intermediate_rect else [intermediate_rect])
+            last_intermediate_rect = intermediate_rect
 
-            pygame.time.delay(8)
+            pygame.time.delay(intermediate_delay)
 
-        # Clear the last intermediate TP icon after the loop finishes
+            # Store the final destination from the last iteration
+            if i == intermediate_flicker_count - 1:
+                 final_row, final_col = new_row, new_col
+                 final_screen_x = intermediate_screen_x
+                 final_screen_y = intermediate_screen_y
+                 final_rect = intermediate_rect
+
+
+        # Clear the last intermediate TP icon
         if last_intermediate_rect:
             screen.fill(BLACK, last_intermediate_rect)
+            # Optional: redraw original tile
             pygame.display.update(last_intermediate_rect)
-        # --- End Intermediate Flicker Loop ---
-
 
         # --- Final Destination Flicker ---
-        # Use the last selected new_row, new_col as the final destination # [cite: 88]
-        final_screen_x = grid_offset_x + new_col * TILE_WIDTH
-        final_screen_y = grid_offset_y + new_row * TILE_HEIGHT
-        final_rect = pygame.Rect(final_screen_x, final_screen_y, TILE_WIDTH, TILE_HEIGHT)
-
-        for _ in range(20):
+        for _ in range(10): # Reduced flicker count
             random_color = random.choice(blinking_text_color_list)
-
-            # Fill final position with random color (using offset)
-            screen.fill(random_color, final_rect)
-
-            # Draw the player sprite at the final location (using offset)
-            screen.blit(tile_mapping['P'], (final_screen_x, final_screen_y)) # [cite: 89]
-
+            screen.fill(random_color, final_rect) # Fill background
+            screen.blit(player_sprite, (final_screen_x, final_screen_y)) # Draw player on top
+            pygame.display.update(final_rect)
+            pygame.time.delay(40)
+            screen.fill(BLACK, final_rect) # Clear before placing player finally
             pygame.display.update(final_rect)
             pygame.time.delay(40)
 
-        # Clear the final position before placing the player (using offset)
-        screen.fill(BLACK, final_rect)
-        pygame.display.update(final_rect)
-        # --- End Final Destination Flicker ---
+
+        # --- Update Game State ---
+        # Clear old player position from the grid (logical update)
+        if 0 <= player_row < len(grid) and 0 <= player_col < len(grid[0]):
+            grid[player_row][player_col] = ' '
+        else:
+            print(f"Warning: Original player position ({player_row}, {player_col}) was out of bounds.")
 
 
-        # Clear old player position from the grid (logical update, no drawing)
-        grid[player_row][player_col] = ' ' # [cite: 90]
+        # Update the grid with new player position (logical update)
+        grid[final_row][final_col] = 'P'
 
-        # Update the grid with new player position (logical update, no drawing)
-        grid[new_row][new_col] = 'P'
+        # Update player's logical position
+        player_row, player_col = final_row, final_col
 
-        # Ensure final player placement is visible (using offset)
-        screen.blit(tile_mapping['P'], (final_screen_x, final_screen_y))
-        pygame.display.update(final_rect)
+        # Ensure final player placement is visible (redraw the grid or just the player tile)
+        # The main game loop's draw_grid() will handle the final drawing
+        # screen.blit(player_sprite, (final_screen_x, final_screen_y))
+        # pygame.display.update(final_rect)
 
-        # Return new player position (logical coordinates)
-        return new_row, new_col
-
-    # Movement settings - simplified for consistent movement # [cite: 91]
-    movement_cooldown = 100  # ms between moves (one space per 100ms)
+    # --- Movement settings ---
+    movement_cooldown = 100  # ms between moves
     last_move_time = 0
-    # Use keys_held_time and momentum dictionaries from gameplayOLD.py.txt
-    keys_held_time = {
-        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0,
-        pygame.K_j: 0, pygame.K_l: 0,
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0 # [cite: 33]
-    }
-    momentum = { # [cite: 92]
-        pygame.K_UP: 0, pygame.K_DOWN: 0, pygame.K_LEFT: 0, pygame.K_RIGHT: 0,
-        pygame.K_u: 0, pygame.K_i: 0, pygame.K_o: 0, # [cite: 34]
-        pygame.K_j: 0, pygame.K_l: 0,
-        pygame.K_n: 0, pygame.K_m: 0, pygame.K_COMMA: 0
-    }
+    keys_held_time = { k: 0 for k in keys_pressed } # Initialize based on keys_pressed dict
+    momentum = { k: 0 for k in keys_pressed }
 
-
-    # How long a key needs to be held to generate momentum (in ms)
-    MOMENTUM_THRESHOLD = 300 # [cite: 93]
-    # Maximum momentum value (number of extra moves)
+    MOMENTUM_THRESHOLD = 300
     MAX_MOMENTUM = 5
 
     def player_input():
-        """Handle player movement with consistent rate and momentum"""
-        nonlocal player_row, player_col, score, gems, whips, teleports, keys, cloaks, is_cloaked # Added cloaks, is_cloaked
+        """Handle player movement, whip, teleport, and cloak actions."""
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys, cloaks, is_cloaked
         nonlocal slow_enemies, medium_enemies, fast_enemies, last_move_time
-        # Need access to these for drawing during whip
-        nonlocal values
+        nonlocal values # Needed for drawing during actions like whip
 
         current_time = pygame.time.get_ticks()
         current_keys = pygame.key.get_pressed()
-        action_performed = False # [cite: 94]
+        action_performed = False # Tracks if non-movement action occurred
 
-        # Handle whip activation with the 'W' key
-        if current_keys[pygame.K_w]:
-            if not keys_pressed.get(pygame.K_w, False):  # Key just pressed
-                keys_pressed[pygame.K_w] = True
-                if whips > 0:
-                    # Call use_whip and update enemy lists
-                    slow_enemies, medium_enemies, fast_enemies = use_whip() # Removed kills # [cite: 95]
-                    whips -= 1 # Decrement whip after use
-                    action_performed = True
-        else: # [cite: 97]
+        # --- Action Handling (Whip, Teleport, Cloak) ---
+        # Handle whip ('W')
+        if current_keys[pygame.K_w] and not keys_pressed.get(pygame.K_w, False):
+            keys_pressed[pygame.K_w] = True
+            if whips > 0:
+                # Decrement whip *before* calling use_whip to reflect cost
+                whips -= 1
+                values[3] = whips # Update HUD value immediately
+                # Call use_whip and update enemy lists
+                slow_enemies, medium_enemies, fast_enemies = use_whip()
+                action_performed = True
+                last_move_time = current_time # Reset move timer after action
+        elif not current_keys[pygame.K_w]:
             keys_pressed[pygame.K_w] = False
 
-        # Handle Teleport activation with the 't' key
-        if current_keys[pygame.K_t]:
-            if not keys_pressed.get(pygame.K_t, False): # Use .get for safety if key not initialized
-                keys_pressed[pygame.K_t] = True
-                if teleports > 0:
-                    # Pass necessary variables to teleport
-                    player_row, player_col = teleport(grid, player_row, player_col, tile_mapping, screen) # [cite: 98]
-                    teleports -= 1
-                    action_performed = True # Mark action performed
-            # No else needed here, key remains pressed until released
+        # Handle Teleport ('T')
+        if current_keys[pygame.K_t] and not keys_pressed.get(pygame.K_t, False):
+            keys_pressed[pygame.K_t] = True
+            if teleports > 0:
+                teleports -= 1
+                values[4] = teleports # Update HUD
+                teleport() # Calls the teleport function which handles animation and player pos update
+                action_performed = True
+                last_move_time = current_time # Reset move timer
+        elif not current_keys[pygame.K_t]:
+            keys_pressed[pygame.K_t] = False
 
-        # Handle key release for teleport
-        elif not current_keys[pygame.K_t] and keys_pressed.get(pygame.K_t, False):
-             keys_pressed[pygame.K_t] = False
-
-
-        # Handle cloak activation with the 'c' key # [cite: 99]
-        # Activate cloak if 'c' is pressed
-        if current_keys[pygame.K_c]:
-            if not keys_pressed.get(pygame.K_c, False): # Use .get for safety
-                keys_pressed[pygame.K_c] = True
-                if cloaks > 0 and not is_cloaked:
-                    cloak()
-                    action_performed = True # Mark action performed # [cite: 100]
-            # No else needed here, key remains pressed until released
-
-        # Handle key release for cloak
-        elif not current_keys[pygame.K_c] and keys_pressed.get(pygame.K_c, False):
-             keys_pressed[pygame.K_c] = False
+        # Handle Cloak ('C')
+        if current_keys[pygame.K_c] and not keys_pressed.get(pygame.K_c, False):
+            keys_pressed[pygame.K_c] = True
+            if cloaks > 0 and not is_cloaked:
+                cloaks -= 1
+                values[6] = cloaks # Update HUD
+                cloak() # Activates cloak state and timer
+                action_performed = True
+                last_move_time = current_time # Reset move timer
+        elif not current_keys[pygame.K_c]:
+            keys_pressed[pygame.K_c] = False
 
 
-        # Check if enough time has passed since last move
+        # --- Movement Handling ---
         time_since_last_move = current_time - last_move_time
-        if time_since_last_move < movement_cooldown and not action_performed: # Only return if no other action was taken
-            return action_performed # Not time to move yet, but might have performed an action
+        move_attempted = False # Tracks if a move was attempted this frame
 
-        # Ready to make a move or already performed an action # [cite: 101]
-        move_made = False
-
-        # Define all direction keys with their movement vectors (delta_row, delta_col)
-        direction_keys = [
-            (pygame.K_UP, (-1, 0)), # [cite: 101]
-            (pygame.K_DOWN, (1, 0)), # [cite: 102]
-            (pygame.K_LEFT, (0, -1)),
-            (pygame.K_RIGHT, (0, 1)),
-
-            # UIOJLNM, keys
-            (pygame.K_u, (-1, -1)),  # Up-left
-            (pygame.K_i, (-1, 0)),   # Up
-            (pygame.K_o, (-1, 1)),   # Up-right # [cite: 103]
-            (pygame.K_j, (0, -1)),   # Left
-            (pygame.K_l, (0, 1)),    # Right
-            (pygame.K_n, (1, -1)),   # Down-left
-            (pygame.K_m, (1, 0)),    # Down
-            (pygame.K_COMMA, (1, 1)) # Down-right # [cite: 104]
-        ]
-
-        # Check movement keys only if enough time has passed
         if time_since_last_move >= movement_cooldown:
-            # First check keys being held down - using all direction keys
-            for key, (delta_row, delta_col) in direction_keys:
+            move_made = False # Tracks if a successful move was made this frame
+
+            # Define all direction keys with their movement vectors (delta_row, delta_col)
+            direction_keys = [
+                (pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)),
+                (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1)),
+                (pygame.K_u, (-1, -1)), (pygame.K_i, (-1, 0)), (pygame.K_o, (-1, 1)),
+                (pygame.K_j, (0, -1)), (pygame.K_l, (0, 1)),
+                (pygame.K_n, (1, -1)), (pygame.K_m, (1, 0)), (pygame.K_COMMA, (1, 1))
+            ]
+
+            active_direction_key = None
+
+            # Check currently pressed keys first
+            for key, (dr, dc) in direction_keys:
                 if current_keys[key]:
+                    move_attempted = True
                     if not keys_pressed.get(key, False):  # Key just pressed
-                        keys_pressed[key] = True # [cite: 105]
+                        keys_pressed[key] = True
                         keys_held_time[key] = current_time
+                        momentum[key] = 0 # Reset momentum on new press
 
-                    # Try to move in the direction
-                    move_made = process_move(player_row + delta_row, player_col + delta_col)
-                    if move_made: # [cite: 106]
-                        last_move_time = current_time
-                        # Reset momentum for the key used
-                        if key in momentum: momentum[key] = 0
+                    # Try to move in this direction
+                    if process_move(player_row + dr, player_col + dc):
+                        move_made = True
+                        active_direction_key = key
                         break # Exit loop once a move is made
-                else:
-                    # Key released or not pressed
-                    if keys_pressed.get(key, False): # [cite: 107]
-                        hold_duration = current_time - keys_held_time.get(key, current_time) # Use .get with default
-                        if hold_duration > MOMENTUM_THRESHOLD:
-                            # Add momentum based on hold duration
-                            momentum[key] = min(MAX_MOMENTUM, int((hold_duration - MOMENTUM_THRESHOLD) / 100)) # [cite: 108]
-                        keys_pressed[key] = False
 
-            # If no key is pressed but we have momentum, apply it
-            if not move_made:
-                for key, (delta_row, delta_col) in direction_keys:
-                    if momentum.get(key, 0) > 0: # Use .get with default
-                        move_made = process_move(player_row + delta_row, player_col + delta_col) # [cite: 109]
-                        if move_made:
-                            momentum[key] -= 1
-                            last_move_time = current_time
-                            break # Exit loop once a move is made # [cite: 110]
+            # Handle key releases and momentum buildup for *all* direction keys
+            for key, _ in direction_keys:
+                 if not current_keys[key] and keys_pressed.get(key, False): # Key was pressed, now released
+                     hold_duration = current_time - keys_held_time.get(key, current_time)
+                     if hold_duration > MOMENTUM_THRESHOLD:
+                         # Add momentum based on hold duration
+                         momentum[key] = min(MAX_MOMENTUM, int((hold_duration - MOMENTUM_THRESHOLD) / 100))
+                     keys_pressed[key] = False # Mark as released
 
-        return action_performed or move_made
+            # If no key is currently pressed or move failed, check for momentum
+            if not move_made and move_attempted: # Only apply momentum if a move was attempted but failed or no key is pressed now
+                 # Find the key with the highest momentum
+                 momentum_key = None
+                 max_momentum = 0
+                 for key, mom in momentum.items():
+                     if mom > max_momentum:
+                         max_momentum = mom
+                         momentum_key = key
+
+                 if momentum_key is not None and max_momentum > 0:
+                     # Find the corresponding dr, dc
+                     for key, (dr, dc) in direction_keys:
+                         if key == momentum_key:
+                             if process_move(player_row + dr, player_col + dc):
+                                 move_made = True
+                                 momentum[momentum_key] -= 1
+                             else:
+                                 momentum[momentum_key] = 0 # Clear momentum if move fails
+                             break # Exit inner loop
+
+            # Update last move time if a move was successful
+            if move_made:
+                last_move_time = current_time
+                # Optionally reset momentum for the key that *caused* the move
+                if active_direction_key:
+                    momentum[active_direction_key] = 0
+
+
+        return action_performed or move_attempted # Return true if any action or move attempt happened
 
     def process_move(new_row, new_col):
-        """Process a player movement to a new position"""
+        """Process a player movement attempt to a new position."""
         nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks
+        nonlocal current_level_index # Needed for level change
 
-        # Check if position is valid # [cite: 111]
+        # Check bounds
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
-            return False
+            return False # Invalid move (out of bounds)
 
-        # Check if destination is not a wall
-        if grid[new_row][new_col] not in collidable_tiles:
-            # Collect items
-            if grid[new_row][new_col] == "+":  # Gem # [cite: 112]
-                gems += 1
-                score += 10  # Original game awards 1 point per gem
-            elif grid[new_row][new_col] == "W":  # Whip
-                whips += 1
-                score += 10  # Original game awards 1 point per whip # [cite: 113]
-            elif grid[new_row][new_col] == "T":  # Teleport
-                teleports += 1
-                score += 10  # Original game awards 1 point per teleport
-            elif grid[new_row][new_col] == "K":  # Key
-                keys += 1 # [cite: 114]
-                score += 10  # Original game doesn't specify key points explicitly
-            elif grid[new_row][new_col] == "L":  # Stairs to next level
-                # level_num += 1 # Level change is handled separately now
-                score += level_num # Original game awards points equal to level num # [cite: 115]
-                change_level(current_level_index + 1) # Call level change here
-                return True # Indicate successful move leading to level change
-            elif grid[new_row][new_col] == "_":  # Cloak (using _ as per gameplayOLD mapping)
-                cloaks += 1
-                score += 60  # optional value
-            elif grid[new_row][new_col] == "*":  # Nugget # [cite: 115]
-                score += 50  # Gold nuggets are worth 50 points # [cite: 116]
-            elif grid[new_row][new_col] == "S":  # SlowTime
-                score += 5  # SlowTime bonus
-            elif grid[new_row][new_col] == "I":  # Invisible
-                score += 10  # Invisible bonus
-            elif grid[new_row][new_col] == "F":  # SpeedTime # [cite: 117]
-                score += 20  # SpeedTime bonus
-            elif grid[new_row][new_col] == "C":  # Chest
-                score += 50  # Chest bonus
-            elif grid[new_row][new_col] == "!":  # Tablet
-                score += level_num + 250  # Tablet bonus (level + fixed bonus) # [cite: 118]
+        target_char = grid[new_row][new_col]
+        moved = False
 
-            # Move player
-            grid[player_row][player_col] = " "
+        # Check non-collidable first (empty space or collectables)
+        if target_char == " ":
+            moved = True
+        elif target_char == "+": # Gem
+            gems += 1
+            score += 10
+            moved = True
+        elif target_char == "W": # Whip
+            whips += 1
+            score += 10
+            moved = True
+        elif target_char == "T": # Teleport Scroll
+            teleports += 1
+            score += 10
+            moved = True
+        elif target_char == "K": # Key
+            keys += 1
+            score += 10
+            moved = True
+        elif target_char == "_": # Cloak item (using TP sprite visually)
+            cloaks += 1
+            score += 60
+            moved = True
+        elif target_char == "*": # Nugget
+            score += 50
+            moved = True
+        elif target_char == "S": # SlowTime
+            score += 5
+            # Effect applied in main loop based on powerup pickup logic
+            moved = True
+        elif target_char == "I": # Invisible
+            score += 10
+            # Effect applied in main loop
+            moved = True
+        elif target_char == "F": # SpeedTime
+            score += 20
+            # Effect applied in main loop
+            moved = True
+        elif target_char == "C": # Chest
+            score += 50
+            # Add random gems/whips logic here if needed
+            moved = True
+        elif target_char == "!": # Tablet
+            score += level_num + 250
+            moved = True
+        elif target_char == "Z": # Freeze
+             score += 5 # Example score
+             # Effect applied in main loop
+             moved = True
+        # Add other collectable items here...
+        elif target_char == "L": # Stairs
+            score += level_num * 100 # Example score for level change
+            next_level_idx = (current_level_index + 1) % len(level_maps)
+            change_level(next_level_idx)
+            current_level_index = next_level_idx # Update the index tracker
+            return True # Return True immediately as level changes
+
+        # --- If moved onto a collectable or empty space ---
+        if moved:
+            grid[player_row][player_col] = " " # Clear old position
             player_row, player_col = new_row, new_col
-            grid[player_row][player_col] = "P"
+            grid[player_row][player_col] = "P" # Place player in new position
             return True
 
-        # Movement was blocked # [cite: 119]
-        if grid[new_row][new_col] in ["X", "#"]:  # Wall or block
-            if score > 20:  # Only subtract if score is greater than 20 (from old code)
-                score -= 20  # Original game deducts 20 points for hitting walls
+        # --- Check Collisions ---
+        elif target_char in collidable_tiles:
+            # Check if it's a breakable wall 'X' - original code deducted score for # too
+            if target_char in ["X", "#"]:
+                 if score >= 20: # Only deduct if score is sufficient
+                     score -= 20
+            # Handle door 'D' - requires a key
+            elif target_char == 'D':
+                if keys > 0:
+                    keys -= 1
+                    grid[player_row][player_col] = " " # Clear old position
+                    player_row, player_col = new_row, new_col
+                    grid[player_row][player_col] = "P" # Move player onto door space (it becomes empty)
+                    return True # Successful move through door
+                else:
+                    # No key, cannot move
+                    return False
+            # Add other specific collision logic (like locked doors requiring specific keys, etc.)
+            # ...
+
+            # If it's a standard collidable tile not handled above
+            return False # Movement blocked
+
+        # --- Handle Enemy Collision (if player moves onto enemy) ---
+        # This case shouldn't happen if enemies move first, but as a safeguard:
+        elif target_char in ["1", "2", "3"]:
+             # Player moving onto an enemy could instantly trigger gem loss/death
+             if target_char == "1": gems -= 1
+             elif target_char == "2": gems -= 2
+             elif target_char == "3": gems -= 3
+
+             if gems < 0:
+                 player_death(score, level_num)
+                 return True # Move technically happened before death sequence
+
+             # Clear old player position, place player, remove enemy
+             grid[player_row][player_col] = " "
+             player_row, player_col = new_row, new_col
+             grid[player_row][player_col] = "P"
+             # Remove the enemy from its list
+             if target_char == "1": slow_enemies = [e for e in slow_enemies if not (e["row"] == new_row and e["col"] == new_col)]
+             elif target_char == "2": medium_enemies = [e for e in medium_enemies if not (e["row"] == new_row and e["col"] == new_col)]
+             elif target_char == "3": fast_enemies = [e for e in fast_enemies if not (e["row"] == new_row and e["col"] == new_col)]
+             return True
+
+
+        # Default case: if the target tile is not explicitly handled, block movement
         return False
 
-    # Game constants # [cite: 120]
-    FAST_PC = True  # Modern computers are "fast" compared to original era
+    # --- Game constants and Timers ---
+    FAST_PC = True # Assume modern PC
 
-    # Timer initialization (from KINGDOM4.INC lines 61-63)
-    if FAST_PC:
-        BASE_SLOW_TIMER = 10
-        BASE_MEDIUM_TIMER = 8
-        BASE_FAST_TIMER = 6
-    else:
-        BASE_SLOW_TIMER = 3
-        BASE_MEDIUM_TIMER = 2
-        BASE_FAST_TIMER = 1 # [cite: 121]
+    BASE_SLOW_TIMER = 10 if FAST_PC else 3
+    BASE_MEDIUM_TIMER = 8 if FAST_PC else 2
+    BASE_FAST_TIMER = 6 if FAST_PC else 1
 
-    # Current timer values
-    SLOW_TIMER = BASE_SLOW_TIMER
-    MEDIUM_TIMER = BASE_MEDIUM_TIMER
-    FAST_TIMER = BASE_FAST_TIMER
+    # Current timer thresholds (can be modified by spells)
+    slow_threshold = BASE_SLOW_TIMER
+    medium_threshold = BASE_MEDIUM_TIMER
+    fast_threshold = BASE_FAST_TIMER
 
-    # Spell effect timers
-    slow_time_effect = 0  # T[4] in original
-    invisible_effect = 0  # T[5] in original
-    speed_time_effect = 0 # T[6] in original
-    freeze_effect = 0     # T[7] in original
+    # Spell effect timers (in ticks)
+    slow_time_effect = 0
+    invisible_effect = 0 # Not implemented yet, placeholder
+    speed_time_effect = 0
+    freeze_effect = 0
 
-    # Higher rate faster enemies move # [cite: 122]
-    GAME_TICK_RATE = 16.0 # Use tick rate from gameplayOLD
+    GAME_TICK_RATE = 16.0 # Target ticks per second
 
-    # Initialize enemy movement counters
+    # Enemy movement counters
     slow_counter = 0
     medium_counter = 0
     fast_counter = 0
 
-    # How many ticks to wait between enemy movements (higher = slower) - Using gameplayOLD logic
-    # Note: These will be updated dynamically based on spell effects later
-    slow_threshold = 10 # [cite: 123]
-    medium_threshold = 7
-    fast_threshold = 4
-
-
-    # Game loop
+    # --- Game loop ---
     running = True
     clock = pygame.time.Clock()
-    tick_counter = 0
 
-    wait = True
+    waiting_for_start_key = True # Start paused
 
     # Ensure the "saves" directory exists
     saves_dir = os.path.join("src", "saves")
     if not os.path.exists(saves_dir):
-        os.makedirs(saves_dir)
+        try:
+            os.makedirs(saves_dir)
+        except OSError as e:
+            print(f"Error creating saves directory: {e}")
+            # Handle error appropriately, maybe exit or disable saving
 
     def save_game(state, slot):
-        """Save the game state to a JSON file."""
-        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json") # [cite: 124]
-        with open(save_path, "w") as save_file:
-            json.dump(state, save_file, indent=4)  # Save only the player state
-        print(f"Saving to file {slot}...")
-        pygame.time.wait(2000)  # Wait for 2 seconds
+        """Save the relevant game state to a JSON file."""
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")
+        try:
+            # Include essential state variables
+            save_data = {
+                "player_row": state["player_row"],
+                "player_col": state["player_col"],
+                "score": state["score"],
+                "level_num": state["level_num"],
+                "gems": state["gems"],
+                "whips": state["whips"],
+                "teleports": state["teleports"],
+                "keys": state["keys"],
+                "cloaks": state["cloaks"], # Save cloaks
+                "current_level_index": state["current_level_index"], # Save level index
+                # Optionally save enemy positions if desired (more complex restore)
+                # "slow_enemies": state["slow_enemies"],
+                # "medium_enemies": state["medium_enemies"],
+                # "fast_enemies": state["fast_enemies"],
+                # Optionally save grid state (large file)
+                # "grid": state["grid"],
+            }
+            with open(save_path, "w") as save_file:
+                json.dump(save_data, save_file, indent=4)
+            print(f"Game saved to slot {slot}...")
+            game_text(25, f"Game Saved to Slot {slot}", WHITE, False, True, BLACK) # Display confirmation
+            pygame.display.flip()
+            pygame.time.wait(1500)
+        except Exception as e:
+             print(f"Error saving game to slot {slot}: {e}")
+             game_text(25, f"Error Saving Game!", RED, False, True, BLACK)
+             pygame.display.flip()
+             pygame.time.wait(1500)
+
 
     def restore_game(slot):
         """Restore the game state from a JSON file."""
-        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json") # [cite: 125]
+        save_path = os.path.join(saves_dir, f"KINGDOM{slot}.json")
         if os.path.exists(save_path):
-            with open(save_path, "r") as save_file:
-                state = json.load(save_file)
-            print(f"Restoring from file {slot}...")
-            pygame.time.wait(2000)  # Wait for 2 seconds
-            return state  # Return the restored state
-        else: # [cite: 126]
+            try:
+                with open(save_path, "r") as save_file:
+                    state = json.load(save_file)
+                print(f"Restoring from file {slot}...")
+                game_text(25, f"Restoring from Slot {slot}...", WHITE, False, True, BLACK)
+                pygame.display.flip()
+                pygame.time.wait(1500)
+                return state
+            except Exception as e:
+                 print(f"Error loading game from slot {slot}: {e}")
+                 game_text(25, f"Error Loading Save!", RED, False, True, BLACK)
+                 pygame.display.flip()
+                 pygame.time.wait(1500)
+                 return None
+        else:
             print(f"No save file found for slot {slot}.")
+            game_text(25, f"No Save File Found for Slot {slot}", YELLOW, False, True, BLACK)
+            pygame.display.flip()
+            pygame.time.wait(1500)
             return None
 
-    def handle_save(state):
-        """Handle the save process."""
-        paused = True
-        print("\nGame is PAUSED.\n")  # Output when the game is paused for saving
-        print("Are you sure you want to SAVE (Y/N)?")
-        while paused: # [cite: 127]
+    def prompt_save_restore(action):
+        """Prompt the user to pick a save/restore slot (A, B, or C)."""
+        slot = None
+        prompt_message = f"Pick slot to {action} (A, B, or C)? "
+        input_char = ""
+
+        while slot not in ["A", "B", "C"]:
+            # Display prompt
+            game_text(25, prompt_message + input_char + "█", WHITE, True, True, BLACK) # Blinking cursor
             pygame.display.flip()
+
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    key_char = event.unicode.upper()
+                    if key_char in ("A", "B", "C"):
+                        input_char = key_char
+                        slot = key_char
+                        # Display final choice briefly
+                        game_text(25, prompt_message + input_char, WHITE, False, True, BLACK)
+                        pygame.display.flip()
+                        pygame.time.wait(300)
+                        return slot
+                    elif event.key == pygame.K_ESCAPE:
+                         game_text(25, f"{action} Cancelled", YELLOW, False, True, BLACK)
+                         pygame.display.flip()
+                         pygame.time.wait(1000)
+                         return None # User cancelled
+                    # Ignore other keys
+
+    def handle_save():
+        """Handle the save confirmation and process."""
+        # Display confirmation prompt
+        game_text(25, "Are you sure you want to SAVE (Y/N)?", "CHANGING", False, True, BLACK)
+        pygame.display.flip()
+
+        confirmed = False
+        while True: # Wait for Y/N input
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_y:
-                        paused = False # [cite: 128]
-                        save_slot = prompt_save_restore("SAVE")
-                        if save_slot:
-                            save_game({
-                                "player_row": state["player_row"], # [cite: 129]
-                                "player_col": state["player_col"],
-                                "Score": state["Score"],
-                                "level_num": state["level_num"], # [cite: 130]
-                                "gems": state["gems"],
-                                "whips": state["whips"],
-                                "teleports": state["teleports"], # [cite: 131]
-                                "keys": state["keys"]
-                            }, save_slot)
-                    elif event.key in (pygame.K_n, pygame.K_ESCAPE): # [cite: 132]
-                        paused = False
-        print("\nGame RESUMED.\n")  # Output when the game resumes after saving
+                        confirmed = True
+                        break
+                    elif event.key in (pygame.K_n, pygame.K_ESCAPE):
+                        confirmed = False
+                        break
+            if confirmed is not None: break # Exit loop once Y or N is pressed
+
+        if confirmed:
+            save_slot = prompt_save_restore("SAVE")
+            if save_slot:
+                # Gather current state
+                current_state = {
+                    "player_row": player_row,
+                    "player_col": player_col,
+                    "score": score,
+                    "level_num": level_num,
+                    "gems": gems,
+                    "whips": whips,
+                    "teleports": teleports,
+                    "keys": keys,
+                    "cloaks": cloaks,
+                    "current_level_index": current_level_index,
+                    # "grid": grid, # Avoid saving grid by default unless necessary
+                    # "slow_enemies": slow_enemies, # Avoid saving enemies unless necessary
+                    # "medium_enemies": medium_enemies,
+                    # "fast_enemies": fast_enemies,
+                }
+                save_game(current_state, save_slot)
+        else:
+             game_text(25, "Save Cancelled", YELLOW, False, True, BLACK)
+             pygame.display.flip()
+             pygame.time.wait(1000)
+
 
     def handle_restore():
-        """Handle the restore process."""
-        paused = True
-        print("\nGame is PAUSED.\n")  # Output when the game is paused for restoring
-        print("Are you sure you want to RESTORE (Y/N)?") # [cite: 133]
-        while paused:
-            pygame.display.flip()
+        """Handle the restore confirmation and process."""
+        nonlocal grid, player_row, player_col, score, level_num, gems, whips, teleports, keys, cloaks
+        nonlocal current_level_index, slow_enemies, medium_enemies, fast_enemies, waiting_for_start_key, values
+
+        # Display confirmation prompt
+        game_text(25, "Are you sure you want to RESTORE (Y/N)?", "CHANGING", False, True, BLACK)
+        pygame.display.flip()
+
+        confirmed = False
+        while True: # Wait for Y/N input
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_y:
-                        paused = False # [cite: 134]
-                        restore_slot = prompt_save_restore("RESTORE")
-                        if restore_slot:
-                            restored_state = restore_game(restore_slot)
-                            if restored_state: # [cite: 135]
-                                # Regenerate the grid based on the saved level number
-                                grid = generate_grid_for_level(restored_state["level_num"])
-                                return { # [cite: 136]
-                                    "grid": grid,  # Regenerated grid
-                                    "player_row": restored_state["player_row"], # [cite: 137]
-                                    "player_col": restored_state["player_col"],
-                                    "Score": restored_state["Score"],
-                                    "level_num": restored_state["level_num"], # [cite: 138]
-                                    "gems": restored_state["gems"],
-                                    "whips": restored_state["whips"],
-                                    "teleports": restored_state["teleports"], # [cite: 139]
-                                    "keys": restored_state["keys"]
-                                } # [cite: 140]
+                        confirmed = True
+                        break
                     elif event.key in (pygame.K_n, pygame.K_ESCAPE):
-                        paused = False
-        print("\nGame RESUMED.\n")  # Output when the game resumes after restoring
-        return None
+                        confirmed = False
+                        break
+            if confirmed is not None: break
 
-    def prompt_save_restore(action):
-        """Prompt the user to pick a save/restore slot."""
-        slot = None # [cite: 141]
-        print(f"Pick which letter to {action} to/from: A, B, or C? A") # [cite: 142]
-        while slot not in {"A", "B", "C"}:
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key in (pygame.K_a, pygame.K_b, pygame.K_c):
-                        slot = chr(event.key).upper() # [cite: 143]
-                        return slot
-
-    def generate_grid_for_level(level_num):
-        """Generate the grid for the given level number."""
-        # Ensure the level number is valid
-        if 1 <= level_num <= len(level_maps): # [cite: 144]
-            return [list(row) for row in level_maps[level_num - 1]]  # Convert strings to lists of characters
-        else:
-            raise ValueError(f"Level {level_num} is not defined in level_maps.")
-
-    def draw_grid():
-        nonlocal score, level_num, gems, whips, teleports, keys, cloaks # Ensure access to the latest values
-        screen.fill(BLACK)
-
-        # Draw the border first
-        border_image = tile_mapping['^']
-        for row_index, row_str in enumerate(level_border):
-            # Ensure row_index is within screen bounds if border map is larger than screen rows
-            if row_index * TILE_HEIGHT >= HEIGHT: continue
-            for col_index, char in enumerate(row_str):
-                # Ensure col_index is within screen bounds
-                if col_index * TILE_WIDTH >= WIDTH: continue
-                if char == '^':
-                    screen.blit(border_image, (col_index * TILE_WIDTH, row_index * TILE_HEIGHT))
-
-        # Draw the main game grid, offset by one tile
-        grid_offset_x = TILE_WIDTH
-        grid_offset_y = TILE_HEIGHT
-        for row_index, row in enumerate(grid):
-             # Calculate screen coordinates with offset
-             screen_y = grid_offset_y + (row_index * TILE_HEIGHT)
-             # Ensure row_index is within screen bounds (considering offset)
-             if screen_y >= HEIGHT - TILE_HEIGHT: continue # Stop if tile goes beyond bottom border area
-
-             for col_index, char in enumerate(row):
-                 # Calculate screen coordinates with offset
-                 screen_x = grid_offset_x + (col_index * TILE_WIDTH)
-                 # Ensure col_index is within screen bounds (considering offset)
-                 if screen_x >= WIDTH - TILE_WIDTH: continue # Stop if tile goes beyond right border area
-
-                 if char == "P": # [cite: 155]
-                     if is_cloaked: # Changed player icon
-                         screen.blit(tile_mapping['TP'], (screen_x, screen_y))
-                     else:
-                         screen.blit(tile_mapping['P'], (screen_x, screen_y)) # [cite: 156]
-                 elif char in tile_mapping:
-                     screen.blit(tile_mapping[char], (screen_x, screen_y))
-
-        # Update the values list with the current game state before drawing the HUD
-        values = [score, level_num, gems, whips, teleports, keys, cloaks]
-        hud_original(values) # Use hud_original with updated values
-
-        # Display level-specific messages
-        if level_num == 1:
-             game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
-
-    waiting_for_start_key = True
-
-    while running:
-        # Handle events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: # [cite: 145]
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                # If waiting, any key press starts the level
-                if waiting_for_start_key:
-                    waiting_for_start_key = False
-                    pygame.event.clear(pygame.KEYDOWN) # Clear the keydown queue to prevent immediate move
-                    continue # Skip the rest of the keydown handling for this frame
-
-                # --- Existing keydown handling (only runs if not waiting) ---
-                if event.key == pygame.K_p:
-                    pause_quit(quitting=False)
-                elif event.key in (pygame.K_q, pygame.K_ESCAPE): # ASCII value # 81 & 27 # [cite: 146]
-                    if pause_quit(quitting=True):
-                        running = False
-                elif event.key == pygame.K_TAB:
-                    # Go to next level when Tab is pressed # [cite: 147]
-                    current_level_index = (current_level_index + 1) % len(level_maps)
-                    change_level(current_level_index)
-                elif event.key == pygame.K_s:
-                    handle_save({
-                        "player_row": player_row, # [cite: 148]
-                        "player_col": player_col,
-                        "Score": score,
-                        "level_num": level_num,
-                        "gems": gems, # [cite: 149]
-                        "whips": whips,
-                        "teleports": teleports,
-                        "keys": keys
-                    }) # [cite: 150]
-                elif event.key == pygame.K_r:
-                    restored_state = handle_restore()
-                    if restored_state:
+        if confirmed:
+            restore_slot = prompt_save_restore("RESTORE")
+            if restore_slot:
+                restored_state = restore_game(restore_slot)
+                if restored_state:
+                    try:
                         # Apply the restored state
-                        grid = restored_state["grid"] # Regenerate grid based on restored level # [cite: 151]
+                        current_level_index = restored_state["current_level_index"]
+                        level_num = restored_state["level_num"]
+                        grid = [list(row) for row in level_maps[current_level_index]] # Regenerate grid
+
                         player_row = restored_state["player_row"]
                         player_col = restored_state["player_col"]
-                        score = restored_state["Score"]
-                        level_num = restored_state["level_num"] # [cite: 152]
+                        score = restored_state["score"]
                         gems = restored_state["gems"]
                         whips = restored_state["whips"]
                         teleports = restored_state["teleports"]
-                        keys = restored_state["keys"] # [cite: 153]
-                        waiting_for_start_key = True # Set wait flag after restore
+                        keys = restored_state["keys"]
+                        cloaks = restored_state["cloaks"]
 
-                        # Reset enemy lists based on the restored grid
+                        # Ensure player is placed correctly on the regenerated grid
+                        if 0 <= player_row < len(grid) and 0 <= player_col < len(grid[0]):
+                             grid[player_row][player_col] = "P"
+                        else:
+                             print(f"Warning: Restored player position ({player_row}, {player_col}) is out of bounds for level {level_num}. Resetting.")
+                             # Find a default starting 'P' or empty space if needed
+                             # For simplicity, we might just let the game potentially error or place player at 0,0 if needed.
+
+                        # Reset enemy lists based on the regenerated grid
                         slow_enemies = []
                         medium_enemies = []
                         fast_enemies = []
@@ -1299,105 +1266,253 @@ def levels(difficulty_input, color="C", mixUp=False, hud=""):
                                 elif tile == "3":
                                     fast_enemies.append({"row": r, "col": c})
 
+                        values = [score, level_num, gems, whips, teleports, keys, cloaks] # Update HUD values
+                        waiting_for_start_key = True # Pause after restore
+                        print("Game restored successfully.")
+                    except KeyError as e:
+                         print(f"Error applying restored state: Missing key {e}")
+                         game_text(25, f"Error in Save Data!", RED, False, True, BLACK)
+                         pygame.display.flip()
+                         pygame.time.wait(1500)
+                    except IndexError:
+                         print(f"Error applying restored state: Level index {current_level_index} out of bounds.")
+                         game_text(25, f"Error in Save Data!", RED, False, True, BLACK)
+                         pygame.display.flip()
+                         pygame.time.wait(1500)
+
+        else: # Restore cancelled
+             game_text(25, "Restore Cancelled", YELLOW, False, True, BLACK)
+             pygame.display.flip()
+             pygame.time.wait(1000)
+
+    def draw_borders(mapping, offset_x=0, offset_y=0): # Add offset parameters
+         """Draws the static level and window borders."""
+         border_char = '^'
+         if border_char not in mapping:
+              print("Warning: Border character '^' not found in tile_mapping.")
+              return
+
+         border_image = mapping[border_char]
+
+         # Draw level_border (inner border) - Apply offsets
+         for row_index, row_str in enumerate(level_border):
+             screen_draw_y = offset_y + (row_index * GP_TILE_HEIGHT)
+             if screen_draw_y >= HEIGHT: continue # Basic screen bounds check
+             for col_index, char in enumerate(row_str):
+                 screen_draw_x = offset_x + (col_index * GP_TILE_WIDTH)
+                 if screen_draw_x >= WIDTH: continue # Basic screen bounds check
+                 if char == border_char:
+                     screen.blit(border_image, (screen_draw_x, screen_draw_y))
+
+         # Draw window_border (outer border, offset) - Apply offsets
+         for row_index, row_str in enumerate(window_border):
+             # Original offset calculation relative to level_border
+             base_y = (row_index * GP_TILE_HEIGHT) - GP_TILE_HEIGHT
+             screen_draw_y = offset_y + base_y # Apply main offset
+             if screen_draw_y >= HEIGHT or screen_draw_y + GP_TILE_HEIGHT <= 0: continue
+             for col_index, char in enumerate(row_str):
+                 base_x = (col_index * GP_TILE_WIDTH) - GP_TILE_WIDTH
+                 screen_draw_x = offset_x + base_x # Apply main offset
+                 if screen_draw_x >= WIDTH or screen_draw_x + GP_TILE_WIDTH <= 0: continue
+                 if char == border_char:
+                     screen.blit(border_image, (screen_draw_x, screen_draw_y))
+
+    def draw_grid():
+        """Draws the game grid, borders, HUD, and messages."""
+        nonlocal score, level_num, gems, whips, teleports, keys, cloaks # Ensure access to latest values
+        screen.fill(BLACK)
+
+        GRID_ROWS = HEIGHT / GP_TILE_HEIGHT # Number of rows in the playable area
+        GRID_COLS = WIDTH / GP_TILE_WIDTH # Number of columns in the playable area
+
+        # --- Calculate Centering Offsets ---
+        # Calculate total width/height including the border tiles
+        total_grid_width_px = (GRID_COLS + 2) * GP_TILE_WIDTH  # Grid content + 2 border tiles
+        total_grid_height_px = (GRID_ROWS + 2) * GP_TILE_HEIGHT # Grid content + 2 border tiles
+
+        offset_x = 0
+        offset_y = 0
+
+        if hud_input == "O": # Bottom HUD - Center horizontally
+            available_width = WIDTH # Use the full screen width
+            offset_x = (available_width - total_grid_width_px) // 2
+            offset_y = 0 # Keep grid at the top
+        elif hud_input == "R": # Right HUD - Center vertically
+            available_height = HEIGHT # Use the full screen height
+            available_width = (GRID_COLS + 2) * GP_TILE_WIDTH # Grid area width
+            offset_x = 0 # Keep grid to the left
+            offset_y = (available_height - total_grid_height_px) // 2
+
+        # Ensure offsets are not negative (e.g., if grid is larger than screen space)
+        offset_x = max(0, offset_x)
+        offset_y = max(0, offset_y)
+        # --- End Offset Calculation ---
+
+
+        # Draw borders using the helper function with calculated offsets
+        # Pass the calculated offsets to draw_borders
+        draw_borders(tile_mapping, offset_x, offset_y)
+
+        # Draw the main game grid, offset by one tile *relative to the border offset*
+        grid_content_offset_x = offset_x + GP_TILE_WIDTH
+        grid_content_offset_y = offset_y + GP_TILE_HEIGHT
+
+        # Define the drawing boundaries based on the total size and offset
+        # These boundaries should correspond to the inner edges of the border
+        max_draw_x = grid_content_offset_x + (GRID_COLS * GP_TILE_WIDTH)
+        max_draw_y = grid_content_offset_y + (GRID_ROWS * GP_TILE_HEIGHT)
+
+
+        # Iterate through the logical grid (up to GRID_ROWS x GRID_COLS)
+        for row_index in range(min(GRID_ROWS, len(grid))):
+             screen_y = grid_content_offset_y + (row_index * GP_TILE_HEIGHT)
+             # Stop drawing rows if they start beyond the calculated bottom boundary
+             if screen_y >= max_draw_y: continue
+
+             row_data = grid[row_index]
+             for col_index in range(min(GRID_COLS, len(row_data))):
+                 screen_x = grid_content_offset_x + (col_index * GP_TILE_WIDTH)
+                 # Stop drawing columns if they start beyond the calculated right boundary
+                 if screen_x >= max_draw_x: continue
+
+                 char = row_data[col_index]
+                 # Determine character to draw (handle player cloak)
+                 draw_char = char
+                 if row_index == player_row and col_index == player_col:
+                      draw_char = 'TP' if is_cloaked else 'P'
+
+                 # Draw tile if it exists in the mapping
+                 if draw_char in tile_mapping:
+                     # Final check to prevent drawing outside screen bounds (redundant but safe)
+                     if screen_x < WIDTH and screen_y < HEIGHT:
+                         screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
+                 elif char != ' ': # Don't warn for empty space
+                      # print(f"Warning: Character '{char}' at ({row_index},{col_index}) not in tile_mapping.")
+                      # Optionally draw a placeholder for unknown characters
+                      if screen_x < WIDTH and screen_y < HEIGHT:
+                          pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
+
+
+        # Update the values list with the current game state before drawing the HUD
+        # HUD drawing is independent of grid centering and uses absolute/screen-relative positioning
+        values = [score, level_num, gems, whips, teleports, keys, cloaks]
+        draw_hud(values, color_input, hud_input) # Use draw_hud with updated values
+
+        # Display level-specific messages (using game_text, which handles its own positioning)
+        if level_num == 1:
+             game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
+
+        # Display pause message if waiting (using game_text)
+        if waiting_for_start_key:
+            game_text(25, "Press any key to begin this level.", "CHANGING", False, True, BLACK)
+
+    # --- Main Game Loop ---
+    while running:
+        dt = clock.tick(GAME_TICK_RATE) / 1000.0 # Delta time in seconds
+
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                # If waiting, any key press starts the level
+                if waiting_for_start_key:
+                    waiting_for_start_key = False
+                    pygame.event.clear(pygame.KEYDOWN) # Prevent immediate move
+                    continue # Skip rest of keydown handling
+
+                # --- Keydown handling (only runs if not waiting) ---
+                if event.key == pygame.K_p:
+                    pause_quit(quitting=False)
+                elif event.key in (pygame.K_q, pygame.K_ESCAPE):
+                    if pause_quit(quitting=True):
+                        running = False # Quit game loop if confirmed
+                elif event.key == pygame.K_TAB: # Cheat/Debug: Next level
+                    current_level_index = (current_level_index + 1) % len(level_maps)
+                    change_level(current_level_index)
+                elif event.key == pygame.K_s:
+                    handle_save()
+                elif event.key == pygame.K_r:
+                    handle_restore()
+                # Player movement/action keys are handled in player_input()
+
             elif event.type == pygame.KEYUP:
-                if event.key in keys_pressed:
-                    keys_pressed[event.key] = False
+                 # Handled within player_input() for momentum calculation
+                 pass
 
-        # --- Game Logic Updates (conditional) ---
+
+        # --- Game Logic Updates (only if not waiting) ---
         if not waiting_for_start_key:
-            # Process player input
-            action_performed = player_input()
+            # Process player input (handles movement and actions like whip/teleport/cloak)
+            player_input() # This function now handles timing and momentum internally
 
-            # Auto-deactivate cloak after duration # [cite: 154]
-            if is_cloaked and pygame.time.get_ticks() - cloak_start_time > CLOAK_DURATION: # Use constant from gameplayOLD
+            # Auto-deactivate cloak after duration
+            if is_cloaked and pygame.time.get_ticks() - cloak_start_time > CLOAK_DURATION:
                 is_cloaked = False
 
-            # Update spell effect timers # [cite: 157]
-            if slow_time_effect > 0: slow_time_effect -= 1
-            if invisible_effect > 0: invisible_effect -= 1
-            if speed_time_effect > 0: speed_time_effect -= 1
-            if freeze_effect > 0: freeze_effect -= 1 # [cite: 158]
+            # --- Update spell effect timers ---
+            # Timers decrease each frame/tick based on dt, or simply decrement per tick if integer-based
+            tick_decrement = 1 # Assume timers decrease by 1 each game tick
+            if slow_time_effect > 0: slow_time_effect -= tick_decrement
+            if invisible_effect > 0: invisible_effect -= tick_decrement
+            if speed_time_effect > 0: speed_time_effect -= tick_decrement
+            if freeze_effect > 0: freeze_effect -= tick_decrement
 
-            # Update movement thresholds based on spell effects (Using gameplayOLD logic)
+            # --- Update enemy movement thresholds based on spell effects ---
             if speed_time_effect > 0:
-                # Speed time makes enemies move very fast
-                slow_threshold = 6
-                medium_threshold = 5 # [cite: 159]
-                fast_threshold = 4
+                slow_threshold = max(1, BASE_SLOW_TIMER // 2) # Faster
+                medium_threshold = max(1, BASE_MEDIUM_TIMER // 2)
+                fast_threshold = max(1, BASE_FAST_TIMER // 2)
             elif slow_time_effect > 0:
-                # Slow time makes enemies move much slower
-                slow_threshold = 30
-                medium_threshold = 25
-                fast_threshold = 20
-            else:
-                # Normal speeds # [cite: 160]
-                slow_threshold = 10 # Keep defaults based on gameplayOLD's initial settings
-                medium_threshold = 7
-                fast_threshold = 4
+                slow_threshold = BASE_SLOW_TIMER * 2 # Slower
+                medium_threshold = BASE_MEDIUM_TIMER * 2
+                fast_threshold = BASE_FAST_TIMER * 2
+            else: # Reset to base speeds
+                slow_threshold = BASE_SLOW_TIMER
+                medium_threshold = BASE_MEDIUM_TIMER
+                fast_threshold = BASE_FAST_TIMER
 
-
-            # Update game state and enemy movement counters
-            tick_counter += 1
-
-            # Only increment counters and allow movement if freeze effect is inactive # [cite: 161]
+            # --- Enemy Movement Logic ---
+            # Only move enemies if freeze effect is not active
             if freeze_effect <= 0:
-                # Increment individual enemy counters
+                # Increment counters (could also use time-based accumulation with dt)
                 slow_counter += 1
                 medium_counter += 1
                 fast_counter += 1
 
-                # Move slow enemies (type 1) # [cite: 162]
+                # Move slow enemies (type 1)
                 if slow_counter >= slow_threshold:
-                    for i in range(len(slow_enemies)-1, -1, -1):
-                        if i < len(slow_enemies):  # Make sure the enemy still exists
-                            if move_enemy(slow_enemies[i], "1", 8): # [cite: 163]
-                                del slow_enemies[i]
-                    slow_counter = 0  # Reset the counter
+                    # Iterate backwards for safe removal
+                    for i in range(len(slow_enemies) - 1, -1, -1):
+                        # Ensure index is still valid after potential player actions
+                        if i < len(slow_enemies):
+                            enemy_died = move_enemy(slow_enemies[i], "1", 8) # Pass move probability
+                            if enemy_died:
+                                # Check again if index is valid before deleting
+                                if i < len(slow_enemies):
+                                     del slow_enemies[i]
+                    slow_counter = 0 # Reset counter
 
                 # Move medium enemies (type 2)
-                if medium_counter >= medium_threshold: # [cite: 164]
-                    for i in range(len(medium_enemies)-1, -1, -1):
-                        if i < len(medium_enemies):  # Make sure the enemy still exists
-                            if move_enemy(medium_enemies[i], "2", 7):
-                                del medium_enemies[i] # [cite: 165]
-                    medium_counter = 0  # Reset the counter
+                if medium_counter >= medium_threshold:
+                    for i in range(len(medium_enemies) - 1, -1, -1):
+                         if i < len(medium_enemies):
+                             enemy_died = move_enemy(medium_enemies[i], "2", 7)
+                             if enemy_died:
+                                  if i < len(medium_enemies):
+                                       del medium_enemies[i]
+                    medium_counter = 0
 
                 # Move fast enemies (type 3)
-                if fast_counter >= fast_threshold: # [cite: 165]
-                    for i in range(len(fast_enemies)-1, -1, -1): # [cite: 166]
-                        if i < len(fast_enemies):  # Make sure the enemy still exists
-                            if move_enemy(fast_enemies[i], "3", 6):
-                                del fast_enemies[i]
-                    fast_counter = 0  # Reset the counter # [cite: 167]
+                if fast_counter >= fast_threshold:
+                    for i in range(len(fast_enemies) - 1, -1, -1):
+                         if i < len(fast_enemies):
+                             enemy_died = move_enemy(fast_enemies[i], "3", 6)
+                             if enemy_died:
+                                  if i < len(fast_enemies):
+                                       del fast_enemies[i]
+                    fast_counter = 0
 
-
-            # Handle powerups pickup logic (Using gameplayOLD logic)
-            for row_index, row in enumerate(grid):
-                for col_index, char in enumerate(row):
-                    # If player is on the slowtime powerup
-                    if char == "S" and row_index == player_row and col_index == player_col: # [cite: 168]
-                        slow_time_effect = 70 if not FAST_PC else 100
-                        grid[row_index][col_index] = " "
-                        # Visual/sound effects would go here
-
-                    # If player is on the speedtime powerup # [cite: 169]
-                    if char == "F" and row_index == player_row and col_index == player_col:
-                        speed_time_effect = 50 if not FAST_PC else 80
-                        grid[row_index][col_index] = " " # [cite: 170]
-                        # Visual/sound effects would go here
-
-                    # If player is on the freeze powerup
-                    if char == "Z" and row_index == player_row and col_index == player_col: # [cite: 171]
-                        freeze_effect = 55 if not FAST_PC else 60
-                        grid[row_index][col_index] = " "
-                        # Visual/sound effects would go here
-
-        draw_grid()
-
-        if waiting_for_start_key:
-            game_text(25, "Press any key to begin this level.", "CHANGING", False, True, BLACK)
-
-        pygame.display.flip()
-        clock.tick(GAME_TICK_RATE) # Use tick rate from gameplayOLD # [cite: 171]
-
-#levels("N", "C", False, "O")
+        # --- Drawing ---
+        draw_grid() # Handles drawing grid, borders, HUD, and messages
+        pygame.display.flip() # Update the full display

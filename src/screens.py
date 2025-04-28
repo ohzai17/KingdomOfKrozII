@@ -1,14 +1,15 @@
-from utils import *
+import utils
 from texts import *
 from audio import *
 from draw_text import draw_text
-from gameplay import levels
+import gameplay as gp
+from game_text import scale_loaded_sprites
 
 ############################################################################################################################################################################################################################
 
 def color(): # From KINGDOM4.INC (line 66)
 
-    color_user_input = "C"
+    color_input = "C"
     running = True
     
     while running:
@@ -29,20 +30,20 @@ def color(): # From KINGDOM4.INC (line 66)
                 case pygame.KEYDOWN:
                     match event.key:
                         case pygame.K_m:
-                            color_user_input = "M"
+                            color_input = "M"
                             set_monochrome_palette()
                             play_sound(500, 30)
                             running = False
                         case _:
                             play_sound(500, 30)                            
                             running = False
-                    print("Color:" , color_user_input)
+                    print("Color:" , color_input)
 
-    return color_user_input
+    return color_input
 
 ############################################################################################################################################################################################################################
 
-def speed(color_user_input): # From KINGDOM4.INC (line 87)
+def speed(color_input): # From KINGDOM4.INC (line 87)
 
     speed_user_input = "S"
     running = True
@@ -50,7 +51,7 @@ def speed(color_user_input): # From KINGDOM4.INC (line 87)
     while running:
         screen.fill(BLACK)
 
-        if color_user_input == "C":
+        if color_input == "C":
             draw_text(2, game_title, BLUE)
         
         draw_text(14, speed_heading_1)
@@ -81,7 +82,7 @@ def speed(color_user_input): # From KINGDOM4.INC (line 87)
 
 ############################################################################################################################################################################################################################
 
-def title(color_user_input): # From KINGDOM3.INC (line 64)
+def title(color_input): # From KINGDOM3.INC (line 64)
 
     logo = pygame.image.load(logo_path).convert_alpha()
     aspect_ratio = logo.get_height() / logo.get_width()
@@ -97,7 +98,7 @@ def title(color_user_input): # From KINGDOM3.INC (line 64)
 
         time_elapsed += 1 
 
-        colorized_logo = change_logo_color(logo, time_elapsed, color_user_input)
+        colorized_logo = change_logo_color(logo, time_elapsed, color_input)
         logo_x = ((GRID_WIDTH * CHAR_WIDTH) - logo_width) // 2
         logo_y = 4 * CHAR_HEIGHT
         screen.blit(colorized_logo, (logo_x, logo_y))
@@ -123,7 +124,6 @@ def title(color_user_input): # From KINGDOM3.INC (line 64)
 
 def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
 
-    difficulty_user_input = "N"
     blinking_difficulty_text = ""
     running = True
     
@@ -164,27 +164,28 @@ def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
                     if blinking_difficulty_text == "":
                         match event.key:
                             case pygame.K_e:
-                                difficulty_user_input = 'E'
+                                difficulty_input = 'E'
                                 blinking_difficulty_text = "EXPERIENCED"
                                 play_sound(300, 100)
                                 play_sound(700, 100)
                             case pygame.K_a:
-                                difficulty_user_input = 'A'
+                                difficulty_input = 'A'
                                 blinking_difficulty_text = "ADVANCED"
                                 play_sound(300, 100)
                                 play_sound(700, 100)                                
                             case pygame.K_x:
-                                difficulty_user_input = 'X'
+                                difficulty_input = 'X'
                                 blinking_difficulty_text = "SECRET MODE  "
                                 play_sound(300, 100)
                                 play_sound(700, 100)                                
                             case _:
+                                difficulty_input = 'N'
                                 blinking_difficulty_text = "NOVICE"
                                 play_sound(300, 100)
                                 play_sound(700, 100)
-                        print("Difficulty:" , difficulty_user_input)
+                        print("Difficulty:" , difficulty_input)
                     else:
-                        return difficulty_user_input
+                        return difficulty_input
 
 ############################################################################################################################################################################################################################
 
@@ -505,6 +506,7 @@ def sign_off(): # From KINGDOM1.INC (lines 471-493)
 ############################################################################################################################################################################################################################
 
 def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
+    global TILE_HEIGHT, TILE_WIDTH
     screen.fill(BLACK)
     draw_text(4, "SELECT HUD STYLE", text_color=YELLOW, center=True)
 
@@ -533,7 +535,6 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
     pygame.display.flip()
 
     selecting = True
-    selected_hud = "O"
 
     while selecting:
         for event in pygame.event.get():
@@ -542,13 +543,18 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_o:
-                    selected_hud = "O"
+                    utils.TILE_WIDTH, utils.TILE_HEIGHT = WIDTH // 66, WIDTH // 66
+                    gp.GP_TILE_WIDTH, gp.GP_TILE_HEIGHT = utils.TILE_WIDTH, utils.TILE_HEIGHT
+                    hud_input = "O"
                     selecting = False
                 elif event.key == pygame.K_r:
-                    selected_hud = "R"
+                    hud_input = "R"
+                    utils.TILE_HEIGHT = HEIGHT // 25
+                    utils.TILE_WIDTH = utils.TILE_HEIGHT // 1.77777777777777777777
+                    gp.GP_TILE_WIDTH, gp.GP_TILE_HEIGHT = utils.TILE_WIDTH, utils.TILE_HEIGHT
                     selecting = False
 
-    return selected_hud
+    return hud_input
 
 
 # START of load
@@ -746,26 +752,15 @@ def update_leaderboard(leaderboard, name, score, level):
 
 ############################################################################################################################################################################################################################                    
 
-def process_user_choice(user_choice):
+def process_user_choice(user_choice, hud_input, difficulty_input, color_input):
     """Handle user choices and navigate through the game screens."""
-def run_all_screens():
-    color_user_input = color()
-    speed_user_input = speed(color_user_input)
-    title(color_user_input)
-    difficulty_input = difficulty(BACKGROUND)
-    shareware(BACKGROUND)
-    hud_choice = hud_selector()
-    user_choice = load()
-    
-    # This runs and proccess the loading screen along with screens in load()
     startGame = True
-    while startGame:  
-        match(user_choice): 
+    while startGame:
+        match user_choice:
             case "b":
                 print(f"Choice: B")
-                descent()   
-                levels(difficulty_input, color_user_input, hud=hud_choice)
-                print(f"HUD: B")
+                descent()
+                gp.levels(difficulty_input, color_input, hud_input, mixUp=False)
                 startGame = False
             case "i":
                 print(f"Choice: I")
@@ -794,5 +789,18 @@ def run_all_screens():
             case "r":
                 print(f"Choice: R")
                 descent()
-                levels(difficulty_input, color_user_input, mixUp=True, hud=hud_choice)
+                gp.levels(difficulty_input, color_input, hud_input, mixUp=True)
                 startGame = False
+    sign_off()
+
+def run_all_screens():
+    color_input = color()
+    speed_user_input = speed(color_input)
+    title(color_input)
+    difficulty(BACKGROUND)
+    shareware(BACKGROUND)
+    hud_input = hud_selector()
+    scale_loaded_sprites()
+    gp.scale_gameplay_sprites((TILE_WIDTH, TILE_HEIGHT), color_input)
+    user_choice = load()
+    process_user_choice(user_choice, hud_input, difficulty_input, color_input)

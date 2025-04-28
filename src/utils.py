@@ -8,15 +8,19 @@ import numpy as np
 
 pygame.init()
 # 16:9
-WIDTH, HEIGHT = 1254, 1
+WIDTH, HEIGHT = 1376, 1
 HEIGHT = int(WIDTH * 9 / 16)
 resolution = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
 GRID_WIDTH = 80
 GAME_WIDTH = 66
-TILE_WIDTH, TILE_HEIGHT = WIDTH // 66, WIDTH // 66
+TILE_WIDTH, TILE_HEIGHT = 0, 0
 CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
+
+color_input = ""
+difficulty_input = ""
+hud_input = ""
 
 def rgb(r, g, b):
     return (r, g, b)
@@ -77,6 +81,15 @@ audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 logo_path = os.path.join(assets_dir, "kroz_logo.png")
 leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
+
+def format_centered_int(value, width) -> str:
+    s_value = str(value)
+    padding = width - len(s_value)
+    if padding < 0:
+        return s_value
+    left_padding = padding // 2
+    right_padding = (padding + 1) // 2
+    return ' ' * left_padding + s_value + ' ' * right_padding
 
 def set_monochrome_palette():
     global BACKGROUND, BLUE, DARK_BLUE, OLD_BLUE, CYAN, GREEN, AQUA, RED, PURPLE, ORANGE, BROWN, YELLOW, WHITE, GRAY, MAGENTA, LIGHT_GRAY, LIGHT_BLUE,LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, DARK_RED

@@ -1,7 +1,11 @@
 import string
-from utils import *
+import os
+import pygame
+import utils
+import gameplay as gp
 
 char_map = {}
+original_char_map = {}
 
 # Define character sets
 uppercase_letters = string.ascii_uppercase
@@ -24,12 +28,9 @@ special_char_symbols = {
 
 def load_sprite(char_key, filename_base):
     filename = f"{filename_base}.png"
-    full_path = os.path.join(screen_assets_dir, filename)
+    full_path = os.path.join(utils.screen_assets_dir, filename)
     try:
-        sprite = pygame.image.load(full_path).convert_alpha()
-        # Resize the sprite to TILE_WIDTH x TILE_HEIGHT
-        resized_sprite = pygame.transform.scale(sprite, (TILE_WIDTH, TILE_HEIGHT))
-        char_map[char_key] = resized_sprite
+        original_char_map[char_key] = pygame.image.load(full_path).convert_alpha()
     except pygame.error as e:
         print(f"Warning: Could not load image '{filename}': {e}")
     except FileNotFoundError:
@@ -52,6 +53,17 @@ for name in special_char_names:
     else:
         print(f"Warning: No symbol mapping found for special character name: '{name}'")
 
+def scale_loaded_sprites():
+    """Scales all sprites stored in original_char_map and populates char_map."""
+    global char_map # Ensure we are modifying the global char_map
+    char_map.clear() # Clear any potentially pre-existing scaled sprites
+    for char_key, original_sprite in original_char_map.items():
+        try:
+            resized_sprite = pygame.transform.scale(original_sprite, (gp.GP_TILE_WIDTH, gp.GP_TILE_HEIGHT))
+            char_map[char_key] = resized_sprite
+        except Exception as e:
+            print(f"Error scaling sprite '{char_key}': {e}")
+
 def game_text(row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False):
     """
     Draws a single row of text using character sprites onto the screen.
@@ -73,9 +85,9 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
             Defaults to None.
         title_box (bool, optional): For special title screen background (uses the color from text_background).
     """
-    y = (row * TILE_HEIGHT) - TILE_HEIGHT
-    text_pixel_width = len(text) * TILE_WIDTH
-    grid_pixel_width = GAME_WIDTH * TILE_WIDTH
+    y = (row * gp.GP_TILE_HEIGHT) - gp.GP_TILE_HEIGHT
+    text_pixel_width = len(text) * gp.GP_TILE_WIDTH
+    grid_pixel_width = utils.GAME_WIDTH * gp.GP_TILE_WIDTH
 
     # Flashing
     current_time = pygame.time.get_ticks()
@@ -98,9 +110,9 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
     current_actual_color = None # The color to apply to text sprites
     if text_color == "CHANGING":
         # Ensure the color list is not empty to avoid division by zero
-        if blinking_text_color_list:
-            color_index = (current_time // 150) % len(blinking_text_color_list)
-            current_actual_color = blinking_text_color_list[color_index]
+        if utils.blinking_text_color_list:
+            color_index = (current_time // 150) % len(utils.blinking_text_color_list)
+            current_actual_color = utils.blinking_text_color_list[color_index]
         else:
             current_actual_color = None
             print("Warning: blinking_text_color_list is empty, cannot use 'CHANGING'.")
@@ -120,10 +132,10 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
         actual_bg_color = text_background
 
     for i, char in enumerate(text):
-        char_x = start_x + (i * TILE_WIDTH)
+        char_x = start_x + (i * gp.GP_TILE_WIDTH)
 
         # Ensure the character position is within the screen bounds horizontally
-        if char_x + TILE_WIDTH <= 0 or char_x >= screen.get_width():
+        if char_x + gp.GP_TILE_WIDTH <= 0 or char_x >= utils.screen.get_width():
              continue
 
         # Draw background first, based on the determined color and condition
@@ -131,18 +143,18 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
             # Determine background rectangle properties based on title_box
             if title_box:
                 # Calculate extended Y position and height for title box style
-                bg_y = y - int(0.5 * TILE_HEIGHT)
-                bg_height = TILE_HEIGHT + int(0.5 * TILE_HEIGHT) + int(0.5 * TILE_HEIGHT)
+                bg_y = y - int(0.5 * gp.GP_TILE_HEIGHT)
+                bg_height = gp.GP_TILE_HEIGHT + int(0.5 * gp.GP_TILE_HEIGHT) + int(0.5 * gp.GP_TILE_HEIGHT)
                 # Ensure calculated dimensions are non-negative
                 bg_y = max(0, bg_y)
                 bg_height = max(0, bg_height)
             else:
                 # Standard background position and height
                 bg_y = y
-                bg_height = TILE_HEIGHT
+                bg_height = gp.GP_TILE_HEIGHT
             
             # Draw the background rectangle for the current character
-            pygame.draw.rect(screen, actual_bg_color, (char_x, bg_y, TILE_WIDTH, bg_height))
+            pygame.draw.rect(utils.screen, actual_bg_color, (char_x, bg_y, gp.GP_TILE_WIDTH, bg_height))
 
         if char in char_map:
             original_sprite = char_map[char]
@@ -159,4 +171,4 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
                 sprite_to_draw = color_surface
 
             # Draw the character sprite (background was drawn above)
-            screen.blit(sprite_to_draw, (char_x, y))
+            utils.screen.blit(sprite_to_draw, (char_x, y))
