@@ -335,7 +335,6 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         # Reset the flag when changing levels
         waiting_for_start_key = True
 
-    # --- Start of Enemy Movement Code from gameplayOLD.py.txt ---
     def has_line_of_sight(from_row, from_col, to_row, to_col):
         """Check if there's a direct line of sight between two positions"""
         # Bresenham's line algorithm for line of sight
@@ -368,7 +367,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     def move_enemy(enemy, enemy_type, move_prob):
         if is_cloaked: # Enemies don't move if player is cloaked
-            return False # Indicate enemy did not move (or die)
+             return False # Indicate enemy did not move (or die)
         else:
             """Move an enemy toward the player if they can see the player"""
             nonlocal score, gems  # Access Score and gems from the outer scope
@@ -409,51 +408,68 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             if x_dist > y_dist:
                 # Move horizontally first
                 if player_col < col:
-                    new_col -= 1
-                    x_dir = -1 # Corrected direction indication
+                    new_col -= 1 #
+                    # x_dir = -1 # Original working code direction indication differs, using working code
+                    x_dir = 1 #
                 elif player_col > col:
                     new_col += 1
-                    x_dir = 1 # Corrected direction indication
-                # If horizontal move is blocked, try vertical
-                if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]) and grid[new_row][new_col] != " ":
+                    # x_dir = 1 # Original working code direction indication differs, using working code
+                    x_dir = -1
+                # If horizontal move is blocked, try vertical (Logic from non-working, as working didn't have this fallback)
+                # Check bounds before accessing grid
+                temp_check_col = new_col
+                if not (0 <= row < len(grid) and 0 <= temp_check_col < len(grid[0])) or grid[row][temp_check_col] != " ":
                     new_col = col # Reset horizontal attempt
                     if player_row < row:
                         new_row -= 1
-                        y_dir = -1
+                        y_dir = -1 # Using non-working Y direction logic here
                     elif player_row > row:
                         new_row += 1
-                        y_dir = 1
+                        y_dir = 1 # Using non-working Y direction logic here
             else: # y_dist >= x_dist
                 # Move vertically first
                 if player_row < row:
                     new_row -= 1
-                    y_dir = -1
+                    # y_dir = -1 # Original working code direction indication differs, using working code
+                    y_dir = 1
                 elif player_row > row:
                     new_row += 1
-                    y_dir = 1
-                 # If vertical move is blocked, try horizontal
-                if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]) and grid[new_row][new_col] != " ":
+                    # y_dir = 1 # Original working code direction indication differs, using working code
+                    y_dir = -1
+                 # If vertical move is blocked, try horizontal (Logic from non-working, as working didn't have this fallback)
+                 # Check bounds before accessing grid
+                temp_check_row = new_row
+                if not (0 <= temp_check_row < len(grid) and 0 <= col < len(grid[0])) or grid[temp_check_row][col] != " ":
                     new_row = row # Reset vertical attempt
                     if player_col < col:
                         new_col -= 1
-                        x_dir = -1
+                        x_dir = -1 # Using non-working X direction logic here
                     elif player_col > col:
-                        new_col += 1
-                        x_dir = 1
+                         new_col += 1
+                         x_dir = 1 # Using non-working X direction logic here
 
-            # Final check if any move was determined
+
+            # If no movement was determined yet, try the other axis (Added from working code)
             if new_row == row and new_col == col:
-                 # If still no move, it might be blocked in both primary directions or already adjacent
-                 # Revert to original position and return false (stay still)
-                 grid[row][col] = enemy_type
-                 return False
+                if player_col < col:
+                    new_col -= 1
+                    x_dir = 1 #
+                elif player_col > col: #
+                    new_col += 1
+                    x_dir = -1
+                elif player_row < row:
+                    new_row -= 1
+                    y_dir = 1 #
+                elif player_row > row:
+                    new_row += 1
+                    y_dir = -1
 
-
-            # Handle movement and collisions based on target tile (new_row, new_col)
+            # Check if the calculated new position is valid before accessing the grid
             if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
                 target_tile = grid[new_row][new_col]
 
-                if target_tile == "X": # Breaking X blocks
+                # Breaking X blocks
+                if target_tile == "X":
                     grid[new_row][new_col] = " "  # Break the block
                     # Award points based on enemy type
                     if enemy_type == "1": score += 10
@@ -461,50 +477,59 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                     elif enemy_type == "3": score += 30
                     return True  # Enemy dies when breaking block
 
+                # Handle collision with gems, whips, teleports
                 elif target_tile == "+":  # Gem Collision
                     if enemy_type == "1": gems -= 1
                     elif enemy_type == "2": gems -= 2
                     elif enemy_type == "3": gems -= 3
 
-                    if gems < 0:
-                        player_death(score, level_num) # End game if gems depleted
-                        return True # Enemy technically 'dies' as game ends
+                    if gems < 0: #
+                        player_death(score, level_num) # Call player_death when out of gems
+                        # If player_death exits, this won't be reached, but good practice.
+                        # Depending on player_death implementation, enemy might 'die' if game ends.
+                        return True # Indicate enemy removal if game ends
 
-                    # Move enemy onto the gem space (destroying the gem)
+                    # Update display - Move enemy onto the gem space (destroying the gem)
                     enemy["row"], enemy["col"] = new_row, new_col
                     grid[new_row][new_col] = enemy_type
                     return False # Enemy survives, gem is gone
 
-                elif target_tile in {"W", "T", "_", "K", "S", "I", "F", "Q", "*", "A", "?", "<", "[", "|", ",", "±", "≥", "≤", "⌠", "⌡", "÷", "ô", "ö", "ò", "û", "ù", "¿", "â"}: # Other Items
+                # Collide with other specific items (whip 'W', teleport 'T')
+                # Add other item characters here if needed from the non-working file's list
+                elif target_tile in {"W", "T"}:
                     # Destroy the item and move the enemy
                     enemy["row"], enemy["col"] = new_row, new_col
-                    grid[new_row][new_col] = enemy_type
+                    grid[new_row][new_col] = enemy_type #
                     return False # Enemy survives, item destroyed
 
-                elif target_tile == " ": # Empty space
+                # Empty space - move there
+                elif target_tile == " ":
                     enemy["row"], enemy["col"] = new_row, new_col
                     grid[new_row][new_col] = enemy_type
                     return False # Enemy survives
 
-                elif target_tile == "P": # Player Collision
+                # Hit player
+                elif target_tile == "P":
                     # Attack player by taking gems
                     if enemy_type == "1": gems -= 1
                     elif enemy_type == "2": gems -= 2
                     elif enemy_type == "3": gems -= 3
 
                     if gems < 0:
-                        player_death(score, level_num) # End game if gems depleted
+                        player_death(score, level_num)  # Call player_death when out of gems
+                        # If player_death exits, this won't be reached.
+                        return True # Indicate enemy removal if game ends
 
                     return True  # Enemy dies after attacking
 
-                else: # Blocked by solid wall (#) or other non-passable object
+                # Blocked by solid wall or other object not explicitly handled above
+                else:
                     grid[row][col] = enemy_type # Stay in place
                     return False
-            else: # Moved outside grid boundaries (shouldn't normally happen with checks)
-                grid[row][col] = enemy_type # Stay in place
+            else: # Moved outside grid boundaries (or new_row/new_col were invalid)
+                grid[row][col] = enemy_type  # Stay in place
                 return False
-    # --- End of Enemy Movement Code ---
-
+            
     def use_whip():
         """Handle the whip animation and enemy interactions, keeping HUD and border visible, with color cycling."""
         nonlocal score, whips, slow_enemies, medium_enemies, fast_enemies, values # Keep score nonlocal if it's modified directly here
