@@ -32,4 +32,16 @@ def footStep():
     play_wav(sound_file)
     
 def enemyCollision():
-    play_wav('enemyCollision.wav')    
+    play_wav('enemyCollision.wav')
+    
+def electricWall():
+    play_wav('electricWall.wav')
+    
+def teleport():
+    play_wav('teleport.wav')
+    
+def whip():
+    play_wav('whip.wav')
+    
+def zeroCollecible():
+    play_wav('zeroCollectible.wav')
