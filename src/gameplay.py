@@ -367,128 +367,110 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         if is_cloaked:
             return False
         else:
-            """Move an enemy toward the player if they can see the player"""
-            nonlocal score, gems  # Access Score and gems from the outer scope
-        
+            """Move an enemy toward the player if they can see the player, allowing diagonal movement."""
+            nonlocal score, gems, player_row, player_col # Access Score, gems, and player position
+
         row, col = enemy["row"], enemy["col"]
-            
-            # Check if enemy was removed
-        if grid[row][col] != enemy_type:
-                return True  # Remove enemy
-            
+
+        # Check if enemy was removed (e.g., by whip) before its turn
+        if not (0 <= row < len(grid) and 0 <= col < len(grid[0])) or grid[row][col] != enemy_type:
+            return True  # Signal that the enemy should be removed from the list
+
         # Original game had different odds for different enemy types
         # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
         # Only give player a move chance if the player can see the enemy
         if has_line_of_sight(row, col, player_row, player_col):
             if random.randint(0, move_prob-1) == 0:
+                # This allows the player to potentially move out of the way
+                # Note: player_input() handles its own cooldowns
                 player_input()
-        
-        # Check if enemy can see player
+                # Re-check if player moved or an action occurred that might affect the grid
+                # (e.g., player teleported, whipped the enemy)
+                if not (0 <= row < len(grid) and 0 <= col < len(grid[0])) or grid[row][col] != enemy_type:
+                    return True # Enemy was affected by player's action
+
+        # Check if enemy can see player *after* potential player move
         if not has_line_of_sight(row, col, player_row, player_col):
             return False  # Stay still if can't see player
-        
-        # Clear current position
+
+        # --- MODIFIED: Diagonal Movement Calculation ---
+        # Calculate desired direction towards player
+        dr = 0
+        if player_row < row:
+            dr = -1
+        elif player_row > row:
+            dr = 1
+
+        dc = 0
+        if player_col < col:
+            dc = -1
+        elif player_col > col:
+            dc = 1
+
+        # If no direction needed (enemy is on player), stay put (should be handled by collision later)
+        if dr == 0 and dc == 0:
+            return False
+
+        new_row, new_col = row + dr, col + dc
+        # --- END MODIFICATION ---
+
+        # Clear current position before checking the new one
         grid[row][col] = " "
-        
-        # Calculate move direction toward player
-        new_row, new_col = row, col
-        x_dir, y_dir = 0, 0
-        
-        # Try to move closer to the player along optimal axis first
-        x_dist = abs(player_col - col)
-        y_dist = abs(player_row - row)
-        
-        # Move along the axis with greater distance first
-        # This makes enemies try to minimize the longest dimension first
-        if x_dist > y_dist:
-            # Move horizontally first
-            if player_col < col:
-                new_col -= 1
-                x_dir = 1
-            elif player_col > col:
-                new_col += 1
-                x_dir = -1
-        else:
-            # Move vertically first
-            if player_row < row:
-                new_row -= 1
-                y_dir = 1
-            elif player_row > row:
-                new_row += 1
-                y_dir = -1
-        
-        # If no movement was determined, try the other axis
-        if new_row == row and new_col == col:
-            if player_col < col:
-                new_col -= 1
-                x_dir = 1
-            elif player_col > col:
-                new_col += 1
-                x_dir = -1
-            elif player_row < row:
-                new_row -= 1
-                y_dir = 1
-            elif player_row > row:
-                new_row += 1
-                y_dir = -1
-        
-        # Handle movement and collisions
+
+        # Handle movement and collisions at the new position
         if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
+            target_char = grid[new_row][new_col]
+
             # Breaking X blocks
-            if grid[new_row][new_col] == "X":
+            if target_char == "X":
                 grid[new_row][new_col] = " "  # Break the block
                 # Award points based on enemy type
                 if enemy_type == "1": score += 10
                 elif enemy_type == "2": score += 20
                 elif enemy_type == "3": score += 30
                 enemyCollision()  # Play sound for breaking block
-                return True  # Enemy dies when breaking block
-            
-            # Handle collision with gems, whips, teleports
-            elif grid[new_row][new_col] == "+":  # Gem
-                if enemy_type == "1": gems -= 1
-                elif enemy_type == "2": gems -= 2
-                elif enemy_type == "3": gems -= 3
-                
-                if gems < 0:
-                    player_death(screen)  # Call player_death when out of gems
-                
-                # Update display
+                # Enemy dies when breaking block - don't place it back
+                return True
+
+            # Handle collision with gems, whips, teleports (enemy destroys them)
+            elif target_char in {"+", "W", "T", "K", "_", "*", "S", "I", "F", "C", "!", "Z", "Q"}:
                 enemy["row"], enemy["col"] = new_row, new_col
-                grid[new_row][new_col] = enemy_type
-                return False
-                
-            # Collide with an item (whip, teleport)
-            elif grid[new_row][new_col] in {"W", "T"}:
-                # Destroy the item and move the enemy
-                enemy["row"], enemy["col"] = new_row, new_col
-                grid[new_row][new_col] = enemy_type
-                return False
-                
+                grid[new_row][new_col] = enemy_type # Enemy moves onto the item space
+                # Optionally play a sound or have other effects
+                return False # Enemy survives, item is gone
+
             # Empty space - move there
-            elif grid[new_row][new_col] == " ":
+            elif target_char == " ":
                 enemy["row"], enemy["col"] = new_row, new_col
                 grid[new_row][new_col] = enemy_type
-                return False
+                return False # Enemy survives
 
             # Hit player
-            elif grid[new_row][new_col] == "P":
+            elif target_char == "P":
                 # Attack player by taking gems
                 if enemy_type == "1": gems -= 1
                 elif enemy_type == "2": gems -= 2
                 elif enemy_type == "3": gems -= 3
-                
+
                 if gems < 0:
-                    player_death(screen)  # Call player_death when out of gems
-                enemyCollision()  # Play sound for enemy collision    
-                return True  # Enemy dies
-                
-            # Blocked - stay in place
+                    # Player death sequence handles game over/leaderboard
+                    player_death(score, level_num) # Pass necessary info
+                    # Since player_death exits, we might not strictly need to return True,
+                    # but it indicates the enemy caused a terminal event.
+                    return True
+
+                enemyCollision()  # Play sound for enemy collision
+                # Enemy dies after hitting player
+                # Don't place the enemy back on the grid
+                return True
+
+            # Blocked by wall or other obstacle - stay in place
             else:
-                grid[row][col] = enemy_type
+                grid[row][col] = enemy_type # Put enemy back in original spot
                 return False
         else:
-            grid[row][col] = enemy_type  # Stay in place
+            # Moved out of bounds (shouldn't normally happen with checks)
+            grid[row][col] = enemy_type # Put enemy back
             return False
             
     def use_whip():
@@ -848,8 +830,6 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                         screen.blit(bg_sprite, last_intermediate_rect.topleft)
                     else: # If no specific tile, just fill black
                         screen.fill(BLACK, last_intermediate_rect)
-                else: # Fallback if calculation failed or indices out of bounds for the specific row
-                    screen.fill(BLACK, last_intermediate_rect)
 
             screen.blit(tp_sprite, (intermediate_screen_x, intermediate_screen_y)) # Draw TP icon
             pygame.display.update([last_intermediate_rect, intermediate_rect] if last_intermediate_rect else [intermediate_rect])
@@ -946,127 +926,112 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     def player_input():
         """Handle player movement, whip, teleport, and cloak actions."""
-        nonlocal player_row, player_col, score, gems, whips, teleports, keys, cloaks, is_cloaked
-        nonlocal slow_enemies, medium_enemies, fast_enemies, last_move_time
-        nonlocal values # Needed for drawing during actions like whip
+        nonlocal player_row, player_col, last_move_time, keys_pressed, keys_held_time, momentum
+        nonlocal score, gems, whips, teleports, keys, cloaks, is_cloaked, values # Added values
 
         current_time = pygame.time.get_ticks()
-        current_keys = pygame.key.get_pressed()
-        action_performed = False # Tracks if non-movement action occurred
-
-        # --- Action Handling (Whip, Teleport, Cloak) ---
-        # Handle whip ('W')
-        if current_keys[pygame.K_w] and not keys_pressed.get(pygame.K_w, False):
-            keys_pressed[pygame.K_w] = True
-            if whips > 0:
-                # Decrement whip *before* calling use_whip to reflect cost
-                whips -= 1
-                values[3] = whips # Update HUD value immediately
-                # Call use_whip and update enemy lists
-                slow_enemies, medium_enemies, fast_enemies = use_whip()
-                action_performed = True
-                last_move_time = current_time # Reset move timer after action
-        elif not current_keys[pygame.K_w]:
-            keys_pressed[pygame.K_w] = False
-
-        # Handle Teleport ('T')
-        if current_keys[pygame.K_t] and not keys_pressed.get(pygame.K_t, False):
-            keys_pressed[pygame.K_t] = True
-            if teleports > 0:
-                teleports -= 1
-                values[4] = teleports # Update HUD
-                teleport() # Calls the teleport function which handles animation and player pos update
-                action_performed = True
-                last_move_time = current_time # Reset move timer
-        elif not current_keys[pygame.K_t]:
-            keys_pressed[pygame.K_t] = False
-
-        # Handle Cloak ('C')
-        if current_keys[pygame.K_c] and not keys_pressed.get(pygame.K_c, False):
-            keys_pressed[pygame.K_c] = True
-            if cloaks > 0 and not is_cloaked:
-                cloaks -= 1
-                values[6] = cloaks # Update HUD
-                cloak() # Activates cloak state and timer
-                action_performed = True
-                last_move_time = current_time # Reset move timer
-        elif not current_keys[pygame.K_c]:
-            keys_pressed[pygame.K_c] = False
-
-
-        # --- Movement Handling ---
         time_since_last_move = current_time - last_move_time
-        move_attempted = False # Tracks if a move was attempted this frame
 
+        # --- Handle Non-Movement Actions First ---
+        keys = pygame.key.get_pressed() # Get current key state
+
+        # Check for actions like whip, teleport, cloak (these might have their own cooldowns or conditions)
+        if keys[pygame.K_w]: # Whip
+            if whips > 0:
+                use_whip()
+                whips -= 1
+                values[3] = whips # Update HUD value
+                last_move_time = current_time # Apply cooldown after action
+        elif keys[pygame.K_t]: # Teleport
+            if teleports > 0:
+                teleport()
+                teleports -= 1
+                values[4] = teleports # Update HUD value
+                last_move_time = current_time # Apply cooldown after action
+        elif keys[pygame.K_c]: # Cloak
+            if cloaks > 0 and not is_cloaked:
+                cloak()
+                cloaks -= 1
+                values[6] = cloaks # Update HUD value
+                last_move_time = current_time # Apply cooldown after action
+        # Add other non-movement actions here (Pause, Quit, Save, Restore)
+        elif keys[pygame.K_p]: # Pause
+             pause_quit(quitting=False)
+             last_move_time = current_time # Prevent immediate move after unpausing
+        elif keys[pygame.K_q]: # Quit Prompt
+             if pause_quit(quitting=True): # Returns True if user confirms quit
+                 nonlocal running
+                 running = False
+             last_move_time = current_time # Prevent immediate move after cancel
+        elif keys[pygame.K_s]: # Save
+             handle_save()
+             last_move_time = current_time
+        elif keys[pygame.K_r]: # Restore
+             handle_restore()
+             last_move_time = current_time
+
+
+        # --- Handle Movement ---
+        move_attempted_this_frame = False # Track if any move key is pressed this frame
+
+        # Define all direction keys with their movement vectors (delta_row, delta_col)
+        # Prioritize cardinal directions slightly if multiple keys are pressed simultaneously
+        # (though the loop break handles the first one found)
+        direction_keys = [
+            (pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)),
+            (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1)),
+            (pygame.K_u, (-1, -1)), (pygame.K_i, (-1, 0)), (pygame.K_o, (-1, 1)), # Note: K_i overlaps K_UP
+            (pygame.K_j, (0, -1)),                         (pygame.K_l, (0, 1)), # Note: K_j/l overlap K_LEFT/RIGHT
+            (pygame.K_n, (1, -1)), (pygame.K_m, (1, 0)), (pygame.K_COMMA, (1, 1)) # Note: K_m overlaps K_DOWN
+        ]
+
+        # Check held keys for movement *only if cooldown has passed*
         if time_since_last_move >= movement_cooldown:
-            move_made = False # Tracks if a successful move was made this frame
+            processed_move_key = None # Track which key initiated the move attempt
 
-            # Define all direction keys with their movement vectors (delta_row, delta_col)
-            direction_keys = [
-                (pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)),
-                (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1)),
-                (pygame.K_u, (-1, -1)), (pygame.K_i, (-1, 0)), (pygame.K_o, (-1, 1)),
-                (pygame.K_j, (0, -1)), (pygame.K_l, (0, 1)),
-                (pygame.K_n, (1, -1)), (pygame.K_m, (1, 0)), (pygame.K_COMMA, (1, 1))
-            ]
+            for key_code, (dr, dc) in direction_keys:
+                if keys[key_code]: # Check if this direction key is currently pressed
+                    move_attempted_this_frame = True
+                    processed_move_key = key_code # Mark this key as the one we're processing
 
-            active_direction_key = None
+                    # --- Momentum Calculation (Optional, keep if desired) ---
+                    keys_held_time[key_code] = keys_held_time.get(key_code, 0) + (current_time - (last_move_time if time_since_last_move < movement_cooldown * 2 else current_time)) # Approximate time held
+                    if keys_held_time[key_code] > MOMENTUM_THRESHOLD:
+                        momentum[key_code] = min(momentum.get(key_code, 0) + 1, MAX_MOMENTUM)
+                    # --- End Momentum ---
 
-            # Check currently pressed keys first
-            for key, (dr, dc) in direction_keys:
-                if current_keys[key]:
-                    move_attempted = True
-                    if not keys_pressed.get(key, False):  # Key just pressed
-                        keys_pressed[key] = True
-                        keys_held_time[key] = current_time
-                        momentum[key] = 0 # Reset momentum on new press
+                    new_row, new_col = player_row + dr, player_col + dc
+                    move_successful = process_move(new_row, new_col)
 
-                    # Try to move in this direction
-                    if process_move(player_row + dr, player_col + dc):
-                        move_made = True
-                        footStep() # Play footstep sound
-                        active_direction_key = key
-                        break # Exit loop once a move is made
+                    # --- Update Last Move Time REGARDLESS of success ---
+                    # This prevents rapid attempts when blocked
+                    last_move_time = current_time
 
-            # Handle key releases and momentum buildup for *all* direction keys
-            for key, _ in direction_keys:
-                 if not current_keys[key] and keys_pressed.get(key, False): # Key was pressed, now released
-                     hold_duration = current_time - keys_held_time.get(key, current_time)
-                     if hold_duration > MOMENTUM_THRESHOLD:
-                         # Add momentum based on hold duration
-                         momentum[key] = min(MAX_MOMENTUM, int((hold_duration - MOMENTUM_THRESHOLD) / 100))
-                     keys_pressed[key] = False # Mark as released
+                    if move_successful:
+                        footStep() # Play footstep sound on successful move
+                        # Reset momentum for other directions if one succeeds
+                        for k in momentum:
+                            if k != key_code:
+                                momentum[k] = 0
+                                keys_held_time[k] = 0
+                    else:
+                        # Collision occurred: Reset momentum for the direction that failed
+                        momentum[key_code] = 0
+                        keys_held_time[key_code] = 0
+                        # Play wall bump sound? -> electricWall() is used in process_move for bounds
 
-            # If no key is currently pressed or move failed, check for momentum
-            if not move_made and move_attempted: # Only apply momentum if a move was attempted but failed or no key is pressed now
-                 # Find the key with the highest momentum
-                 momentum_key = None
-                 max_momentum = 0
-                 for key, mom in momentum.items():
-                     if mom > max_momentum:
-                         max_momentum = mom
-                         momentum_key = key
+                    break # IMPORTANT: Process only the first pressed direction key found in the list
 
-                 if momentum_key is not None and max_momentum > 0:
-                     # Find the corresponding dr, dc
-                     for key, (dr, dc) in direction_keys:
-                         if key == momentum_key:
-                             if process_move(player_row + dr, player_col + dc):
-                                 move_made = True
-                                 momentum[momentum_key] -= 1
-                             else:
-                                 momentum[momentum_key] = 0 # Clear momentum if move fails
-                             break # Exit inner loop
+            # If no direction key was pressed in this check, reset all momentum
+            if not processed_move_key:
+                 for k in momentum:
+                     momentum[k] = 0
+                     keys_held_time[k] = 0
 
-            # Update last move time if a move was successful
-            if move_made:
-                last_move_time = current_time
-                # Optionally reset momentum for the key that *caused* the move
-                if active_direction_key:
-                    momentum[active_direction_key] = 0
-
-
-        return action_performed or move_attempted # Return true if any action or move attempt happened
+        # Update keys_pressed state for the next frame (if needed elsewhere, otherwise remove)
+        # This might not be necessary if we directly use pygame.key.get_pressed()
+        # for key_code in keys_pressed:
+        #     keys_pressed[key_code] = keys[key_code]
 
     def process_move(new_row, new_col):
         """Process a player movement attempt to a new position."""
