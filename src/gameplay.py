@@ -492,13 +492,13 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             return False
             
     def use_whip():
-        """Handle the whip animation and enemy interactions, keeping HUD and border visible, with color cycling."""
-        nonlocal score, whips, slow_enemies, medium_enemies, fast_enemies, values, player_row, player_col, is_cloaked, grid, level_num, gems, teleports, keys, cloaks, hud_input, color_input # Add hud_input, color_input
+        """Handle the whip animation and enemy interactions, implementing object breaking logic."""
+        nonlocal score, whips, slow_enemies, medium_enemies, fast_enemies, values, player_row, player_col, is_cloaked, grid, level_num, gems, teleports, keys, cloaks, hud_input, color_input, whip_power # Added whip_power
 
         # Check if player has whips
         if whips <= 0:
-            # Return current enemy lists if no whips
-            zeroCollecible()  # Play sound for no whips
+            # Sound for no whips KINGDOM5.INC.txt
+            zeroCollecible()
             return slow_enemies, medium_enemies, fast_enemies
 
         # Define the whip animation positions (counter-clockwise)
@@ -514,11 +514,10 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         ]
 
         enemies_hit = []
+        objects_hit = {} # Dictionary to store results of object hits { (r,c): broken_boolean }
         delay = 25
-        # grid_offset_x = GP_TILE_WIDTH # Removed old simple offset
-        # grid_offset_y = GP_TILE_HEIGHT # Removed old simple offset
 
-        # --- MODIFIED: Calculate Grid Offsets (like draw_grid) ---
+        # --- Calculate Grid Offsets ---
         target_grid_width_px = (LOGICAL_GRID_WIDTH + 2) * GP_TILE_WIDTH
         target_grid_height_px = (LOGICAL_GRID_HEIGHT + 2) * GP_TILE_HEIGHT
 
@@ -526,28 +525,22 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             offset_x = (WIDTH - target_grid_width_px) // 2
             offset_y = 0
         elif hud_input == "R": # Right HUD
-            hud_width = WIDTH - (GP_TILE_WIDTH * LOGICAL_GRID_WIDTH) # Assuming LOGICAL_GRID_WIDTH is game area
-            available_width = WIDTH - hud_width
-            offset_x = 0 # Align grid to the left
+            offset_x = 0
             offset_y = (HEIGHT - target_grid_height_px) // 2
-        else: # No HUD or unknown type - center in full screen
+        else: # No HUD or unknown type
             offset_x = (WIDTH - target_grid_width_px) // 2
             offset_y = (HEIGHT - target_grid_height_px) // 2
 
         offset_x = max(0, offset_x)
         offset_y = max(0, offset_y)
 
-        # Grid content offset relative to screen, including border
         grid_content_offset_x = offset_x + GP_TILE_WIDTH
         grid_content_offset_y = offset_y + GP_TILE_HEIGHT
         # --- END OFFSET CALCULATION ---
 
-
-        # --- MODIFIED: Calculate bottom boundary based on HUD ---
-        # This boundary is still relative to the screen height for the HUD overlay case
-        bottom_boundary = HEIGHT - GP_TILE_HEIGHT # Default for side HUD
+        # --- Calculate bottom boundary based on HUD ---
+        bottom_boundary = HEIGHT - GP_TILE_HEIGHT
         if hud_input == "O":
-            # Adjust boundary higher to accommodate overlaid HUD (approx 3 tiles: border + 2 text rows)
             bottom_boundary = HEIGHT - (GP_TILE_HEIGHT * 4)
         # --- END MODIFICATION ---
 
@@ -560,7 +553,46 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 continue
 
             original_tile_char = grid[whip_row][whip_col]
-            if original_tile_char in ["1", "2", "3"]:
+
+            # --- Check for breakable objects BEFORE enemy check ---
+            object_broken = False
+            # Block (4), Moving Block (38), Zap Block (43), Gravity Block (64)
+            # From KINGDOM4.INC.txt
+            if original_tile_char in ['X', 'M', 'O', 'Y']:
+                if random.randint(0, 6) < whip_power: # random(7) < WhipPower
+                    object_broken = True
+                else:
+                    pass
+                objects_hit[(whip_row, whip_col)] = object_broken
+            # Forest (19), Tree (20)
+            # From KINGDOM4.INC.txt
+            elif original_tile_char in ['/', 'J']:
+                i_power = 8 if original_tile_char == '/' else whip_power # Whip power is 8 for Forest
+                if random.randint(0, 6) < i_power: # random(7) < i
+                    object_broken = True
+                else:
+                    pass
+                objects_hit[(whip_row, whip_col)] = object_broken
+            # Statue (46)
+            # From KINGDOM4.INC.txt
+            elif original_tile_char == '>':
+                if random.randint(0, 49) < whip_power: # random(50) < WhipPower
+                    object_broken = True
+                else:
+                    pass
+                objects_hit[(whip_row, whip_col)] = object_broken
+            # Rock (65)
+            # From KINGDOM4.INC.txt
+            elif original_tile_char == '0':
+                if random.randint(0, 29) < whip_power: # random(30) < WhipPower
+                    object_broken = True
+                else:
+                    pass
+                objects_hit[(whip_row, whip_col)] = object_broken
+            # --- End breakable object check ---
+
+            # Enemy hit check (only if object wasn't there or wasn't broken)
+            if not object_broken and original_tile_char in ["1", "2", "3"]:
                 is_already_hit = any(r == whip_row and c == whip_col for r, c, _ in enemies_hit)
                 if not is_already_hit:
                     enemies_hit.append((whip_row, whip_col, original_tile_char))
@@ -577,80 +609,95 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
             # --- Direct Drawing within Whip Loop ---
             screen.fill(BLACK)
-            # --- MODIFIED: Pass offsets to draw_borders ---
             draw_borders(tile_mapping, offset_x, offset_y)
-            # --- END MODIFICATION ---
 
-            # Draw the main game grid (using calculated content offsets)
-            # Define the drawing boundaries based on the *logical* grid size and offset
+            # Draw the main game grid
             max_draw_x = grid_content_offset_x + (LOGICAL_GRID_WIDTH * GP_TILE_WIDTH)
             max_draw_y = grid_content_offset_y + (LOGICAL_GRID_HEIGHT * GP_TILE_HEIGHT)
 
             for r_idx in range(min(LOGICAL_GRID_HEIGHT, len(grid))):
-                 # --- MODIFIED: Use grid_content_offset_y ---
-                 screen_y = grid_content_offset_y + (r_idx * GP_TILE_HEIGHT)
-                 # --- END MODIFICATION ---
-                 # --- MODIFIED: Check against max_draw_y and bottom_boundary ---
-                 if screen_y >= max_draw_y or screen_y >= bottom_boundary: continue
-                 # --- END MODIFICATION ---
+                screen_y = grid_content_offset_y + (r_idx * GP_TILE_HEIGHT)
+                if screen_y >= max_draw_y or screen_y >= bottom_boundary: continue
 
-                 row_data = grid[r_idx]
-                 for c_idx in range(min(LOGICAL_GRID_WIDTH, len(row_data))):
-                     # --- MODIFIED: Use grid_content_offset_x ---
-                     screen_x = grid_content_offset_x + (c_idx * GP_TILE_WIDTH)
-                     # --- END MODIFICATION ---
-                     # --- MODIFIED: Check against max_draw_x ---
-                     if screen_x >= max_draw_x: continue # Right boundary check based on logical width
-                     # --- END MODIFICATION ---
+                row_data = grid[r_idx]
+                for c_idx in range(min(LOGICAL_GRID_WIDTH, len(row_data))):
+                    screen_x = grid_content_offset_x + (c_idx * GP_TILE_WIDTH)
+                    if screen_x >= max_draw_x: continue
 
-                     # Draw the colored whip sprite
-                     if r_idx == whip_row and c_idx == whip_col and colored_whip_image:
-                          # --- MODIFIED: Use grid_content_offset_x/y ---
-                          whip_screen_x = grid_content_offset_x + whip_col * GP_TILE_WIDTH
-                          whip_screen_y = grid_content_offset_y + whip_row * GP_TILE_HEIGHT
-                          # --- END MODIFICATION ---
-                          # --- MODIFIED: Check against max_draw_x/y and bottom_boundary ---
-                          if whip_screen_x < max_draw_x and whip_screen_y < max_draw_y and whip_screen_y < bottom_boundary:
-                              screen.blit(colored_whip_image, (whip_screen_x, whip_screen_y))
-                          # --- END MODIFICATION ---
-                     # Draw normal tiles
-                     else:
-                         char = row_data[c_idx]
-                         draw_char = char
-                         if r_idx == player_row and c_idx == player_col:
-                              draw_char = 'TP' if is_cloaked else 'P'
+                    # Draw the colored whip sprite OR the original tile if whip didn't break it
+                    if r_idx == whip_row and c_idx == whip_col:
+                        # Decide what to draw: whip, original tile, or nothing (if broken)
+                        should_draw_whip = False
+                        original_sprite_to_draw = None
 
-                         if draw_char in tile_mapping:
-                             screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
-                         elif char != ' ':
-                             pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
+                        if (whip_row, whip_col) in objects_hit:
+                            if not objects_hit[(whip_row, whip_col)]: # Object hit but not broken
+                                should_draw_whip = True
+                                # Prepare to draw original tile underneath if whip animation is brief
+                                original_sprite_to_draw = tile_mapping.get(original_tile_char)
+                            # else: object broken, draw nothing specific here, handle later
+                        else: # No object hit, potentially enemy or empty
+                            should_draw_whip = True
+                            original_sprite_to_draw = tile_mapping.get(original_tile_char if original_tile_char != ' ' else None)
 
 
-            # --- MODIFIED: Draw HUD *after* grid content ---
-            current_values = [score, level_num, gems, whips, teleports, keys, cloaks] # Use current values
-            draw_hud(current_values, color_input, hud_input) # Redraw HUD over the grid if hud_input == "O"
-            # --- END MODIFICATION ---
+                        # Draw background/original tile first if whip is overlaying it
+                        if should_draw_whip and original_sprite_to_draw:
+                             screen.blit(original_sprite_to_draw, (screen_x, screen_y))
 
-            # Display level-specific messages (Consider adjusting Y if needed for hud_input == "O")
+                        # Draw colored whip sprite on top if applicable
+                        if should_draw_whip and colored_whip_image:
+                            whip_screen_x = screen_x # simplified
+                            whip_screen_y = screen_y # simplified
+                            if whip_screen_x < max_draw_x and whip_screen_y < max_draw_y and whip_screen_y < bottom_boundary:
+                                screen.blit(colored_whip_image, (whip_screen_x, whip_screen_y))
+
+                    # Draw normal tiles (not under the whip)
+                    else:
+                        char = row_data[c_idx]
+                        draw_char = char
+                        if r_idx == player_row and c_idx == player_col:
+                             draw_char = 'TP' if is_cloaked else 'P'
+
+                        if draw_char in tile_mapping:
+                            screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
+                        elif char != ' ':
+                            pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
+
+
+            # --- Draw HUD ---
+            current_values = [score, level_num, gems, whips, teleports, keys, cloaks]
+            draw_hud(current_values, color_input, hud_input)
+
+            # Display level-specific messages
             if level_num == 1:
                 game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
-            # ... other messages ...
 
             pygame.display.flip()
             pygame.time.wait(delay)
 
-        # Process enemy hits and update game state
+        # --- Process hits AFTER animation ---
         new_slow_enemies = []
         new_medium_enemies = []
         new_fast_enemies = []
-        enemy_scores = {"1": 10, "2": 20, "3": 30}
+        enemy_scores = {"1": 10, "2": 20, "3": 30} # Simplified scores
 
+        # Process broken objects
+        for (r, c), broken in objects_hit.items():
+            if broken:
+                original_char = grid[r][c] # Get char before clearing
+                grid[r][c] = " "
+                # Add sounds for breaking specific objects here if desired
+
+        # Process enemy hits (check grid AFTER objects are broken)
         for r, c, enemy_char in enemies_hit:
+            # Ensure the tile wasn't an object that got broken in the same whip action
             if 0 <= r < len(grid) and 0 <= c < len(grid[0]) and grid[r][c] == enemy_char:
                 grid[r][c] = " "
                 score += enemy_scores.get(enemy_char, 0)
+                # Add general enemy hit sound here
 
-        # Rebuild enemy lists (no changes needed here)
+        # Rebuild enemy lists based on the *final* grid state
         for enemy in slow_enemies:
             if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "1":
                 new_slow_enemies.append(enemy)
@@ -661,10 +708,10 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "3":
                 new_fast_enemies.append(enemy)
 
-        # Decrement whip count after use
-        whips -= 1
-        whip_audio()
+        #whip_audio() # Play whip sound once per use
         return new_slow_enemies, new_medium_enemies, new_fast_enemies
+
+
 
     is_cloaked = False
     cloak_start_time = 0
