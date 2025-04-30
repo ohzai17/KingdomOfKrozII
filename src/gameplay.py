@@ -167,10 +167,10 @@ def player_death(score, level_num):
 def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (lines 96-183)
     BACKGROUND = BLUE
     TEXT = YELLOW
-    VALUE_TEXT = DARK_RED
+    VALUE_TEXT = RED
     TEXT_BOX = LIGHT_GRAY
-    OPTIONS_TEXT = LIGHT_AQUA
-    OPTIONS_BOX = DARK_RED
+    OPTIONS_TEXT = LIGHT_CYAN
+    OPTIONS_BOX = RED
 
     option_list = ["Whip", "Teleport", "Cloak", "Pause", "Quit", "Save", "Restore"]
 
@@ -178,17 +178,17 @@ def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (
 
     if is_monochrome:
         BACKGROUND = BLACK
-        TEXT = GRAY
-        VALUE_TEXT = GRAY
+        TEXT = LIGHT_GRAY
+        VALUE_TEXT = LIGHT_GRAY
         TEXT_BOX = BLACK
-        OPTIONS_TEXT = GRAY
+        OPTIONS_TEXT = LIGHT_GRAY
         OPTIONS_BOX = BLACK
 
     if hud_input == "O":
         pygame.draw.rect(screen, BACKGROUND, (0, (GP_TILE_HEIGHT * 25), WIDTH, HEIGHT - (GP_TILE_HEIGHT * 25)))
         game_text(29, "         Level", TEXT, False, False)
-        game_text(27, "  Score     Gems      Whips     ", TEXT)
-        game_text(32, "Teleports   Keys      Cloaks    ", TEXT)
+        game_text(27, "  Score     Gems      Whips        ", TEXT)
+        game_text(32, "Teleports   Keys      Cloaks       ", TEXT)
         game_text(27, "*" * 48 + "Options", OPTIONS_TEXT, False, False, ("ONLY_TEXT", OPTIONS_BOX))
 
         for i, word in enumerate(option_list):
@@ -933,40 +933,40 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         time_since_last_move = current_time - last_move_time
 
         # --- Handle Non-Movement Actions First ---
-        keys = pygame.key.get_pressed() # Get current key state
+        key_pressed = pygame.key.get_pressed() # Get current key state
 
         # Check for actions like whip, teleport, cloak (these might have their own cooldowns or conditions)
-        if keys[pygame.K_w]: # Whip
+        if key_pressed[pygame.K_w]: # Whip
             if whips > 0:
                 use_whip()
                 whips -= 1
                 values[3] = whips # Update HUD value
                 last_move_time = current_time # Apply cooldown after action
-        elif keys[pygame.K_t]: # Teleport
+        elif key_pressed[pygame.K_t]: # Teleport
             if teleports > 0:
                 teleport()
                 teleports -= 1
                 values[4] = teleports # Update HUD value
                 last_move_time = current_time # Apply cooldown after action
-        elif keys[pygame.K_c]: # Cloak
+        elif key_pressed[pygame.K_c]: # Cloak
             if cloaks > 0 and not is_cloaked:
                 cloak()
                 cloaks -= 1
                 values[6] = cloaks # Update HUD value
                 last_move_time = current_time # Apply cooldown after action
         # Add other non-movement actions here (Pause, Quit, Save, Restore)
-        elif keys[pygame.K_p]: # Pause
+        elif key_pressed[pygame.K_p]: # Pause
              pause_quit(quitting=False)
              last_move_time = current_time # Prevent immediate move after unpausing
-        elif keys[pygame.K_q]: # Quit Prompt
+        elif key_pressed[pygame.K_q]: # Quit Prompt
              if pause_quit(quitting=True): # Returns True if user confirms quit
                  nonlocal running
                  running = False
              last_move_time = current_time # Prevent immediate move after cancel
-        elif keys[pygame.K_s]: # Save
+        elif key_pressed[pygame.K_s]: # Save
              handle_save()
              last_move_time = current_time
-        elif keys[pygame.K_r]: # Restore
+        elif key_pressed[pygame.K_r]: # Restore
              handle_restore()
              last_move_time = current_time
 
@@ -990,7 +990,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             processed_move_key = None # Track which key initiated the move attempt
 
             for key_code, (dr, dc) in direction_keys:
-                if keys[key_code]: # Check if this direction key is currently pressed
+                if key_pressed[key_code]: # Check if this direction key is currently pressed
                     move_attempted_this_frame = True
                     processed_move_key = key_code # Mark this key as the one we're processing
 
@@ -1027,11 +1027,6 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                  for k in momentum:
                      momentum[k] = 0
                      keys_held_time[k] = 0
-
-        # Update keys_pressed state for the next frame (if needed elsewhere, otherwise remove)
-        # This might not be necessary if we directly use pygame.key.get_pressed()
-        # for key_code in keys_pressed:
-        #     keys_pressed[key_code] = keys[key_code]
 
     def process_move(new_row, new_col):
         """Process a player movement attempt to a new position."""

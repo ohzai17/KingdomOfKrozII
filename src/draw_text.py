@@ -98,7 +98,7 @@ def draw_text(row, text, text_color=None, flashing=False, center=True, text_back
     if text_color == "CHANGING":
         # Ensure the color list is not empty to avoid division by zero
         if blinking_text_color_list:
-            color_index = (current_time // 150) % len(blinking_text_color_list)
+            color_index = (current_time // 50) % len(blinking_text_color_list)
             current_actual_color = blinking_text_color_list[color_index]
         else:
             current_actual_color = None

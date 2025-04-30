@@ -15,7 +15,7 @@ def color(): # From KINGDOM4.INC (line 66)
     while running:
         screen.fill(BLACK)
 
-        draw_text(2, game_title, BLUE)
+        draw_text(2, game_title, LIGHT_BLUE)
         draw_text(10, color_heading)
         draw_text(10, color_cursor, None, True)
 
@@ -52,13 +52,13 @@ def speed(color_input): # From KINGDOM4.INC (line 87)
         screen.fill(BLACK)
 
         if color_input == "C":
-            draw_text(2, game_title, BLUE)
+            draw_text(2, game_title, LIGHT_BLUE)
         
         draw_text(14, speed_heading_1)
         draw_text(14, speed_cursor, None, True)
-        draw_text(17, speed_subtext_1, GRAY)
-        draw_text(19, speed_subtext_2, GRAY)
-        draw_text(21, speed_subtext_3, GRAY)
+        draw_text(17, speed_subtext_1, LIGHT_GRAY)
+        draw_text(19, speed_subtext_2, LIGHT_GRAY)
+        draw_text(21, speed_subtext_3, LIGHT_GRAY)
 
         pygame.display.flip()
 
@@ -107,7 +107,7 @@ def title(color_input): # From KINGDOM3.INC (line 64)
         draw_text(19, title_subtext_1, YELLOW)
         draw_text(21, title_subtext_2, YELLOW)
         draw_text(23, title_subtext_3, YELLOW)
-        draw_text(25, press_any_key_dot, AQUA)
+        draw_text(25, press_any_key_dot, LIGHT_CYAN)
 
         pygame.display.flip()
 
@@ -115,7 +115,8 @@ def title(color_input): # From KINGDOM3.INC (line 64)
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    return None
                 case pygame.KEYDOWN:
                     play_sound(220, 100)
                     running = False
@@ -133,12 +134,12 @@ def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
         draw_text(2, difficulty_title, "CHANGING", False, True, RED, True)
         draw_text(5, difficulty_heading_1)
         draw_text(7, difficulty_heading_2)
-        draw_text(9, difficulty_subtext_1, AQUA)
-        draw_text(10, difficulty_subtext_2, AQUA)
-        draw_text(11, difficulty_subtext_3, AQUA)
-        draw_text(12, difficulty_subtext_4, AQUA)
-        draw_text(13, difficulty_subtext_5, AQUA)
-        draw_text(14, difficulty_subtext_6, AQUA)
+        draw_text(9, difficulty_subtext_1, LIGHT_CYAN)
+        draw_text(10, difficulty_subtext_2, LIGHT_CYAN)
+        draw_text(11, difficulty_subtext_3, LIGHT_CYAN)
+        draw_text(12, difficulty_subtext_4, LIGHT_CYAN)
+        draw_text(13, difficulty_subtext_5, LIGHT_CYAN)
+        draw_text(14, difficulty_subtext_6, LIGHT_CYAN)
         draw_text(17, difficulty_subtext_7, LIGHT_GREEN)
         draw_text(17, difficulty_subtext_7a)
         draw_text(18, difficulty_subtext_8, LIGHT_GREEN)
@@ -147,10 +148,10 @@ def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
         if blinking_difficulty_text == "":
             draw_text(22, difficulty_heading_3_1, YELLOW)
             draw_text(22, difficulty_heading_3_2)
-            draw_text(22, difficulty_cursor, ORANGE, True)
+            draw_text(22, difficulty_cursor, BROWN, True)
         else:
             draw_text(22, blinking_difficulty_text, YELLOW, True)
-            draw_text(25, difficulty_footer, GRAY)
+            draw_text(25, difficulty_footer, LIGHT_GRAY)
 
         pygame.display.flip()
 
@@ -474,9 +475,9 @@ def sign_off(): # From KINGDOM1.INC (lines 471-493)
     while running:
         screen.fill(BLACK)
 
-        draw_text(2, game_title, GRAY)
-        draw_text(3, ending_subtitle_1, GRAY)
-        draw_text(5, ending_subtitle_2, GRAY, False, False)
+        draw_text(2, game_title, LIGHT_GRAY)
+        draw_text(3, ending_subtitle_1, LIGHT_GRAY)
+        draw_text(5, ending_subtitle_2, LIGHT_GRAY, False, False)
 
 
         for i, line in enumerate(ending_paragraphs_1):
@@ -485,7 +486,7 @@ def sign_off(): # From KINGDOM1.INC (lines 471-493)
 
         for i, line in enumerate(ending_paragraphs_2):
             row = 11 + i
-            draw_text(row, line, GRAY, False, False)
+            draw_text(row, line, LIGHT_GRAY, False, False)
 
         for i, line in enumerate(ending_paragraphs_3):
             row = 22 + i
@@ -651,7 +652,7 @@ def leaderboard_screen(score, level_num):
 
         draw_text(2, game_title, BLUE)  # Display the game title
         draw_text(4, leaderboard_headers, CYAN)
-        draw_text(22, leaderboard_prompt, BRIGHT_RED, False, True, GRAY)
+        draw_text(22, leaderboard_prompt, BRIGHT_RED, False, True, DARK_GRAY)
 
         # Draw leaderboard entries with aligned numbers
         for i, entry in enumerate(leaderboard):

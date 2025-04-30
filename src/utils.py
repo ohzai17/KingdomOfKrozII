@@ -11,7 +11,7 @@ pygame.init()
 WIDTH, HEIGHT = 1380, 1
 HEIGHT = int(WIDTH * 9 / 16)
 resolution = (WIDTH, HEIGHT)
-screen = pygame.display.set_mode(resolution)
+screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
 GRID_WIDTH = 80
 GAME_WIDTH = 66
 TILE_WIDTH, TILE_HEIGHT = 0, 0
@@ -27,32 +27,21 @@ def rgb(r, g, b):
 
 # Colors used in the game
 BLACK = rgb(0, 0, 0)
-BLUE = rgb(8,4,180)
-DARK_BLUE = rgb(3, 3, 178)
-OLD_BLUE = rgb(44, 0, 180)
-CYAN = rgb(0, 255, 255)
-GREEN = rgb(0, 128, 0)
-AQUA = rgb(0, 242, 250)
-RED = rgb(255, 0, 0)
-PURPLE = rgb(128, 0, 128)
-ORANGE = rgb(255, 66, 77)
-BROWN  = rgb(170, 85, 0)
-YELLOW = rgb(254, 254, 6)
+DARK_GRAY = rgb(85, 85, 85)
+BLUE = rgb(0, 0, 170)
+LIGHT_BLUE = rgb(85, 85, 255)
+GREEN = (0, 170, 0)
+LIGHT_GREEN = rgb(85, 255, 85)
+CYAN = (0, 170, 170)
+LIGHT_CYAN = (85, 255, 255)
+RED = rgb(170, 0, 0)
+LIGHT_RED = rgb(255, 85, 85)
+MAGENTA = rgb(170, 0, 170)
+LIGHT_MAGENTA = rgb(255, 85, 255)
+BROWN = rgb(170, 85, 0)
+YELLOW = rgb(255, 255, 85)
+LIGHT_GRAY = rgb(170, 170, 170)
 WHITE = rgb(255, 255, 255)
-GRAY = rgb(128, 128, 128)
-SILVER = rgb(192, 192, 192)
-MAGENTA = rgb(255, 0, 255)
-LIGHT_GRAY = rgb(150, 150, 150)
-LIGHT_BLUE = rgb(173, 216, 230)
-LIGHT_GREEN = rgb(0, 241, 54)
-LIGHT_AQUA = rgb(224, 255, 255)
-LIGHT_RED = rgb(255, 182, 193) 
-LIGHT_PURPLE = rgb(221, 160, 221)
-LIGHT_YELLOW = rgb(255, 255, 224)
-DARK_RED = rgb(140, 0, 0)
-PERSIMMON = rgb(255, 86, 85)
-SALMON = rgb(255, 86, 255)
-BRIGHT_RED = rgb(170, 1, 0)
 BACKGROUND = BLUE
 
 WIDTH, HEIGHT = screen.get_size()
@@ -61,12 +50,12 @@ clock = pygame.time.Clock() # Used in flash, returns the number of milliseconds 
 
 square_size = 8 # Used for square bullets
 
-logo_color_list = [RED, AQUA, PURPLE, YELLOW, LIGHT_BLUE, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW]
-blinking_text_color_list = [AQUA, PURPLE, YELLOW, GRAY, BLUE, GREEN, RED, PURPLE, YELLOW]
-rect_colors_list = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
-rect_colors = [BLACK, PURPLE, GRAY, RED, GREEN, BROWN]
+logo_color_list = [DARK_GRAY, BLUE, LIGHT_BLUE, GREEN, LIGHT_GREEN, CYAN, LIGHT_CYAN, RED, LIGHT_RED, MAGENTA, LIGHT_MAGENTA, BROWN, YELLOW, LIGHT_GRAY, WHITE]
+blinking_text_color_list = [BLACK, DARK_GRAY, BLUE, LIGHT_BLUE, GREEN, LIGHT_GREEN, CYAN, LIGHT_CYAN, RED, LIGHT_RED, MAGENTA, LIGHT_MAGENTA, BROWN, YELLOW, LIGHT_GRAY, WHITE]
+rect_colors_list = [BLACK, RED, GREEN, BROWN]
+rect_colors = [BLACK, RED, GREEN, BROWN]
 flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
-whip_cycle_colors = [RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, MAGENTA, WHITE, GRAY]
+whip_cycle_colors = [RED, YELLOW, GREEN, BLUE, CYAN, MAGENTA, WHITE]
 
 # Random rectangle Colors to cycle through 
 rect_colors_cycle = rect_colors_list
@@ -93,30 +82,24 @@ def format_centered_int(value, width) -> str:
     return ' ' * left_padding + s_value + ' ' * right_padding
 
 def set_monochrome_palette():
-    global BACKGROUND, BLUE, DARK_BLUE, OLD_BLUE, CYAN, GREEN, AQUA, RED, PURPLE, ORANGE, BROWN, YELLOW, WHITE, GRAY, MAGENTA, LIGHT_GRAY, LIGHT_BLUE,LIGHT_GREEN, LIGHT_AQUA, LIGHT_RED, LIGHT_PURPLE, LIGHT_YELLOW, DARK_RED
+    global BACKGROUND, BLACK, DARK_GRAY, BLUE, LIGHT_BLUE, GREEN, LIGHT_GREEN, CYAN, LIGHT_CYAN, RED, LIGHT_RED, MAGENTA, LIGHT_MAGENTA, BROWN, YELLOW, LIGHT_GRAY, WHITE
     BACKGROUND = BLACK
-    BLUE = rgb(8,4,180)
-    DARK_BLUE = rgb(3, 3, 178)
-    OLD_BLUE = rgb(44, 0, 180)
-    CYAN = rgb(0, 255, 255)
-    GREEN = rgb(0, 128, 0)
-    AQUA = rgb(0, 242, 250)
-    RED = rgb(255, 0, 0)
-    PURPLE = rgb(128, 0, 128)
-    ORANGE = rgb(255, 66, 77)
-    BROWN  = rgb(139, 69, 19)
-    YELLOW = rgb(254, 254, 6)
+    BLACK = rgb(0, 0, 0)
+    DARK_GRAY = rgb(85, 85, 85)
+    BLUE = rgb(0, 0, 170)
+    LIGHT_BLUE = rgb(85, 85, 255)
+    GREEN = (0, 170, 0)
+    LIGHT_GREEN = rgb(85, 255, 85)
+    CYAN = (0, 170, 170)
+    LIGHT_CYAN = (85, 255, 255)
+    RED = rgb(170, 0, 0)
+    LIGHT_RED = rgb(255, 85, 85)
+    MAGENTA = rgb(170, 0, 170)
+    LIGHT_MAGENTA = rgb(255, 85, 255)
+    BROWN = rgb(170, 85, 0)
+    YELLOW = rgb(255, 255, 85)
+    LIGHT_GRAY = rgb(170, 170, 170)
     WHITE = rgb(255, 255, 255)
-    GRAY = rgb(128, 128, 128)
-    MAGENTA = rgb(255, 0, 255)
-    LIGHT_GRAY =  (150, 150, 150)
-    LIGHT_BLUE = rgb(173, 216, 230)
-    LIGHT_GREEN = rgb(0, 241, 54)
-    LIGHT_AQUA = rgb(224, 255, 255)
-    LIGHT_RED = rgb(255, 182, 193) 
-    LIGHT_PURPLE = rgb(221, 160, 221)
-    LIGHT_YELLOW = rgb(255, 255, 224)
-    DARK_RED = rgb(140, 0, 0)
 
 pygame.font.init()
 def load_font(size):
@@ -152,25 +135,45 @@ def apply_grayscale_f(surface):
 
     return gray_surface
 
+last_interval_index = -1
+last_random_color = None
+
 def change_logo_color(image, time, color_user_input):
+    global last_interval_index, last_random_color # Use global variables to store state
+
     if color_user_input == "M":
+        # Reset state if switching to monochrome
+        last_interval_index = -1
+        last_random_color = None
         return apply_grayscale(image)
     else:
-        color_index = (time // 150) % len(logo_color_list)
-        current_color = logo_color_list[color_index] 
+        # Calculate the current time interval index (changes every 300ms)
+        current_interval_index = time // 100
+
+        # Check if the interval has changed since the last call
+        if current_interval_index != last_interval_index:
+            # If it changed, pick a new random color
+            current_color = random.choice(logo_color_list)
+            # Store the new color and the current interval index
+            last_random_color = current_color
+            last_interval_index = current_interval_index
+        else:
+            # If still within the same interval, use the previously chosen color
+            current_color = last_random_color
+
+        # Ensure a color was selected (handles the very first call)
+        if current_color is None:
+             current_color = random.choice(logo_color_list)
+             last_random_color = current_color
+             last_interval_index = current_interval_index
+
+        # --- Original tinting logic ---
         color_filter = pygame.Surface(image.get_size()) # Create imaging surface
-        color_filter.fill(current_color) 
+        color_filter.fill(current_color)
         colorized_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
-        colorized_image.blit(image, (0, 0)) 
+        colorized_image.blit(image, (0, 0))
         colorized_image.blit(color_filter, (0, 0), special_flags=pygame.BLEND_RGB_MULT) # Apply color filter
         return colorized_image
-
-# def change_title_color(time, color_user_input):
-#     if color_user_input == "M":
-#         return BLACK
-#     else:
-#         color_index = (time // 150) % len(blinking_text_color_list)
-#         return blinking_text_color_list[color_index]
 
 def flash(screen, text, WIDTH, HEIGHT):
     if (pygame.time.get_ticks() // 80) % 2 == 0:
