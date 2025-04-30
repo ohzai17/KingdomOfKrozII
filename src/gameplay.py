@@ -673,7 +673,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         is_cloaked = True
         # Note: Cloak decrement happens in player_input where the action is initiated
 
-    def teleport():
+    def teleport(t_trap=False):
         """Teleports the player to a random empty space on the grid with a flickering effect."""
         nonlocal player_row, player_col # Modifies player position directly
         # Access necessary variables from the outer scope for offset calculation
@@ -765,6 +765,8 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
         intermediate_flicker_count = 250
         intermediate_delay = 6
+        if t_trap:
+            intermediate_flicker_count = 1
 
         final_row, final_col = -1, -1 # Initialize final position
 
@@ -791,9 +793,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                         original_char = ' ' # Assume space under player
                     bg_sprite = tile_mapping.get(original_char)
                     if bg_sprite:
-                         screen.blit(bg_sprite, last_intermediate_rect.topleft)
+                        screen.blit(bg_sprite, last_intermediate_rect.topleft)
                     else: # If no specific tile, just fill black
-                         screen.fill(BLACK, last_intermediate_rect)
+                        screen.fill(BLACK, last_intermediate_rect)
                 else: # Fallback if calculation failed or indices out of bounds for the specific row
                     screen.fill(BLACK, last_intermediate_rect)
 
@@ -877,18 +879,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              grid[final_row][final_col] = 'P'
              # Update player's logical position
              player_row, player_col = final_row, final_col
+             intermediate_flicker_count = 250 # Reset flicker count for next teleport
         else:
              print(f"Error: Final teleport destination ({final_row}, {final_col}) is out of bounds.")
-             # If the final position was invalid, we might need to put the player back
-             # or handle this error more gracefully. For now, the player might disappear
-             # if the original position was also cleared and the final was invalid.
-
-
-        # This line seems redundant as player_row/col are updated above if valid
-        # grid[final_row][final_col] = 'P'
-
-        # This line seems redundant as player_row/col are updated above if valid
-        # player_row, player_col = final_row, final_col
 
     # --- Movement settings ---
     movement_cooldown = 100  # ms between moves
@@ -1086,7 +1079,15 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == ".": # teleport trap
             score -= 50
-            moved = True
+            # Move player onto the trap space *before* teleporting
+            grid[player_row][player_col] = " " # Clear old position
+            player_row, player_col = new_row, new_col
+            grid[player_row][player_col] = "P" # Place player on trap temporarily
+            draw_grid() # Redraw the entire grid with player on the trap
+            pygame.display.flip() # Update the display to show this frame
+            pygame.time.wait(150) # Pause briefly (e.g., 150 milliseconds)
+            teleport(t_trap=True) # Call teleport immediately
+            return True # Move was successful (led to teleport)
         # Add other collectable items here...
         elif target_char == "L": # Stairs
             score += level_num * 100 # Example score for level change
@@ -1515,7 +1516,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
         # Display level-specific messages (using game_text, which handles its own positioning)
         if level_num == 1:
-             game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
+            game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
 
         # Display pause message if waiting (using game_text)
         if waiting_for_start_key:
