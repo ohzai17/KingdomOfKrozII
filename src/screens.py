@@ -198,7 +198,7 @@ def shareware(BACKGROUND): # From KINGDOM3.INC (lines 495-541)
         screen.fill(BACKGROUND)
 
         draw_text(1, shareware_title)
-        draw_text(2, "—" * 80)
+        draw_text(2, "—" * 82)
         draw_text(22, shareware_line22, None, False, False)
 
         for i, line in enumerate(shareware_paragraph_1):
@@ -217,7 +217,7 @@ def shareware(BACKGROUND): # From KINGDOM3.INC (lines 495-541)
             row = 20 + i
             draw_text(row, line, YELLOW, False, False)
 
-        draw_text(25, "█" * 80, rand_color)
+        draw_text(25, "█" * 82, rand_color)
         draw_text(25, press_any_key_dot, BLACK, True)
 
         pygame.display.update()
@@ -583,7 +583,7 @@ def load(): # From KINGDOM3.INC (lines 141-495) includes other screens
         draw_text(2, game_title)
         draw_text(4, load_subtext_1, BROWN)
         draw_text(6, load_subtext_2, BROWN)
-        draw_text(10, "—" * 80, RED)
+        draw_text(10, "—" * 82, RED)
         draw_text(24, load_selector, None, False, False, BLUE)
         draw_text(24, load_cursor, None, True, False) #investigate cursor size
         draw_text(24, load_pad, BLACK, False, False)
@@ -650,28 +650,28 @@ def leaderboard_screen(score, level_num):
     while running:
         screen.fill(BLACK)
 
-        draw_text(2, game_title, BLUE)  # Display the game title
-        draw_text(4, leaderboard_headers, CYAN)
-        draw_text(22, leaderboard_prompt, BRIGHT_RED, False, True, DARK_GRAY)
+        draw_text(2, game_title, LIGHT_BLUE)  # Display the game title
+        draw_text(4, leaderboard_headers, LIGHT_CYAN)
+        draw_text(22, leaderboard_prompt, RED, False, True, LIGHT_GRAY)
 
         # Draw leaderboard entries with aligned numbers
         for i, entry in enumerate(leaderboard):
             row = 6 + i
-            color = PERSIMMON if i % 2 == 0 else SALMON
+            color = LIGHT_RED if i % 2 == 0 else LIGHT_MAGENTA
             number = f"{i + 1:>2}"  # Right-align numbers to ensure proper spacing
             draw_text(row, f"{number} {entry['name']:<20}{entry['score']:<15}{entry['level']:<5}", color)
 
             # Adjust the pad position based on the current run position
             if current_run_position:
                 if current_run_position <= 6 and i == 5:  # Move pad below the 6th player
-                    draw_text(row + 1, 21 * " " + leaderboard_pad, BRIGHT_RED, False, False, None)
+                    draw_text(row + 1, 21 * " " + leaderboard_pad, LIGHT_RED, False, False, None)
                 elif current_run_position > 6 and i == current_run_position - 1:  # Move pad above the current run
-                    draw_text(row - 1, 21 * " " + leaderboard_pad, BRIGHT_RED, False, False, None)
+                    draw_text(row - 1, 21 * " " + leaderboard_pad, LIGHT_RED, False, False, None)
 
         # Adjust cursor position based on user input length
         cursor_position = 21 + len(user_input)
-        draw_text(11, 21 * " " + leaderboard_pad, BRIGHT_RED, False, False, None)
-        draw_text(11, cursor_position * " " + leaderboard_cursor, PERSIMMON, True, False, None)
+        draw_text(11, 21 * " " + leaderboard_pad, RED, False, False, None)
+        draw_text(11, cursor_position * " " + leaderboard_cursor, LIGHT_RED, True, False, None)
         
         # Display user input and dynamic pad
         if len(user_input) > 13:

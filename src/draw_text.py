@@ -23,19 +23,27 @@ special_char_symbols = {
     "chance": "&", "chest": "*", "clues": "@", "enemy1a": "{", "enemy2a": "}", "enemy3": "[", "gem": "]",
     "key": "^", "player": ">", "power": "<", "stairs": "|", "teleport": ";", "whip": "~"
 }
-
 def load_sprite(char_key, filename_base):
     filename = f"{filename_base}.png"
     full_path = os.path.join(screen_assets_dir, filename)
     try:
         sprite = pygame.image.load(full_path).convert_alpha()
-        # Resize the sprite to CHAR_WIDTH x CHAR_HEIGHT
-        resized_sprite = pygame.transform.scale(sprite, (CHAR_WIDTH, CHAR_HEIGHT))
+        # Determine target size based on char_key
+        target_width = CHAR_WIDTH
+        target_height = CHAR_HEIGHT
+        if char_key == special_char_symbols.get("dash") or char_key == special_char_symbols.get("cursor"):
+             target_width += 2 # Special case for dash and cursor
+
+        # Resize the sprite
+        # Ensure dimensions are integers for scaling
+        resized_sprite = pygame.transform.scale(sprite, (int(target_width), int(target_height)))
         char_map[char_key] = resized_sprite
     except pygame.error as e:
         print(f"Warning: Could not load image '{filename}': {e}")
     except FileNotFoundError:
         print(f"Warning: Image file not found: '{full_path}'")
+    except ValueError as e:
+         print(f"Error resizing sprite '{filename_base}' ({char_key}): {e}. Target Width={target_width}, Target Height={target_height}")
 
 # Load uppercase letters and digits
 for char in uppercase_letters + digits:
