@@ -1,6 +1,8 @@
 from maps import *
 from utils import *
 from game_text import game_text
+from audio import enemyCollision, electricWall, whip as whip_audio, footStep, zeroCollecible
+
 GP_TILE_WIDTH, GP_TILE_HEIGHT = 0, 0
 LOGICAL_GRID_WIDTH, LOGICAL_GRID_HEIGHT = 64, 23
 """
@@ -439,6 +441,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 if enemy_type == "1": score += 10
                 elif enemy_type == "2": score += 20
                 elif enemy_type == "3": score += 30
+                enemyCollision()  # Play sound for breaking block
                 return True  # Enemy dies when breaking block
             
             # Handle collision with gems, whips, teleports
@@ -477,7 +480,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 
                 if gems < 0:
                     player_death(screen)  # Call player_death when out of gems
-                    
+                enemyCollision()  # Play sound for enemy collision    
                 return True  # Enemy dies
                 
             # Blocked - stay in place
@@ -495,6 +498,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         # Check if player has whips
         if whips <= 0:
             # Return current enemy lists if no whips
+            zeroCollecible()  # Play sound for no whips
             return slow_enemies, medium_enemies, fast_enemies
 
         # Define the whip animation positions (counter-clockwise)
@@ -659,7 +663,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
         # Decrement whip count after use
         whips -= 1
-
+        whip_audio()
         return new_slow_enemies, new_medium_enemies, new_fast_enemies
 
     is_cloaked = False
@@ -979,6 +983,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                     # Try to move in this direction
                     if process_move(player_row + dr, player_col + dc):
                         move_made = True
+                        footStep() # Play footstep sound
                         active_direction_key = key
                         break # Exit loop once a move is made
 
@@ -1030,6 +1035,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
         # Check bounds
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
+            electricWall()
             return False # Invalid move (out of bounds)
 
         target_char = grid[new_row][new_col]
