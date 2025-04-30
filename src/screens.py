@@ -544,9 +544,9 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_o:
+                    hud_input = "O"
                     utils.TILE_WIDTH, utils.TILE_HEIGHT = WIDTH // 66, WIDTH // 66
                     gp.GP_TILE_WIDTH, gp.GP_TILE_HEIGHT = utils.TILE_WIDTH, utils.TILE_HEIGHT
-                    hud_input = "O"
                     selecting = False
                 elif event.key == pygame.K_r:
                     hud_input = "R"
