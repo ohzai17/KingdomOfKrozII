@@ -40,8 +40,14 @@ def electricWall():
 def teleport():
     play_wav('teleport.wav')
     
+def teleportTrap():
+    play_wav('teleportTrap.wav')
+    
 def whip():
     play_wav('whip.wav')
     
 def zeroCollecible():
     play_wav('zeroCollectible.wav')
+    
+def chestPickup():
+    play_wav('chestPickup.wav')

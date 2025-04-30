@@ -1,7 +1,7 @@
 from maps import *
 from utils import *
 from game_text import game_text
-from audio import enemyCollision, electricWall, whip as whip_audio, footStep, zeroCollecible
+from audio import enemyCollision, electricWall, whip as whip_audio, footStep, zeroCollecible, teleportTrap, chestPickup
 
 GP_TILE_WIDTH, GP_TILE_HEIGHT = 0, 0
 LOGICAL_GRID_WIDTH, LOGICAL_GRID_HEIGHT = 64, 23
@@ -1074,6 +1074,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == "C": # Chest
             score += 50
+            chestPickup() # Play sound for chest pickup
             # Add random gems/whips logic here if needed
             moved = True
         elif target_char == "!": # Tablet
@@ -1085,6 +1086,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == ".": # teleport trap
             score -= 50
+            teleportTrap()  # Play sound for teleport trap
             # Move player onto the trap space *before* teleporting
             grid[player_row][player_col] = " " # Clear old position
             player_row, player_col = new_row, new_col
