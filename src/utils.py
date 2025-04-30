@@ -8,11 +8,11 @@ import numpy as np
 
 pygame.init()
 # 16:9
-WIDTH, HEIGHT = 1380, 1
-HEIGHT = int(WIDTH * 9 / 16)
+WIDTH, HEIGHT = 1, 787
+WIDTH = int(HEIGHT * 16 / 9)
 resolution = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
-GRID_WIDTH = 80
+GRID_WIDTH, GRID_HEIGHT = 80, 25
 GAME_WIDTH = 66
 TILE_WIDTH, TILE_HEIGHT = 0, 0
 CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
@@ -52,14 +52,10 @@ square_size = 8 # Used for square bullets
 
 logo_color_list = [DARK_GRAY, BLUE, LIGHT_BLUE, GREEN, LIGHT_GREEN, CYAN, LIGHT_CYAN, RED, LIGHT_RED, MAGENTA, LIGHT_MAGENTA, BROWN, YELLOW, LIGHT_GRAY, WHITE]
 blinking_text_color_list = [BLACK, DARK_GRAY, BLUE, LIGHT_BLUE, GREEN, LIGHT_GREEN, CYAN, LIGHT_CYAN, RED, LIGHT_RED, MAGENTA, LIGHT_MAGENTA, BROWN, YELLOW, LIGHT_GRAY, WHITE]
-rect_colors_list = [BLACK, RED, GREEN, BROWN]
-rect_colors = [BLACK, RED, GREEN, BROWN]
 flash_colors = [MAGENTA, YELLOW, WHITE]  # Colors 13-15 in VGA Palette
 whip_cycle_colors = [RED, YELLOW, GREEN, BLUE, CYAN, MAGENTA, WHITE]
 
-# Random rectangle Colors to cycle through 
-rect_colors_cycle = rect_colors_list
-rand_color = random.choice(rect_colors_cycle)
+rand_color = random.choice(logo_color_list)
 
 # Define the base directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
