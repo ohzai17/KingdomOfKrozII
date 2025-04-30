@@ -1086,7 +1086,6 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == ".": # teleport trap
             score -= 50
-            teleportTrap()  # Play sound for teleport trap
             # Move player onto the trap space *before* teleporting
             grid[player_row][player_col] = " " # Clear old position
             player_row, player_col = new_row, new_col
@@ -1095,6 +1094,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             pygame.display.flip() # Update the display to show this frame
             pygame.time.wait(150) # Pause briefly (e.g., 150 milliseconds)
             teleport(t_trap=True) # Call teleport immediately
+            teleportTrap()  # Play sound for teleport trap
             return True # Move was successful (led to teleport)
         elif target_char == "Q": # Power Ring
             score += 20
