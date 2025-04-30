@@ -51,7 +51,7 @@ special_cases = {
 
 for sprite_name in sprites:
     filename = special_cases.get(sprite_name, sprite_name) + ".png"
-    full_path = os.path.join(assets_dir, filename) # Use assets_dir from utils
+    full_path = os.path.join(sprites_dir, filename) # Use assets_dir from utils
     try:
         img = pygame.image.load(full_path).convert_alpha() # Use convert_alpha() for potential transparency
         original_images[sprite_name] = img
