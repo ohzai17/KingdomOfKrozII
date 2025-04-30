@@ -1,7 +1,7 @@
 from maps import *
 from utils import *
 from game_text import game_text
-from audio import enemyCollision, electricWall, whip as whip_audio, footStep, zeroCollecible
+from audio import enemyCollision, electricWall, whip as whip_audio, footStep, zeroCollecible, teleportTrap, chestPickup
 
 GP_TILE_WIDTH, GP_TILE_HEIGHT = 0, 0
 LOGICAL_GRID_WIDTH, LOGICAL_GRID_HEIGHT = 64, 23
@@ -284,18 +284,18 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
         case "E":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 2
         case "A":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 2, 0, 0, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 2, 0, 0, 0, 0, 2
         case "N", " ":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 20, 10, 0, 0, 0
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 2
         case "X":
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 250, 100, 50, 0, 10 # Cloaks for X mode
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 250, 100, 50, 0, 10, 3
         case _:
-            score, level_num, gems, whips, teleports, keys, cloaks = 0, 1, 50, 50, 10, 0, 5 # Default/Other cloaks
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 50, 50, 10, 0, 5, 2
 
     if mixUp:
-        score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, 2
+        score, level_num, gems, whips, teleports, keys = 0, 1, gems + 60, whips + 30, teleports + 15, cloaks + 2, whip_power
 
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
 
@@ -1022,9 +1022,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     def process_move(new_row, new_col):
         """Process a player movement attempt to a new position."""
-        nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks
-        nonlocal current_level_index # Needed for level change
-        nonlocal slow_enemies, medium_enemies, fast_enemies # Declare enemy lists as nonlocal
+        nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks, whip_power
+        nonlocal current_level_index, waiting_for_start_key
+        nonlocal slow_enemies, medium_enemies, fast_enemies
 
         # Check bounds
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
@@ -1074,6 +1074,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == "C": # Chest
             score += 50
+            chestPickup() # Play sound for chest pickup
             # Add random gems/whips logic here if needed
             moved = True
         elif target_char == "!": # Tablet
@@ -1093,8 +1094,28 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             pygame.display.flip() # Update the display to show this frame
             pygame.time.wait(150) # Pause briefly (e.g., 150 milliseconds)
             teleport(t_trap=True) # Call teleport immediately
+            teleportTrap()  # Play sound for teleport trap
             return True # Move was successful (led to teleport)
-        # Add other collectable items here...
+        elif target_char == "Q": # Power Ring
+            score += 20
+            whip_power += 1
+            grid[player_row][player_col] = " " # Clear old position
+            player_row, player_col = new_row, new_col
+            grid[player_row][player_col] = "P" # Place player on trap temporarily
+            draw_grid() # Redraw the entire grid with player on the trap
+            pygame.display.flip() # Update the display to show this frame
+            # Wait for player to press any key
+            waiting_for_key = True
+            while waiting_for_key:
+                game_text(25, "A Power Ring--your whip is now a little stronger!", "CHANGING", False, True, BLACK)
+                pygame.display.flip()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+                    elif event.type == pygame.KEYDOWN:
+                        waiting_for_key = False
+            return True
         elif target_char == "L": # Stairs
             score += level_num * 100 # Example score for level change
             next_level_idx = (current_level_index + 1) % len(level_maps)
@@ -1202,6 +1223,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 "teleports": state["teleports"],
                 "keys": state["keys"],
                 "cloaks": state["cloaks"], # Save cloaks
+                "whip_power": state["whip_power"], # Save whip power
                 "current_level_index": state["current_level_index"], # Save level index
                 # Optionally save enemy positions if desired (more complex restore)
                 # "slow_enemies": state["slow_enemies"],
@@ -1315,6 +1337,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                     "teleports": teleports,
                     "keys": keys,
                     "cloaks": cloaks,
+                    "whip_power": whip_power,
                     "current_level_index": current_level_index,
                     # "grid": grid, # Avoid saving grid by default unless necessary
                     # "slow_enemies": slow_enemies, # Avoid saving enemies unless necessary
@@ -1330,7 +1353,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     def handle_restore():
         """Handle the restore confirmation and process."""
-        nonlocal grid, player_row, player_col, score, level_num, gems, whips, teleports, keys, cloaks
+        nonlocal grid, player_row, player_col, score, level_num, gems, whips, teleports, keys, cloaks, whip_power
         nonlocal current_level_index, slow_enemies, medium_enemies, fast_enemies, waiting_for_start_key, values
 
         # Display confirmation prompt
@@ -1371,6 +1394,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                         teleports = restored_state["teleports"]
                         keys = restored_state["keys"]
                         cloaks = restored_state["cloaks"]
+                        whip_power = restored_state["whip_power"] # Default to 1 if not found
 
                         # Ensure player is placed correctly on the regenerated grid
                         if 0 <= player_row < len(grid) and 0 <= player_col < len(grid[0]):
