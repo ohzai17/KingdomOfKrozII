@@ -8,10 +8,10 @@ import numpy as np
 
 pygame.init()
 # 16:9
-WIDTH, HEIGHT = 1376, 1
+WIDTH, HEIGHT = 1380, 1
 HEIGHT = int(WIDTH * 9 / 16)
 resolution = (WIDTH, HEIGHT)
-screen = pygame.display.set_mode(resolution, pygame.RESIZABLE)
+screen = pygame.display.set_mode(resolution)
 GRID_WIDTH = 80
 GAME_WIDTH = 66
 TILE_WIDTH, TILE_HEIGHT = 0, 0

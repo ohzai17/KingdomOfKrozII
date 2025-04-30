@@ -2,6 +2,7 @@ from maps import *
 from utils import *
 from game_text import game_text
 GP_TILE_WIDTH, GP_TILE_HEIGHT = 0, 0
+LOGICAL_GRID_WIDTH, LOGICAL_GRID_HEIGHT = 64, 23
 """
 game_text(row, text, text_color=None, flashing=False, center=True, text_background=None, title_box = False)
 Draws a single row of text using character sprites onto the screen.
@@ -28,39 +29,34 @@ Args:
 original_images = {}
 tile_mapping = {}
 
-def load_gameplay_sprites():
-    """Loads original, unscaled gameplay sprites."""
-    global original_images
-    sprites = ["border", "block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport",
-               "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river",
-               "power", "forest", "tree", "bomb", "lava", "pit", "tome", "tunnel", "freeze", "nugget",
-               "quake", "iBlock", "iWall", "iDoor", "stop", "trap2", "zap", "create", "generator",
-               "trap3", "mBlock", "trap4", "showGems", "tablet", "zBlock", "blockSpell", "chance",
-               "statue", "wallVanish", "krozK", "krozR", "krozO", "krozZ", "oWall1", "oWall2", "oWall3",
-               "cWall1", "cWall2", "cWall3", "oSpell1", "oSpell2", "oSpell3", "cSpell1", "cSpell2",
-               "cSpell3", "gBlock", "rock", "eWall", "trap5", "tBlock", "tRock", "tGem", "tBlind",
-               "tWhip", "tGold", "tTree", "rope", "dropRope1", "dropRope2", "dropRope3", "dropRope4",
-               "dropRope5", "amulet", "shootRight", "shootLeft", "trap6", "trap7", "trap8", "trap9",
-               "trap10", "trap11", "trap12", "trap13", "message", "whip1", "whip2", "whip3", "whip4"]
+# Load unscaled sprites at runtime
+sprites = ["border", "block", "chest", "enemy1", "enemy2", "enemy3", "gem", "player", "teleport_player","stairs", "teleport",
+            "trap", "wall", "whip", "slowTime", "invisible", "key", "door", "speedTime", "river",
+            "power", "forest", "tree", "bomb", "lava", "pit", "tome", "tunnel", "freeze", "nugget",
+            "quake", "iBlock", "iWall", "iDoor", "stop", "trap2", "zap", "create", "generator",
+            "trap3", "mBlock", "trap4", "showGems", "tablet", "zBlock", "blockSpell", "chance",
+            "statue", "wallVanish", "krozK", "krozR", "krozO", "krozZ", "oWall1", "oWall2", "oWall3",
+            "cWall1", "cWall2", "cWall3", "oSpell1", "oSpell2", "oSpell3", "cSpell1", "cSpell2",
+            "cSpell3", "gBlock", "rock", "eWall", "trap5", "tBlock", "tRock", "tGem", "tBlind",
+            "tWhip", "tGold", "tTree", "rope", "dropRope1", "dropRope2", "dropRope3", "dropRope4",
+            "dropRope5", "amulet", "shootRight", "shootLeft", "trap6", "trap7", "trap8", "trap9",
+            "trap10", "trap11", "trap12", "trap13", "message", "whip1", "whip2", "whip3", "whip4"]
 
-    special_cases = {
-        "enemy1": "enemy1a",
-        "enemy2": "enemy2a"
-    }
+special_cases = {
+    "enemy1": "enemy1a",
+    "enemy2": "enemy2a"
+}
 
-    for sprite_name in sprites:
-        filename = special_cases.get(sprite_name, sprite_name) + ".png"
-        full_path = os.path.join(assets_dir, filename) # Use assets_dir from utils
-        try:
-            img = pygame.image.load(full_path).convert_alpha() # Use convert_alpha() for potential transparency
-            original_images[sprite_name] = img
-        except pygame.error as e:
-            print(f"Warning: Could not load image '{filename}' for sprite '{sprite_name}': {e}")
-        except FileNotFoundError:
-            print(f"Warning: Image file not found: '{full_path}' for sprite '{sprite_name}'")
-
-# Call this function once when the module loads
-load_gameplay_sprites()
+for sprite_name in sprites:
+    filename = special_cases.get(sprite_name, sprite_name) + ".png"
+    full_path = os.path.join(assets_dir, filename) # Use assets_dir from utils
+    try:
+        img = pygame.image.load(full_path).convert_alpha() # Use convert_alpha() for potential transparency
+        original_images[sprite_name] = img
+    except pygame.error as e:
+        print(f"Warning: Could not load image '{filename}' for sprite '{sprite_name}': {e}")
+    except FileNotFoundError:
+        print(f"Warning: Image file not found: '{full_path}' for sprite '{sprite_name}'")
 
 def scale_gameplay_sprites(dimensions, color_input):
     """
@@ -208,7 +204,7 @@ def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (
              game_text(34, "*" * 38 + format_centered_int(values[6], 7), VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX), True) # Cloaks
 
     else: # hud_input == "R" (Right sidebar)
-        hud_width = WIDTH - (GP_TILE_WIDTH * GAME_WIDTH) # Adjust width calculation if GAME_WIDTH is not the game area width
+        hud_width = WIDTH - (GP_TILE_WIDTH * 66) # Adjust width calculation if GAME_WIDTH is not the game area width
         hud_x = WIDTH - hud_width  # Right-hand side
 
         # Create sidebar surface with monochrome handling
@@ -366,181 +362,144 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         return True
 
     def move_enemy(enemy, enemy_type, move_prob):
-        if is_cloaked: # Enemies don't move if player is cloaked
-             return False # Indicate enemy did not move (or die)
+        if is_cloaked:
+            return False
         else:
             """Move an enemy toward the player if they can see the player"""
             nonlocal score, gems  # Access Score and gems from the outer scope
-
-            row, col = enemy["row"], enemy["col"]
-
-            # Check if enemy was removed (e.g., by whip) before its turn
-            if not (0 <= row < len(grid) and 0 <= col < len(grid[0])) or grid[row][col] != enemy_type:
-                return True  # Signal to remove enemy from list if it no longer exists at its position
-
-            # Original game had different odds for different enemy types
-            # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
-            # Only give player a move chance if the player can see the enemy
-            if has_line_of_sight(row, col, player_row, player_col):
-                if random.randint(0, move_prob-1) == 0:
-                     # Allow player input during enemy turn only if enemy can see player
-                    action_made = player_input()
-                    # If player moved or acted, the grid might have changed, re-check enemy position
-                    if not (0 <= row < len(grid) and 0 <= col < len(grid[0])) or grid[row][col] != enemy_type:
-                         return True # Enemy might have been affected by player action (e.g., whip)
-
-            # Check again if enemy can see player (player might have moved or cloaked)
-            if not has_line_of_sight(row, col, player_row, player_col):
-                return False  # Stay still if can't see player
-
-            # Clear current position
-            grid[row][col] = " "
-
-            # Calculate move direction toward player
-            new_row, new_col = row, col
-            x_dir, y_dir = 0, 0
-
-            # Try to move closer to the player along optimal axis first
-            x_dist = abs(player_col - col)
-            y_dist = abs(player_row - row)
-
-            # Move along the axis with greater distance first
-            if x_dist > y_dist:
-                # Move horizontally first
-                if player_col < col:
-                    new_col -= 1 #
-                    # x_dir = -1 # Original working code direction indication differs, using working code
-                    x_dir = 1 #
-                elif player_col > col:
-                    new_col += 1
-                    # x_dir = 1 # Original working code direction indication differs, using working code
-                    x_dir = -1
-                # If horizontal move is blocked, try vertical (Logic from non-working, as working didn't have this fallback)
-                # Check bounds before accessing grid
-                temp_check_col = new_col
-                if not (0 <= row < len(grid) and 0 <= temp_check_col < len(grid[0])) or grid[row][temp_check_col] != " ":
-                    new_col = col # Reset horizontal attempt
-                    if player_row < row:
-                        new_row -= 1
-                        y_dir = -1 # Using non-working Y direction logic here
-                    elif player_row > row:
-                        new_row += 1
-                        y_dir = 1 # Using non-working Y direction logic here
-            else: # y_dist >= x_dist
-                # Move vertically first
-                if player_row < row:
-                    new_row -= 1
-                    # y_dir = -1 # Original working code direction indication differs, using working code
-                    y_dir = 1
-                elif player_row > row:
-                    new_row += 1
-                    # y_dir = 1 # Original working code direction indication differs, using working code
-                    y_dir = -1
-                 # If vertical move is blocked, try horizontal (Logic from non-working, as working didn't have this fallback)
-                 # Check bounds before accessing grid
-                temp_check_row = new_row
-                if not (0 <= temp_check_row < len(grid) and 0 <= col < len(grid[0])) or grid[temp_check_row][col] != " ":
-                    new_row = row # Reset vertical attempt
-                    if player_col < col:
-                        new_col -= 1
-                        x_dir = -1 # Using non-working X direction logic here
-                    elif player_col > col:
-                         new_col += 1
-                         x_dir = 1 # Using non-working X direction logic here
-
-
-            # If no movement was determined yet, try the other axis (Added from working code)
-            if new_row == row and new_col == col:
-                if player_col < col:
-                    new_col -= 1
-                    x_dir = 1 #
-                elif player_col > col: #
-                    new_col += 1
-                    x_dir = -1
-                elif player_row < row:
-                    new_row -= 1
-                    y_dir = 1 #
-                elif player_row > row:
-                    new_row += 1
-                    y_dir = -1
-
-            # Check if the calculated new position is valid before accessing the grid
-            if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
-                target_tile = grid[new_row][new_col]
-
-                # Breaking X blocks
-                if target_tile == "X":
-                    grid[new_row][new_col] = " "  # Break the block
-                    # Award points based on enemy type
-                    if enemy_type == "1": score += 10
-                    elif enemy_type == "2": score += 20
-                    elif enemy_type == "3": score += 30
-                    return True  # Enemy dies when breaking block
-
-                # Handle collision with gems, whips, teleports
-                elif target_tile == "+":  # Gem Collision
-                    if enemy_type == "1": gems -= 1
-                    elif enemy_type == "2": gems -= 2
-                    elif enemy_type == "3": gems -= 3
-
-                    if gems < 0: #
-                        player_death(score, level_num) # Call player_death when out of gems
-                        # If player_death exits, this won't be reached, but good practice.
-                        # Depending on player_death implementation, enemy might 'die' if game ends.
-                        return True # Indicate enemy removal if game ends
-
-                    # Update display - Move enemy onto the gem space (destroying the gem)
-                    enemy["row"], enemy["col"] = new_row, new_col
-                    grid[new_row][new_col] = enemy_type
-                    return False # Enemy survives, gem is gone
-
-                # Collide with other specific items (whip 'W', teleport 'T')
-                # Add other item characters here if needed from the non-working file's list
-                elif target_tile in {"W", "T"}:
-                    # Destroy the item and move the enemy
-                    enemy["row"], enemy["col"] = new_row, new_col
-                    grid[new_row][new_col] = enemy_type #
-                    return False # Enemy survives, item destroyed
-
-                # Empty space - move there
-                elif target_tile == " ":
-                    enemy["row"], enemy["col"] = new_row, new_col
-                    grid[new_row][new_col] = enemy_type
-                    return False # Enemy survives
-
-                # Hit player
-                elif target_tile == "P":
-                    # Attack player by taking gems
-                    if enemy_type == "1": gems -= 1
-                    elif enemy_type == "2": gems -= 2
-                    elif enemy_type == "3": gems -= 3
-
-                    if gems < 0:
-                        player_death(score, level_num)  # Call player_death when out of gems
-                        # If player_death exits, this won't be reached.
-                        return True # Indicate enemy removal if game ends
-
-                    return True  # Enemy dies after attacking
-
-                # Blocked by solid wall or other object not explicitly handled above
-                else:
-                    grid[row][col] = enemy_type # Stay in place
-                    return False
-            else: # Moved outside grid boundaries (or new_row/new_col were invalid)
-                grid[row][col] = enemy_type  # Stay in place
+        
+        row, col = enemy["row"], enemy["col"]
+            
+            # Check if enemy was removed
+        if grid[row][col] != enemy_type:
+                return True  # Remove enemy
+            
+        # Original game had different odds for different enemy types
+        # Fast enemies had 1/6 chance, medium 1/7, slow 1/8
+        # Only give player a move chance if the player can see the enemy
+        if has_line_of_sight(row, col, player_row, player_col):
+            if random.randint(0, move_prob-1) == 0:
+                player_input()
+        
+        # Check if enemy can see player
+        if not has_line_of_sight(row, col, player_row, player_col):
+            return False  # Stay still if can't see player
+        
+        # Clear current position
+        grid[row][col] = " "
+        
+        # Calculate move direction toward player
+        new_row, new_col = row, col
+        x_dir, y_dir = 0, 0
+        
+        # Try to move closer to the player along optimal axis first
+        x_dist = abs(player_col - col)
+        y_dist = abs(player_row - row)
+        
+        # Move along the axis with greater distance first
+        # This makes enemies try to minimize the longest dimension first
+        if x_dist > y_dist:
+            # Move horizontally first
+            if player_col < col:
+                new_col -= 1
+                x_dir = 1
+            elif player_col > col:
+                new_col += 1
+                x_dir = -1
+        else:
+            # Move vertically first
+            if player_row < row:
+                new_row -= 1
+                y_dir = 1
+            elif player_row > row:
+                new_row += 1
+                y_dir = -1
+        
+        # If no movement was determined, try the other axis
+        if new_row == row and new_col == col:
+            if player_col < col:
+                new_col -= 1
+                x_dir = 1
+            elif player_col > col:
+                new_col += 1
+                x_dir = -1
+            elif player_row < row:
+                new_row -= 1
+                y_dir = 1
+            elif player_row > row:
+                new_row += 1
+                y_dir = -1
+        
+        # Handle movement and collisions
+        if 0 <= new_row < len(grid) and 0 <= new_col < len(grid[0]):
+            # Breaking X blocks
+            if grid[new_row][new_col] == "X":
+                grid[new_row][new_col] = " "  # Break the block
+                # Award points based on enemy type
+                if enemy_type == "1": score += 10
+                elif enemy_type == "2": score += 20
+                elif enemy_type == "3": score += 30
+                return True  # Enemy dies when breaking block
+            
+            # Handle collision with gems, whips, teleports
+            elif grid[new_row][new_col] == "+":  # Gem
+                if enemy_type == "1": gems -= 1
+                elif enemy_type == "2": gems -= 2
+                elif enemy_type == "3": gems -= 3
+                
+                if gems < 0:
+                    player_death(screen)  # Call player_death when out of gems
+                
+                # Update display
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy_type
                 return False
+                
+            # Collide with an item (whip, teleport)
+            elif grid[new_row][new_col] in {"W", "T"}:
+                # Destroy the item and move the enemy
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy_type
+                return False
+                
+            # Empty space - move there
+            elif grid[new_row][new_col] == " ":
+                enemy["row"], enemy["col"] = new_row, new_col
+                grid[new_row][new_col] = enemy_type
+                return False
+
+            # Hit player
+            elif grid[new_row][new_col] == "P":
+                # Attack player by taking gems
+                if enemy_type == "1": gems -= 1
+                elif enemy_type == "2": gems -= 2
+                elif enemy_type == "3": gems -= 3
+                
+                if gems < 0:
+                    player_death(screen)  # Call player_death when out of gems
+                    
+                return True  # Enemy dies
+                
+            # Blocked - stay in place
+            else:
+                grid[row][col] = enemy_type
+                return False
+        else:
+            grid[row][col] = enemy_type  # Stay in place
+            return False
             
     def use_whip():
         """Handle the whip animation and enemy interactions, keeping HUD and border visible, with color cycling."""
-        nonlocal score, whips, slow_enemies, medium_enemies, fast_enemies, values # Keep score nonlocal if it's modified directly here
+        nonlocal score, whips, slow_enemies, medium_enemies, fast_enemies, values, player_row, player_col, is_cloaked, grid, level_num, gems, teleports, keys, cloaks, hud_input, color_input # Add hud_input, color_input
 
         # Check if player has whips
         if whips <= 0:
-            return [], [], []  # No whips to use, return empty lists
+            # Return current enemy lists if no whips
+            return slow_enemies, medium_enemies, fast_enemies
 
         # Define the whip animation positions (counter-clockwise)
         whip_positions = [
-            {"row": -1, "col": -1, "sprite_char": "whip1"},  # Use char keys for lookup in tile_mapping
+            {"row": -1, "col": -1, "sprite_char": "whip1"},
             {"row": -1, "col":  0, "sprite_char": "whip3"},
             {"row": -1, "col":  1, "sprite_char": "whip2"},
             {"row":  0, "col":  1, "sprite_char": "whip4"},
@@ -550,40 +509,61 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             {"row":  0, "col": -1, "sprite_char": "whip4"},
         ]
 
-        # Track affected enemies
         enemies_hit = []
+        delay = 25
+        # grid_offset_x = GP_TILE_WIDTH # Removed old simple offset
+        # grid_offset_y = GP_TILE_HEIGHT # Removed old simple offset
 
-        # Timing values
-        delay = 25  # milliseconds per frame
+        # --- MODIFIED: Calculate Grid Offsets (like draw_grid) ---
+        target_grid_width_px = (LOGICAL_GRID_WIDTH + 2) * GP_TILE_WIDTH
+        target_grid_height_px = (LOGICAL_GRID_HEIGHT + 2) * GP_TILE_HEIGHT
 
-        # Grid offsets
-        grid_offset_x = GP_TILE_WIDTH
-        grid_offset_y = GP_TILE_HEIGHT
+        if hud_input == "O": # Bottom HUD
+            offset_x = (WIDTH - target_grid_width_px) // 2
+            offset_y = 0
+        elif hud_input == "R": # Right HUD
+            hud_width = WIDTH - (GP_TILE_WIDTH * LOGICAL_GRID_WIDTH) # Assuming LOGICAL_GRID_WIDTH is game area
+            available_width = WIDTH - hud_width
+            offset_x = 0 # Align grid to the left
+            offset_y = (HEIGHT - target_grid_height_px) // 2
+        else: # No HUD or unknown type - center in full screen
+            offset_x = (WIDTH - target_grid_width_px) // 2
+            offset_y = (HEIGHT - target_grid_height_px) // 2
+
+        offset_x = max(0, offset_x)
+        offset_y = max(0, offset_y)
+
+        # Grid content offset relative to screen, including border
+        grid_content_offset_x = offset_x + GP_TILE_WIDTH
+        grid_content_offset_y = offset_y + GP_TILE_HEIGHT
+        # --- END OFFSET CALCULATION ---
+
+
+        # --- MODIFIED: Calculate bottom boundary based on HUD ---
+        # This boundary is still relative to the screen height for the HUD overlay case
+        bottom_boundary = HEIGHT - GP_TILE_HEIGHT # Default for side HUD
+        if hud_input == "O":
+            # Adjust boundary higher to accommodate overlaid HUD (approx 3 tiles: border + 2 text rows)
+            bottom_boundary = HEIGHT - (GP_TILE_HEIGHT * 4)
+        # --- END MODIFICATION ---
 
         # --- Whip animation loop ---
         for position in whip_positions:
-            # Calculate target position
             whip_row = player_row + position["row"]
             whip_col = player_col + position["col"]
 
-            # Check if position is in bounds
             if not (0 <= whip_row < len(grid) and 0 <= whip_col < len(grid[0])):
                 continue
 
-            # Original tile at this position (for collision logic)
             original_tile_char = grid[whip_row][whip_col]
-
-            # Check for enemy hits at this position *before* visual overlay
             if original_tile_char in ["1", "2", "3"]:
-                # Only add if not already hit in this whip sequence
                 is_already_hit = any(r == whip_row and c == whip_col for r, c, _ in enemies_hit)
                 if not is_already_hit:
-                    enemies_hit.append((whip_row, whip_col, original_tile_char)) # Store char '1', '2', or '3'
+                    enemies_hit.append((whip_row, whip_col, original_tile_char))
 
-            # --- Color Cycling Logic ---
             whip_sprite_char = position["sprite_char"]
-            colored_whip_image = None # Initialize
-            if whip_sprite_char in tile_mapping: # Check if the char key exists in the current mapping
+            colored_whip_image = None
+            if whip_sprite_char in tile_mapping:
                 original_whip_image = tile_mapping[whip_sprite_char]
                 random_color = random.choice(whip_cycle_colors)
                 colored_whip_image = original_whip_image.copy()
@@ -591,46 +571,66 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             else:
                 print(f"Warning: Whip sprite character '{whip_sprite_char}' not found in tile_mapping.")
 
-
             # --- Direct Drawing within Whip Loop ---
-            screen.fill(BLACK) # Clear screen before redraw
+            screen.fill(BLACK)
+            # --- MODIFIED: Pass offsets to draw_borders ---
+            draw_borders(tile_mapping, offset_x, offset_y)
+            # --- END MODIFICATION ---
 
-            # Draw the border and window border
-            draw_borders(tile_mapping)
+            # Draw the main game grid (using calculated content offsets)
+            # Define the drawing boundaries based on the *logical* grid size and offset
+            max_draw_x = grid_content_offset_x + (LOGICAL_GRID_WIDTH * GP_TILE_WIDTH)
+            max_draw_y = grid_content_offset_y + (LOGICAL_GRID_HEIGHT * GP_TILE_HEIGHT)
 
-            # Draw the main game grid (offset)
-            for r_idx, row in enumerate(grid):
-                 screen_y = grid_offset_y + (r_idx * GP_TILE_HEIGHT)
-                 if screen_y >= HEIGHT - GP_TILE_HEIGHT: continue
-                 for c_idx, char in enumerate(row):
-                     screen_x = grid_offset_x + (c_idx * GP_TILE_WIDTH)
-                     if screen_x >= WIDTH - GP_TILE_WIDTH: continue
+            for r_idx in range(min(LOGICAL_GRID_HEIGHT, len(grid))):
+                 # --- MODIFIED: Use grid_content_offset_y ---
+                 screen_y = grid_content_offset_y + (r_idx * GP_TILE_HEIGHT)
+                 # --- END MODIFICATION ---
+                 # --- MODIFIED: Check against max_draw_y and bottom_boundary ---
+                 if screen_y >= max_draw_y or screen_y >= bottom_boundary: continue
+                 # --- END MODIFICATION ---
 
-                     # Draw the colored whip sprite at the current animation position
+                 row_data = grid[r_idx]
+                 for c_idx in range(min(LOGICAL_GRID_WIDTH, len(row_data))):
+                     # --- MODIFIED: Use grid_content_offset_x ---
+                     screen_x = grid_content_offset_x + (c_idx * GP_TILE_WIDTH)
+                     # --- END MODIFICATION ---
+                     # --- MODIFIED: Check against max_draw_x ---
+                     if screen_x >= max_draw_x: continue # Right boundary check based on logical width
+                     # --- END MODIFICATION ---
+
+                     # Draw the colored whip sprite
                      if r_idx == whip_row and c_idx == whip_col and colored_whip_image:
-                          whip_screen_x = grid_offset_x + whip_col * GP_TILE_WIDTH
-                          whip_screen_y = grid_offset_y + whip_row * GP_TILE_HEIGHT
-                          if whip_screen_x < WIDTH - GP_TILE_WIDTH and whip_screen_y < HEIGHT - GP_TILE_HEIGHT:
+                          # --- MODIFIED: Use grid_content_offset_x/y ---
+                          whip_screen_x = grid_content_offset_x + whip_col * GP_TILE_WIDTH
+                          whip_screen_y = grid_content_offset_y + whip_row * GP_TILE_HEIGHT
+                          # --- END MODIFICATION ---
+                          # --- MODIFIED: Check against max_draw_x/y and bottom_boundary ---
+                          if whip_screen_x < max_draw_x and whip_screen_y < max_draw_y and whip_screen_y < bottom_boundary:
                               screen.blit(colored_whip_image, (whip_screen_x, whip_screen_y))
-                     # Otherwise, draw the normal tile from the map
+                          # --- END MODIFICATION ---
+                     # Draw normal tiles
                      else:
-                         # Handle player drawing separately to show cloak state
+                         char = row_data[c_idx]
+                         draw_char = char
                          if r_idx == player_row and c_idx == player_col:
-                              player_char = 'TP' if is_cloaked else 'P'
-                              if player_char in tile_mapping:
-                                  screen.blit(tile_mapping[player_char], (screen_x, screen_y))
-                         elif char in tile_mapping: # Draw other tiles
-                             screen.blit(tile_mapping[char], (screen_x, screen_y))
-                         # Optionally handle characters not in mapping (e.g., draw placeholder or skip)
-                         # else: print(f"Warning: Character '{char}' at ({r_idx},{c_idx}) not in tile_mapping.")
+                              draw_char = 'TP' if is_cloaked else 'P'
+
+                         if draw_char in tile_mapping:
+                             screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
+                         elif char != ' ':
+                             pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
 
 
-            values = [score, level_num, gems, whips, teleports, keys, cloaks]
-            draw_hud(values, color_input, hud_input) # Redraw HUD
+            # --- MODIFIED: Draw HUD *after* grid content ---
+            current_values = [score, level_num, gems, whips, teleports, keys, cloaks] # Use current values
+            draw_hud(current_values, color_input, hud_input) # Redraw HUD over the grid if hud_input == "O"
+            # --- END MODIFICATION ---
 
-            # Display level-specific messages
+            # Display level-specific messages (Consider adjusting Y if needed for hud_input == "O")
             if level_num == 1:
                 game_text(24, "KINGDOM OF KROZ II BY SCOTT MILLER", WHITE, False, True, None)
+            # ... other messages ...
 
             pygame.display.flip()
             pygame.time.wait(delay)
@@ -639,31 +639,28 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         new_slow_enemies = []
         new_medium_enemies = []
         new_fast_enemies = []
-
-        # Define score values for each enemy type
         enemy_scores = {"1": 10, "2": 20, "3": 30}
 
-        # Clear enemies hit by whip from both grid and enemy lists
         for r, c, enemy_char in enemies_hit:
-            if 0 <= r < len(grid) and 0 <= c < len(grid[0]) and grid[r][c] == enemy_char: # Check bounds and if enemy still exists
-                grid[r][c] = " "  # Clear enemy from grid
+            if 0 <= r < len(grid) and 0 <= c < len(grid[0]) and grid[r][c] == enemy_char:
+                grid[r][c] = " "
                 score += enemy_scores.get(enemy_char, 0)
 
-        # Rebuild enemy lists excluding the killed ones
+        # Rebuild enemy lists (no changes needed here)
         for enemy in slow_enemies:
-            # Check if enemy still exists on the grid after whip
             if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "1":
                 new_slow_enemies.append(enemy)
-
         for enemy in medium_enemies:
              if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "2":
                 new_medium_enemies.append(enemy)
-
         for enemy in fast_enemies:
              if 0 <= enemy["row"] < len(grid) and 0 <= enemy["col"] < len(grid[0]) and grid[enemy["row"]][enemy["col"]] == "3":
                 new_fast_enemies.append(enemy)
 
-        return new_slow_enemies, new_medium_enemies, new_fast_enemies # Return updated lists
+        # Decrement whip count after use
+        whips -= 1
+
+        return new_slow_enemies, new_medium_enemies, new_fast_enemies
 
     is_cloaked = False
     cloak_start_time = 0
@@ -679,63 +676,126 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     def teleport():
         """Teleports the player to a random empty space on the grid with a flickering effect."""
         nonlocal player_row, player_col # Modifies player position directly
+        # Access necessary variables from the outer scope for offset calculation
+        nonlocal hud_input, values, color_input # Added values, color_input
 
-        # Define grid offsets
-        grid_offset_x = GP_TILE_WIDTH
-        grid_offset_y = GP_TILE_HEIGHT
+
+        # --- Recalculate Grid Offsets (same logic as draw_grid) ---
+        target_grid_width_px = (LOGICAL_GRID_WIDTH + 2) * GP_TILE_WIDTH
+        target_grid_height_px = (LOGICAL_GRID_HEIGHT + 2) * GP_TILE_HEIGHT
+
+        if hud_input == "O": # Bottom HUD
+            offset_x = (WIDTH - target_grid_width_px) // 2
+            offset_y = 0
+        elif hud_input == "R": # Right HUD
+            # hud_width = WIDTH - (GP_TILE_WIDTH * LOGICAL_GRID_WIDTH) # Original calculation might be off if border included
+            offset_x = 0
+            offset_y = (HEIGHT - target_grid_height_px) // 2
+        else: # No HUD or unknown type
+            offset_x = (WIDTH - target_grid_width_px) // 2
+            offset_y = (HEIGHT - target_grid_height_px) // 2
+
+        offset_x = max(0, offset_x)
+        offset_y = max(0, offset_y)
+
+        # Define grid content offsets *relative to the screen*, including the border offset
+        grid_content_offset_x = offset_x + GP_TILE_WIDTH
+        grid_content_offset_y = offset_y + GP_TILE_HEIGHT
+        # --- End Offset Calculation ---
+
 
         # Find all empty spaces (' ') on the current grid
         empty_spaces = []
         for r, row_data in enumerate(grid):
+            # Ensure we only check within logical grid bounds if necessary, though iterating the actual grid is fine
             for c, char in enumerate(row_data):
-                if char == ' ':
-                    empty_spaces.append((r, c))
+                 # Optional: Add bounds check if grid can be larger than logical size
+                 # if r < LOGICAL_GRID_HEIGHT and c < LOGICAL_GRID_WIDTH:
+                 if char == ' ':
+                     empty_spaces.append((r, c))
+
 
         if not empty_spaces:
             print("No empty spaces to teleport to!")
             return # Cannot teleport if no empty space
 
         # --- Flicker at the original position ---
-        original_screen_x = grid_offset_x + player_col * GP_TILE_WIDTH
-        original_screen_y = grid_offset_y + player_row * GP_TILE_HEIGHT
+        # Use the calculated grid_content_offset_x/y
+        original_screen_x = grid_content_offset_x + player_col * GP_TILE_WIDTH
+        original_screen_y = grid_content_offset_y + player_row * GP_TILE_HEIGHT
         original_rect = pygame.Rect(original_screen_x, original_screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT)
         player_sprite = tile_mapping.get('P')
         if not player_sprite:
              print("Warning: Player sprite 'P' not found in tile_mapping for teleport.")
              return # Cannot proceed without player sprite
 
-        for _ in range(10): # Reduced flicker count
-            random_color = random.choice(blinking_text_color_list)
-            screen.fill(random_color, original_rect) # Fill background
-            screen.blit(player_sprite, (original_screen_x, original_screen_y)) # Draw player on top
-            pygame.display.update(original_rect)
-            pygame.time.delay(40)
-            screen.fill(BLACK, original_rect) # Clear before next flicker or final clear
-            pygame.display.update(original_rect)
-            pygame.time.delay(40)
+        # --- MODIFIED: Initial Flicker Loop at Original Position with Color ---
+        original_flicker_count = 10 # Number of flickers at start
+        original_flicker_delay = 50 # Delay between flickers
 
+        # Get the original tile character at the player's starting position (should be 'P', but could be something else if logic error)
+        # We actually want the background tile *under* the player, which is ' ' after the move starts
+        original_bg_char = ' ' # Assume empty space after player logically moves
+        original_bg_sprite = tile_mapping.get(original_bg_char)
+
+        for _ in range(original_flicker_count):
+            # Fill original position with random color
+            random_color = random.choice(blinking_text_color_list)
+            screen.fill(random_color, original_rect)
+            # Draw player sprite on top
+            screen.blit(player_sprite, original_rect.topleft)
+            pygame.display.update(original_rect)
+            pygame.time.delay(original_flicker_delay // 2)
+
+            # Clear player sprite (fill black/background color then draw original background tile)
+            screen.fill(BLACK, original_rect) # Fill black first as a base
+            if original_bg_sprite:
+                screen.blit(original_bg_sprite, original_rect.topleft)
+            pygame.display.update(original_rect)
+            pygame.time.delay(original_flicker_delay // 2)
+        # --- End Modified Initial Flicker ---
 
         # --- Intermediate Flicker Loop ---
+        # ...existing code...
         last_intermediate_rect = None
         tp_sprite = tile_mapping.get('TP')
         if not tp_sprite:
              print("Warning: Teleport player sprite 'TP' not found.")
              tp_sprite = player_sprite # Fallback to normal player sprite
 
-        intermediate_flicker_count = 50 # Reduced count
-        intermediate_delay = 10 # Slightly increased delay
+        intermediate_flicker_count = 250
+        intermediate_delay = 6
+
+        final_row, final_col = -1, -1 # Initialize final position
 
         for i in range(intermediate_flicker_count):
             new_row, new_col = random.choice(empty_spaces)
-            intermediate_screen_x = grid_offset_x + new_col * GP_TILE_WIDTH
-            intermediate_screen_y = grid_offset_y + new_row * GP_TILE_HEIGHT
+            # Use the calculated grid_content_offset_x/y
+            intermediate_screen_x = grid_content_offset_x + new_col * GP_TILE_WIDTH
+            intermediate_screen_y = grid_content_offset_y + new_row * GP_TILE_HEIGHT
             intermediate_rect = pygame.Rect(intermediate_screen_x, intermediate_screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT)
 
             if last_intermediate_rect:
-                screen.fill(BLACK, last_intermediate_rect) # Clear previous
-                # Optional: redraw original tile if needed
-                # prev_r, prev_c = # calculate from last_intermediate_rect
-                # if grid[prev_r][prev_c] in tile_mapping: screen.blit(tile_mapping[grid[prev_r][prev_c]], last_intermediate_rect.topleft)
+                # Need to redraw the correct background tile before clearing
+                prev_r, prev_c = -1, -1
+                if GP_TILE_WIDTH > 0: prev_c = (last_intermediate_rect.x - grid_content_offset_x) // GP_TILE_WIDTH
+                if GP_TILE_HEIGHT > 0: prev_r = (last_intermediate_rect.y - grid_content_offset_y) // GP_TILE_HEIGHT
+
+                # --- MODIFIED BOUNDS CHECK ---
+                # Check against the length of the specific row grid[prev_r] for the column index
+                if 0 <= prev_r < len(grid) and 0 <= prev_c < len(grid[prev_r]):
+                # --- END MODIFICATION ---
+                    original_char = grid[prev_r][prev_c] # Get char from logical grid
+                    # Ensure the char is not the player temporarily placed during flicker
+                    if prev_r == player_row and prev_c == player_col:
+                        original_char = ' ' # Assume space under player
+                    bg_sprite = tile_mapping.get(original_char)
+                    if bg_sprite:
+                         screen.blit(bg_sprite, last_intermediate_rect.topleft)
+                    else: # If no specific tile, just fill black
+                         screen.fill(BLACK, last_intermediate_rect)
+                else: # Fallback if calculation failed or indices out of bounds for the specific row
+                    screen.fill(BLACK, last_intermediate_rect)
 
             screen.blit(tp_sprite, (intermediate_screen_x, intermediate_screen_y)) # Draw TP icon
             pygame.display.update([last_intermediate_rect, intermediate_rect] if last_intermediate_rect else [intermediate_rect])
@@ -746,27 +806,62 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             # Store the final destination from the last iteration
             if i == intermediate_flicker_count - 1:
                  final_row, final_col = new_row, new_col
-                 final_screen_x = intermediate_screen_x
-                 final_screen_y = intermediate_screen_y
-                 final_rect = intermediate_rect
+                 # Use the calculated grid_content_offset_x/y
+                 final_screen_x = grid_content_offset_x + final_col * GP_TILE_WIDTH
+                 final_screen_y = grid_content_offset_y + final_row * GP_TILE_HEIGHT
+                 final_rect = intermediate_rect # The rect from the last intermediate step is the final one
 
 
-        # Clear the last intermediate TP icon
-        if last_intermediate_rect:
-            screen.fill(BLACK, last_intermediate_rect)
-            # Optional: redraw original tile
-            pygame.display.update(last_intermediate_rect)
+        # Clear the last intermediate TP icon by redrawing the original tile
+        if last_intermediate_rect and 0 <= final_row < len(grid) and 0 <= final_col < len(grid[0]):
+             original_char = grid[final_row][final_col] # Should be ' ' but redraw just in case
+             bg_sprite = tile_mapping.get(original_char)
+             if bg_sprite:
+                 screen.blit(bg_sprite, last_intermediate_rect.topleft)
+             else:
+                 screen.fill(BLACK, last_intermediate_rect)
+             pygame.display.update(last_intermediate_rect)
 
-        # --- Final Destination Flicker ---
-        for _ in range(10): # Reduced flicker count
-            random_color = random.choice(blinking_text_color_list)
-            screen.fill(random_color, final_rect) # Fill background
-            screen.blit(player_sprite, (final_screen_x, final_screen_y)) # Draw player on top
-            pygame.display.update(final_rect)
-            pygame.time.delay(40)
-            screen.fill(BLACK, final_rect) # Clear before placing player finally
-            pygame.display.update(final_rect)
-            pygame.time.delay(40)
+
+        # --- MODIFIED: Final Destination Flicker with Color ---
+        # Ensure final_rect is valid before proceeding
+        if final_row != -1:
+            final_bg_char = grid[final_row][final_col] # Should be ' '
+            final_bg_sprite = tile_mapping.get(final_bg_char)
+            final_flicker_count = 10 # Reduced flicker count
+            final_flicker_delay = 40
+
+            for _ in range(final_flicker_count):
+                # Fill final position with random color
+                random_color = random.choice(blinking_text_color_list)
+                screen.fill(random_color, final_rect)
+                # Draw player on top
+                screen.blit(player_sprite, (final_screen_x, final_screen_y))
+                pygame.display.update(final_rect)
+                pygame.time.delay(final_flicker_delay)
+
+                # Clear player (fill black/background color then draw background)
+                screen.fill(BLACK, final_rect) # Fill black first
+                if final_bg_sprite:
+                     screen.blit(final_bg_sprite, final_rect.topleft)
+                pygame.display.update(final_rect)
+                pygame.time.delay(final_flicker_delay)
+        else:
+             print("Error: Final teleport position not determined.")
+             # Clear the last intermediate flicker if it exists and final position failed
+             if last_intermediate_rect:
+                 # Attempt to redraw original background
+                 prev_r, prev_c = -1, -1
+                 if GP_TILE_WIDTH > 0: prev_c = (last_intermediate_rect.x - grid_content_offset_x) // GP_TILE_WIDTH
+                 if GP_TILE_HEIGHT > 0: prev_r = (last_intermediate_rect.y - grid_content_offset_y) // GP_TILE_HEIGHT
+                 if 0 <= prev_r < len(grid) and 0 <= prev_c < len(grid[0]):
+                     original_char = grid[prev_r][prev_c]
+                     bg_sprite = tile_mapping.get(original_char)
+                     if bg_sprite: screen.blit(bg_sprite, last_intermediate_rect.topleft)
+                     else: screen.fill(BLACK, last_intermediate_rect)
+                 else: screen.fill(BLACK, last_intermediate_rect)
+                 pygame.display.update(last_intermediate_rect)
+             return # Avoid errors if final position wasn't set
 
 
         # --- Update Game State ---
@@ -774,19 +869,26 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         if 0 <= player_row < len(grid) and 0 <= player_col < len(grid[0]):
             grid[player_row][player_col] = ' '
         else:
-            print(f"Warning: Original player position ({player_row}, {player_col}) was out of bounds.")
+            print(f"Warning: Original player position ({player_row}, {player_col}) was out of bounds before teleport.")
 
 
         # Update the grid with new player position (logical update)
-        grid[final_row][final_col] = 'P'
+        if 0 <= final_row < len(grid) and 0 <= final_col < len(grid[0]):
+             grid[final_row][final_col] = 'P'
+             # Update player's logical position
+             player_row, player_col = final_row, final_col
+        else:
+             print(f"Error: Final teleport destination ({final_row}, {final_col}) is out of bounds.")
+             # If the final position was invalid, we might need to put the player back
+             # or handle this error more gracefully. For now, the player might disappear
+             # if the original position was also cleared and the final was invalid.
 
-        # Update player's logical position
-        player_row, player_col = final_row, final_col
 
-        # Ensure final player placement is visible (redraw the grid or just the player tile)
-        # The main game loop's draw_grid() will handle the final drawing
-        # screen.blit(player_sprite, (final_screen_x, final_screen_y))
-        # pygame.display.update(final_rect)
+        # This line seems redundant as player_row/col are updated above if valid
+        # grid[final_row][final_col] = 'P'
+
+        # This line seems redundant as player_row/col are updated above if valid
+        # player_row, player_col = final_row, final_col
 
     # --- Movement settings ---
     movement_cooldown = 100  # ms between moves
@@ -924,6 +1026,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         """Process a player movement attempt to a new position."""
         nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks
         nonlocal current_level_index # Needed for level change
+        nonlocal slow_enemies, medium_enemies, fast_enemies # Declare enemy lists as nonlocal
 
         # Check bounds
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
@@ -978,9 +1081,12 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             score += level_num + 250
             moved = True
         elif target_char == "Z": # Freeze
-             score += 5 # Example score
-             # Effect applied in main loop
-             moved = True
+            score += 5 # Example score
+            # Effect applied in main loop
+            moved = True
+        elif target_char == ".": # teleport trap
+            score -= 50
+            moved = True
         # Add other collectable items here...
         elif target_char == "L": # Stairs
             score += level_num * 100 # Example score for level change
@@ -1000,7 +1106,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         elif target_char in collidable_tiles:
             # Check if it's a breakable wall 'X' - original code deducted score for # too
             if target_char in ["X", "#"]:
-                 if score >= 20: # Only deduct if score is sufficient
+                 if score > 20: # Only deduct if score is sufficient
                      score -= 20
             # Handle door 'D' - requires a key
             elif target_char == 'D':
@@ -1013,10 +1119,6 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 else:
                     # No key, cannot move
                     return False
-            # Add other specific collision logic (like locked doors requiring specific keys, etc.)
-            # ...
-
-            # If it's a standard collidable tile not handled above
             return False # Movement blocked
 
         # --- Handle Enemy Collision (if player moves onto enemy) ---
@@ -1065,14 +1167,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     GAME_TICK_RATE = 16.0 # Target ticks per second
 
-    # Enemy movement counters
-    slow_counter = 0
-    medium_counter = 0
-    fast_counter = 0
 
-    # --- Game loop ---
-    running = True
-    clock = pygame.time.Clock()
 
     waiting_for_start_key = True # Start paused
 
@@ -1347,58 +1442,57 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         nonlocal score, level_num, gems, whips, teleports, keys, cloaks # Ensure access to latest values
         screen.fill(BLACK)
 
-        GRID_ROWS = HEIGHT / GP_TILE_HEIGHT # Number of rows in the playable area
-        GRID_COLS = WIDTH / GP_TILE_WIDTH # Number of columns in the playable area
+        # --- Calculate Target Grid Pixel Size (Based on Logical Size) ---
+        # Add 2 for the border tiles on each side
+        target_grid_width_px = (LOGICAL_GRID_WIDTH + 2) * GP_TILE_WIDTH
+        target_grid_height_px = (LOGICAL_GRID_HEIGHT + 2) * GP_TILE_HEIGHT
 
-        # --- Calculate Centering Offsets ---
-        # Calculate total width/height including the border tiles
-        total_grid_width_px = (GRID_COLS + 2) * GP_TILE_WIDTH  # Grid content + 2 border tiles
-        total_grid_height_px = (GRID_ROWS + 2) * GP_TILE_HEIGHT # Grid content + 2 border tiles
+        if hud_input == "O": # Bottom HUD
+            # Center horizontally within the full screen width
+            offset_x = (WIDTH - target_grid_width_px) // 2
+            offset_y = 0 # Align grid to the top of its available space
+        elif hud_input == "R": # Right HUD
+            # Calculate HUD width based on logical grid size
+            hud_width = WIDTH - (GP_TILE_WIDTH * LOGICAL_GRID_WIDTH)
+            # Grid area is to the left of the HUD
+            available_width = WIDTH - hud_width # Width available for the grid
+            # Center vertically within the full screen height
+            offset_x = 0 # Align grid to the left of its available space
+            offset_y = (HEIGHT - target_grid_height_px) // 2
+        else: # No HUD or unknown type - center in full screen
+            offset_x = (WIDTH - target_grid_width_px) // 2
+            offset_y = (HEIGHT - target_grid_height_px) // 2
 
-        offset_x = 0
-        offset_y = 0
 
-        if hud_input == "O": # Bottom HUD - Center horizontally
-            available_width = WIDTH # Use the full screen width
-            offset_x = (available_width - total_grid_width_px) // 2
-            offset_y = 0 # Keep grid at the top
-        elif hud_input == "R": # Right HUD - Center vertically
-            available_height = HEIGHT # Use the full screen height
-            available_width = (GRID_COLS + 2) * GP_TILE_WIDTH # Grid area width
-            offset_x = 0 # Keep grid to the left
-            offset_y = (available_height - total_grid_height_px) // 2
-
-        # Ensure offsets are not negative (e.g., if grid is larger than screen space)
+        # Ensure offsets are not negative
         offset_x = max(0, offset_x)
         offset_y = max(0, offset_y)
         # --- End Offset Calculation ---
 
 
         # Draw borders using the helper function with calculated offsets
-        # Pass the calculated offsets to draw_borders
         draw_borders(tile_mapping, offset_x, offset_y)
 
         # Draw the main game grid, offset by one tile *relative to the border offset*
         grid_content_offset_x = offset_x + GP_TILE_WIDTH
         grid_content_offset_y = offset_y + GP_TILE_HEIGHT
 
-        # Define the drawing boundaries based on the total size and offset
-        # These boundaries should correspond to the inner edges of the border
-        max_draw_x = grid_content_offset_x + (GRID_COLS * GP_TILE_WIDTH)
-        max_draw_y = grid_content_offset_y + (GRID_ROWS * GP_TILE_HEIGHT)
+        # Define the drawing boundaries based on the *logical* grid size and offset
+        max_draw_x = grid_content_offset_x + (LOGICAL_GRID_WIDTH * GP_TILE_WIDTH)
+        max_draw_y = grid_content_offset_y + (LOGICAL_GRID_HEIGHT * GP_TILE_HEIGHT)
 
 
-        # Iterate through the logical grid (up to GRID_ROWS x GRID_COLS)
-        for row_index in range(min(GRID_ROWS, len(grid))):
+        # Iterate through the logical grid dimensions or actual grid size, whichever is smaller
+        for row_index in range(min(LOGICAL_GRID_HEIGHT, len(grid))):
              screen_y = grid_content_offset_y + (row_index * GP_TILE_HEIGHT)
-             # Stop drawing rows if they start beyond the calculated bottom boundary
-             if screen_y >= max_draw_y: continue
+             # Stop drawing rows if they start beyond the calculated bottom boundary or screen edge
+             if screen_y >= max_draw_y or screen_y >= HEIGHT: continue
 
              row_data = grid[row_index]
-             for col_index in range(min(GRID_COLS, len(row_data))):
+             for col_index in range(min(LOGICAL_GRID_WIDTH, len(row_data))):
                  screen_x = grid_content_offset_x + (col_index * GP_TILE_WIDTH)
-                 # Stop drawing columns if they start beyond the calculated right boundary
-                 if screen_x >= max_draw_x: continue
+                 # Stop drawing columns if they start beyond the calculated right boundary or screen edge
+                 if screen_x >= max_draw_x or screen_x >= WIDTH: continue
 
                  char = row_data[col_index]
                  # Determine character to draw (handle player cloak)
@@ -1408,20 +1502,16 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
                  # Draw tile if it exists in the mapping
                  if draw_char in tile_mapping:
-                     # Final check to prevent drawing outside screen bounds (redundant but safe)
-                     if screen_x < WIDTH and screen_y < HEIGHT:
-                         screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
+                     screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
                  elif char != ' ': # Don't warn for empty space
-                      # print(f"Warning: Character '{char}' at ({row_index},{col_index}) not in tile_mapping.")
                       # Optionally draw a placeholder for unknown characters
-                      if screen_x < WIDTH and screen_y < HEIGHT:
-                          pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
+                      pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
 
 
         # Update the values list with the current game state before drawing the HUD
-        # HUD drawing is independent of grid centering and uses absolute/screen-relative positioning
         values = [score, level_num, gems, whips, teleports, keys, cloaks]
-        draw_hud(values, color_input, hud_input) # Use draw_hud with updated values
+        # Draw HUD - HUD positioning is handled within draw_hud itself relative to screen edges/rows
+        draw_hud(values, color_input, hud_input)
 
         # Display level-specific messages (using game_text, which handles its own positioning)
         if level_num == 1:
@@ -1430,6 +1520,16 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         # Display pause message if waiting (using game_text)
         if waiting_for_start_key:
             game_text(25, "Press any key to begin this level.", "CHANGING", False, True, BLACK)
+
+
+    # Enemy movement counters
+
+    slow_counter = 0
+    medium_counter = 0
+    fast_counter = 0
+
+    running = True
+    clock = pygame.time.Clock()
 
     # --- Main Game Loop ---
     while running:

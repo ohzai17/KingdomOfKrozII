@@ -89,6 +89,9 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
     text_pixel_width = len(text) * gp.GP_TILE_WIDTH
     grid_pixel_width = utils.GAME_WIDTH * gp.GP_TILE_WIDTH
 
+    if utils.hud_input == "O":
+        grid_pixel_width = utils.WIDTH
+
     # Flashing
     current_time = pygame.time.get_ticks()
     is_visible = True

@@ -529,8 +529,8 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
     screen.blit(right_hud_image, (right_x, image_y))
 
     # Approximate row to be below the images (based on your layout)
-    draw_text(23, "       [O] UPDATED UI(BOTTOM)", text_color=WHITE, center=False)
-    draw_text(23, "                                             [R] ORIGINAL UI(SIDEBAR)", text_color=WHITE, center=True)
+    draw_text(23, "       ]O] UPDATED UI(BOTTOM)", text_color=WHITE, center=False)
+    draw_text(23, "                                             ]R] ORIGINAL UI(SIDEBAR)", text_color=WHITE, center=True)
 
     pygame.display.flip()
 
@@ -550,7 +550,7 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
                 elif event.key == pygame.K_r:
                     hud_input = "R"
                     utils.TILE_HEIGHT = HEIGHT // 25
-                    utils.TILE_WIDTH = utils.TILE_HEIGHT // 1.77777777777777777777
+                    utils.TILE_WIDTH = int(utils.TILE_HEIGHT / (16 / 9))
                     gp.GP_TILE_WIDTH, gp.GP_TILE_HEIGHT = utils.TILE_WIDTH, utils.TILE_HEIGHT
                     selecting = False
 
@@ -799,8 +799,8 @@ def run_all_screens():
     title(color_input)
     difficulty(BACKGROUND)
     shareware(BACKGROUND)
-    hud_input = hud_selector()
+    utils.hud_input = hud_selector()
     scale_loaded_sprites()
     gp.scale_gameplay_sprites((TILE_WIDTH, TILE_HEIGHT), color_input)
     user_choice = load()
-    process_user_choice(user_choice, hud_input, difficulty_input, color_input)
+    process_user_choice(user_choice, utils.hud_input, difficulty_input, color_input)
