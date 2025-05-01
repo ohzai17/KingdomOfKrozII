@@ -1,6 +1,7 @@
-from maps import *
+from levels.maps import *
+from levels.traps import *
 from utils import *
-from game_text import game_text
+from utilities.game_text import game_text
 from audio import enemyCollision, electricWall, whip as whip_audio, footStep, zeroCollecible, teleportTrap, chestPickup
 
 GP_TILE_WIDTH, GP_TILE_HEIGHT = 0, 0
@@ -424,6 +425,10 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     def move_enemy(enemy, enemy_type, move_prob):
         nonlocal score, gems, player_row, player_col, grid, is_cloaked # Ensure access
+
+        if pygame.time.get_ticks() < freeze_effect:
+            return False  # Enemy stays frozen, do not move
+
         if is_cloaked:
             return False # Enemies don't move if player is cloaked
 
@@ -635,9 +640,17 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                                 screen.blit(colored_whip_image, (screen_x, screen_y))
                     # Draw normal tiles (not under the whip)
                     else:
-                        if char_to_draw in tile_mapping:
-                            screen.blit(tile_mapping[char_to_draw], (screen_x, screen_y))
-                        elif char_to_draw != ' ': # Draw placeholder for unknown non-space chars
+                        char = row_data[c_idx]
+                        draw_char = char
+                        if r_idx == player_row and c_idx == player_col:
+                            if pygame.time.get_ticks() < invisible_effect:
+                                draw_char = None  # Fully invisible
+                            else:
+                                draw_char = 'TP' if is_cloaked else 'P'
+
+                        if draw_char in tile_mapping:
+                            screen.blit(tile_mapping[draw_char], (screen_x, screen_y))
+                        elif char != ' ':
                             pygame.draw.rect(screen, RED, (screen_x, screen_y, GP_TILE_WIDTH, GP_TILE_HEIGHT), 1)
 
             # --- Draw HUD ---
@@ -957,6 +970,14 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             # If no direction key was pressed in this check, reset all momentum
             # (Momentum logic removed for simplicity)
 
+    def nonlocal_set_freeze(end_time):
+        nonlocal freeze_effect
+        freeze_effect = end_time
+
+    def nonlocal_set_invisible(end_time):
+        nonlocal invisible_effect
+        invisible_effect = end_time
+
     def process_move(new_row, new_col):
         """Process a player movement attempt to a new position."""
         nonlocal player_row, player_col, score, gems, whips, teleports, keys, level_num, cloaks, whip_power
@@ -964,6 +985,8 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         nonlocal slow_enemies, medium_enemies, fast_enemies
         # Add nonlocal declarations for the new flags
         nonlocal first_solid_wall_hit, first_breakable_wall_hit, first_gem_pickup, first_whip_pickup
+        # Add nonlocal for spell effect ticks
+        nonlocal slow_time_effect_ticks, speed_time_effect_ticks, freeze_effect_ticks
 
         # Check bounds
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
@@ -1021,7 +1044,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == "S": # SlowTime
             score += 5
-            # Effect applied in main loop based on powerup pickup logic
+            slow_time_effect_ticks = SPELL_DURATION_TICKS # Activate effect
             moved = True
         elif target_char == "I": # Invisible (Placeholder - maybe cloak?)
             score += 10
@@ -1029,7 +1052,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             moved = True
         elif target_char == "F": # SpeedTime
             score += 20
-            # Effect applied in main loop
+            speed_time_effect_ticks = SPELL_DURATION_TICKS # Activate effect
             moved = True
         elif target_char == "C": # Chest
             score += 50
@@ -1040,16 +1063,16 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             pygame.display.flip() # Update the display to show this frame
             chestPickup() # Play sound for chest pickup
             wait_for_key_press("You found 4 gems and 3 whips inside the chest!")
-            return True # Move was successful (led to teleport)
             # Add random gems/whips logic here if needed
-            moved = True
+            # Since we return True, the standard move logic below won't run for chest
+            # Need to add the gem/whip gain here directly
+            gems += 4
+            whips += 3
+            return True # Move was successful (led to message)
         elif target_char == "!": # Tablet
             score += level_num + 250
             moved = True
-        elif target_char == "Z": # Freeze
-            score += 5 # Example score
-            # Effect applied in main loop
-            moved = True
+
         elif target_char == ".": # teleport trap
             score -= 50
             # Move player onto the trap space *before* teleporting
@@ -1158,11 +1181,60 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              if target_char == "1": slow_enemies = [e for e in slow_enemies if not (e["row"] == new_row and e["col"] == new_col)]
              elif target_char == "2": medium_enemies = [e for e in medium_enemies if not (e["row"] == new_row and e["col"] == new_col)]
              elif target_char == "3": fast_enemies = [e for e in fast_enemies if not (e["row"] == new_row and e["col"] == new_col)]
-             return True # Move was successful (killed enemy)
+             return True
 
+        elif target_char in {"»", "«"}:
+            direction = "right" if target_char == "»" else "left"
+            grid[player_row][player_col] = " "
+            player_row, player_col = new_row, new_col
+            grid[player_row][player_col] = "P"
+            pygame.display.flip()
+            spear_trap(
+                grid,
+                {"1": slow_enemies, "2": medium_enemies, "3": fast_enemies},
+                player_row, player_col, direction,
+                screen, tile_mapping, GP_TILE_WIDTH, GP_TILE_HEIGHT,
+                draw_grid
+            )
+            return True
 
-        # Default case: if the target tile is not explicitly handled, block movement
-        print(f"Debug: Movement blocked by unhandled tile '{target_char}' at ({new_row}, {new_col})")
+        elif target_char == "Z":  # Freeze
+            score += 5 # Example score
+            freeze_effect_ticks = SPELL_DURATION_TICKS # Activate effect
+            moved = True
+            grid[player_row][player_col] = " "
+            player_row, player_col = new_row, new_col
+            grid[player_row][player_col] = "P"
+            draw_grid()
+            pygame.display.flip()
+
+            # The freeze_trap function seems redundant if we use ticks now
+            # from levels.traps import freeze_trap
+            # freeze_trap(
+            #     freeze_duration_ms=3000,
+            #     get_ticks_fn=pygame.time.get_ticks,
+            #     set_freeze_effect_fn=lambda end_time: nonlocal_set_freeze(end_time),
+            # )
+            return True
+
+        elif target_char == "ö":
+            from levels.traps import blindness_trap
+            blindness_trap(
+                duration_ms=3000,
+                get_ticks_fn=pygame.time.get_ticks,
+                set_invisible_effect_fn=nonlocal_set_invisible
+            )
+            score += 5
+            moved = True
+            grid[player_row][player_col] = " "
+            player_row, player_col = new_row, new_col
+            grid[player_row][player_col] = "P"
+
+            return True
+
+        # Default case: If target_char is not handled above, it's likely an unhandled obstacle
+        # or an error. For safety, block movement.
+        print(f"Warning: Unhandled character '{target_char}' at ({new_row}, {new_col}). Blocking move.")
         return False
 
 
@@ -1177,15 +1249,19 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     slow_threshold = BASE_SLOW_TIMER
     medium_threshold = BASE_MEDIUM_TIMER
     fast_threshold = BASE_FAST_TIMER
+    freeze_effect = 0
 
-    # Spell effect timers (in game ticks or milliseconds - decide consistency)
-    # Using ticks for now, assuming GAME_TICK_RATE is consistent
+    # Spell effect timers (in ticks)
+    GAME_TICK_RATE = 16.0 # Target ticks per second
+    SPELL_DURATION_SECONDS = 5 # How long spells last
+    SPELL_DURATION_TICKS = int(SPELL_DURATION_SECONDS * GAME_TICK_RATE)
+
+    # Initialize spell tick counters
     slow_time_effect_ticks = 0
     speed_time_effect_ticks = 0
     freeze_effect_ticks = 0
-    # Invisible effect handled by is_cloaked flag and CLOAK_DURATION
-
-    GAME_TICK_RATE = 16.0 # Target ticks per second
+    # Note: invisible_effect seems to use a different mechanism (end time)
+    invisible_effect = 0 # Keep this as end time for now, used by blindness trap
 
     waiting_for_start_key = True # Start paused
 
@@ -1633,7 +1709,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             tick_decrement = 1 # Decrement by 1 each game tick
             if slow_time_effect_ticks > 0: slow_time_effect_ticks -= tick_decrement
             if speed_time_effect_ticks > 0: speed_time_effect_ticks -= tick_decrement
-            if freeze_effect_ticks > 0: freeze_effect_ticks -= tick_decrement
+            if freeze_effect > 0: freeze_effect -= tick_decrement
 
             # --- Update enemy movement thresholds based on spell effects ---
             if speed_time_effect_ticks > 0:
@@ -1651,8 +1727,8 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
             # --- Enemy Movement Logic ---
             # Only move enemies if freeze effect is not active
-            if freeze_effect_ticks <= 0:
-                # Increment counters
+            if pygame.time.get_ticks() >= freeze_effect:
+                # Increment counters (could also use time-based accumulation with dt)
                 slow_counter += 1
                 medium_counter += 1
                 fast_counter += 1

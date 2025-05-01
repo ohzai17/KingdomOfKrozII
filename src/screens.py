@@ -1,9 +1,9 @@
 import utils
-from texts import *
+from utilities.texts import *
 from audio import *
-from draw_text import draw_text
+from utilities.draw_text import draw_text
 import gameplay as gp
-from game_text import scale_loaded_sprites
+from utilities.game_text import scale_loaded_sprites
 
 ############################################################################################################################################################################################################################
 
