@@ -66,6 +66,8 @@ screen_assets_dir = os.path.join(assets_dir, "screens_assets")
 audio_dir = os.path.join(assets_dir, "audio")
 font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
 logo_path = os.path.join(assets_dir, "kroz_logo.png")
+right_hud_path = os.path.join(assets_dir, "right_hud.png")
+bottom_hud_path = os.path.join(assets_dir, "original_hud.png")
 leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
 
 def format_centered_int(value, width) -> str:

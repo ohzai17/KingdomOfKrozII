@@ -512,8 +512,8 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
     draw_text(4, "SELECT HUD STYLE", text_color=YELLOW, center=True)
 
     # Load HUD preview images
-    bottom_hud_image = pygame.image.load(os.path.join("src", "assets", "original_hud.png")).convert_alpha()
-    right_hud_image = pygame.image.load(os.path.join("src", "assets", "right_hud.png")).convert_alpha()
+    bottom_hud_image = pygame.image.load(bottom_hud_path).convert_alpha()
+    right_hud_image = pygame.image.load(right_hud_path).convert_alpha()
 
     # Resize images
     image_width, image_height = 400, 280
