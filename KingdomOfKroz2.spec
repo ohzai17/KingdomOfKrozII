@@ -47,5 +47,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='dist\\src\\assets\\sprites\\gameIcon.ico'
+    icon='src\\assets\\gameIcon.ico'
 )
