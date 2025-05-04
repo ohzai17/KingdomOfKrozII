@@ -19,7 +19,6 @@ CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
 color_input = ""
-difficulty_input = ""
 hud_input = ""
 
 def rgb(r, g, b):

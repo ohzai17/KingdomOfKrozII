@@ -128,6 +128,7 @@ def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
     blinking_difficulty_text = ""
     running = True
     
+    difficulty_input = "N"
     while running:
         screen.fill(BACKGROUND)
 
@@ -722,8 +723,7 @@ def leaderboard_screen(score, level_num):
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_y:  # User wants to play again
                         popup_running = False
-                        user_choice = load()  # Return to load screen
-                        process_user_choice(user_choice)  # Reuse the function
+                        run_all_screens()
                     elif event.key == pygame.K_n:  # User does not want to play again
                         popup_running = False
                         sign_off() 
@@ -798,7 +798,7 @@ def run_all_screens():
     color_input = color()
     speed_user_input = speed(color_input)
     title(color_input)
-    difficulty(BACKGROUND)
+    difficulty_input = difficulty(BACKGROUND)
     shareware(BACKGROUND)
     utils.hud_input = hud_selector()
     scale_loaded_sprites()

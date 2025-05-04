@@ -135,7 +135,6 @@ def pause_quit(quitting=False): # From KINGDOM.PAS (lines 49-69)
 
     return False  # User didn't quit
 
-# Player Death Function (Copied from gameplayOLD.py.txt for dependency, may need adjustment if not used)
 def player_death(score, level_num):
     """Handle player death when out of gems"""
     print("you have died")
@@ -239,7 +238,6 @@ def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (
             for i in range(7):
                  game_text(3+(i*2), "*" * (70-1) + "   0   ", VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX))
 
-
 def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     """Main gameplay loop for Kroz levels."""
     global tile_mapping # Ensure we use the global tile_mapping
@@ -294,15 +292,13 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
         case "E":
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1 # Whip power starts lower
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1 
         case "A":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 2, 0, 0, 0, 0, 1
-        case "N", " ":
+        case "N" | " ":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1
         case "X":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 250, 100, 50, 0, 10, 1
-        case _: # Default case (e.g., if difficulty_input is unexpected)
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 50, 50, 10, 0, 5, 1
 
     if mixUp:
         # Adjust starting values if mixUp is True
@@ -310,7 +306,6 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         whips += 30
         teleports += 15
         cloaks += 2
-        # whip_power might also be adjusted here if desired
 
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
 
@@ -497,7 +492,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 elif enemy_type == "2": gems -= 2
                 elif enemy_type == "3": gems -= 3
 
-                if gems < 0:
+                if gems <= 0:
+                    values = [score, level_num, gems, whips, teleports, keys, cloaks] # Update HUD values
+                    draw_hud(values, color_input, hud_input)
                     player_death(score, level_num) # Handles game over
                     return True # Enemy caused death
 
@@ -1167,8 +1164,10 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              elif target_char == "3": gems -= 3
 
              enemyCollision() # Play collision sound
-
-             if gems < 0:
+        
+             if gems <= 0:
+                 values = [score, level_num, gems, whips, teleports, keys, cloaks] # Update HUD values
+                 draw_hud(values, color_input, hud_input)
                  player_death(score, level_num)
                  return True # Move technically happened before death sequence
 
@@ -1780,4 +1779,3 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     # --- End of Main Game Loop ---
     print("Exiting game loop.") # Debug message
-# ...existing code...
