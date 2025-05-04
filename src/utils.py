@@ -94,7 +94,7 @@ try:
         if sys.platform == "darwin":
             # Correct path for saves next to .app bundle
             app_dir = os.path.dirname(os.path.dirname(os.path.dirname(sys.executable)))
-            saves_dir = os.path.join(app_dir, "Game Saves") # Put in a clearly named folder
+            saves_dir = os.path.join(app_dir, "saves") # Put in a clearly named folder
         else:
             # Windows/Linux: Create saves next to executable
             app_dir = os.path.dirname(sys.executable)
