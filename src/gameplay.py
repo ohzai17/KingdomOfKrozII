@@ -1,3 +1,4 @@
+import random
 from levels.maps import *
 from levels.traps import *
 from utils import *
@@ -104,7 +105,7 @@ def scale_gameplay_sprites(dimensions, color_input):
 
             if color_input == "M":
                 # Apply grayscale using the function from utils
-                scaled_img = apply_grayscale_f(scaled_img)
+                scaled_img = apply_grayscale(scaled_img)
 
             tile_mapping[char] = scaled_img
         else:
@@ -135,7 +136,6 @@ def pause_quit(quitting=False): # From KINGDOM.PAS (lines 49-69)
 
     return False  # User didn't quit
 
-# Player Death Function (Copied from gameplayOLD.py.txt for dependency, may need adjustment if not used)
 def player_death(score, level_num):
     """Handle player death when out of gems"""
     print("you have died")
@@ -215,7 +215,7 @@ def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (
         hud_surface.fill(BACKGROUND)
         # apply_grayscale_f should be available from utils
         if is_monochrome:
-            hud_surface = apply_grayscale_f(hud_surface)
+            hud_surface = apply_grayscale(hud_surface)
         screen.blit(hud_surface, (hud_x, 0))  # Apply sidebar
 
         game_text(2, " " * 70 + "Score", TEXT)
@@ -239,7 +239,6 @@ def draw_hud(values=None, color_input="C", hud_input="O"): # From KINGDOM4.INC (
             for i in range(7):
                  game_text(3+(i*2), "*" * (70-1) + "   0   ", VALUE_TEXT, False, False, ("ONLY_TEXT", TEXT_BOX))
 
-
 def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     """Main gameplay loop for Kroz levels."""
     global tile_mapping # Ensure we use the global tile_mapping
@@ -254,6 +253,25 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                   level12_map, level14_map, level16_map, level18_map, level20_map, level22_map,
                   level24_map, level25_map]
     current_level_index = 0
+
+    def place_teleport_item(level_maps):
+            for map_data in level_maps:
+                # Loop over the map data
+                empty_spaces = [
+                    (row_idx, col_idx)
+                    for row_idx, row in enumerate(map_data)
+                    for col_idx, tile in enumerate(row)
+                    if tile == " "
+                ]
+                if empty_spaces:
+                    row, col = random.choice(empty_spaces)
+                    # Convert the row to a list and assign the teleport item
+                    map_data[row] = list(map_data[row])  # Convert the string to a list
+                    map_data[row][col] = "_"  # Set the teleport item
+                    map_data[row] = ''.join(map_data[row])  # Convert the list back to a string
+                    
+    place_teleport_item(level_maps)
+
     grid = [list(row) for row in level_maps[current_level_index]]
 
     # Define collidable tiles (adjust as needed based on game rules)
@@ -294,23 +312,20 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
         case "E":
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1 # Whip power starts lower
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 15, 10, 0, 0, 0, 1 
         case "A":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 2, 0, 0, 0, 0, 1
-        case "N", " ":
+        case "N" | " ":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1
         case "X":
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 250, 100, 50, 0, 10, 1
-        case _: # Default case (e.g., if difficulty_input is unexpected)
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 50, 50, 10, 0, 5, 1
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 250, 100, 50, 0, 1, 3
 
     if mixUp:
         # Adjust starting values if mixUp is True
         gems += 60
         whips += 30
         teleports += 15
-        cloaks += 2
-        # whip_power might also be adjusted here if desired
+        cloaks += 1
 
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
 
@@ -425,6 +440,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     def move_enemy(enemy, enemy_type, move_prob):
         nonlocal score, gems, player_row, player_col, grid, is_cloaked # Ensure access
+        nonlocal enemy_collision_played_this_tick # Add nonlocal for the flag
 
         if pygame.time.get_ticks() < freeze_effect:
             return False  # Enemy stays frozen, do not move
@@ -476,7 +492,10 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 if enemy_type == "1": score += 10
                 elif enemy_type == "2": score += 20
                 elif enemy_type == "3": score += 30
-                enemyCollision()
+                # Play sound only once per tick
+                if not enemy_collision_played_this_tick:
+                    enemyCollision()
+                    enemy_collision_played_this_tick = True
                 return True # Enemy dies breaking block
 
             # Destroying items
@@ -497,11 +516,16 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                 elif enemy_type == "2": gems -= 2
                 elif enemy_type == "3": gems -= 3
 
-                if gems < 0:
+                if gems <= 0:
+                    values = [score, level_num, gems, whips, teleports, keys, cloaks] # Update HUD values
+                    draw_hud(values, color_input, hud_input)
                     player_death(score, level_num) # Handles game over
                     return True # Enemy caused death
 
-                enemyCollision() # Play enemy hit sound
+                # Play sound only once per tick
+                if not enemy_collision_played_this_tick:
+                    enemyCollision()
+                    enemy_collision_played_this_tick = True
 
                 # Enemy dies after hitting player
                 return True
@@ -785,8 +809,8 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         tp_sprite = tile_mapping.get('TP')
         if not tp_sprite: tp_sprite = player_sprite # Fallback
 
-        intermediate_flicker_count = 15 # Reduced intermediate flickers
-        intermediate_delay = 15
+        intermediate_flicker_count = 100
+        intermediate_delay = 20
         if t_trap:
             intermediate_flicker_count = 1 # Very short flicker for trap
             teleportTrap()
@@ -852,7 +876,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         # --- Final Destination Flicker (Moved outside the loop) ---
         final_bg_char = grid[final_row][final_col] # Should be ' '
         final_bg_sprite = tile_mapping.get(final_bg_char)
-        final_flicker_count = 6 # Reduced final flickers
+        final_flicker_count = 6
         final_flicker_delay = 50
 
         for _ in range(final_flicker_count):
@@ -987,6 +1011,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
         nonlocal first_solid_wall_hit, first_breakable_wall_hit, first_gem_pickup, first_whip_pickup
         # Add nonlocal for spell effect ticks
         nonlocal slow_time_effect_ticks, speed_time_effect_ticks, freeze_effect_ticks
+        nonlocal enemy_collision_played_this_tick # Add nonlocal for the flag
 
         # Check bounds
         if not (0 <= new_row < len(grid) and 0 <= new_col < len(grid[0])):
@@ -1035,7 +1060,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             keys += 1
             score += 10
             moved = True
-        elif target_char == "_": # Cloak item (using TP sprite visually)
+        elif target_char == "_": # Cloak item 
             cloaks += 1
             score += 60
             moved = True
@@ -1109,6 +1134,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             change_level(next_level_idx)
             current_level_index = next_level_idx % len(level_maps) # Update index tracker safely
             return True # Return True immediately as level changes
+        
+        elif target_char == "-":  # Stop tile
+            moved = True
 
         # --- If moved onto a collectable or empty space (and not handled above) ---
         if moved:
@@ -1166,9 +1194,14 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              elif target_char == "2": gems -= 2
              elif target_char == "3": gems -= 3
 
-             enemyCollision() # Play collision sound
+             # Play sound only once per tick
+             if not enemy_collision_played_this_tick:
+                 enemyCollision()
+                 enemy_collision_played_this_tick = True
 
-             if gems < 0:
+             if gems <= 0:
+                 values = [score, level_num, gems, whips, teleports, keys, cloaks] # Update HUD values
+                 draw_hud(values, color_input, hud_input)
                  player_death(score, level_num)
                  return True # Move technically happened before death sequence
 
@@ -1181,7 +1214,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              if target_char == "1": slow_enemies = [e for e in slow_enemies if not (e["row"] == new_row and e["col"] == new_col)]
              elif target_char == "2": medium_enemies = [e for e in medium_enemies if not (e["row"] == new_row and e["col"] == new_col)]
              elif target_char == "3": fast_enemies = [e for e in fast_enemies if not (e["row"] == new_row and e["col"] == new_col)]
-             return True
+             return True     
 
         elif target_char in {"»", "«"}:
             direction = "right" if target_char == "»" else "left"
@@ -1229,6 +1262,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             grid[player_row][player_col] = " "
             player_row, player_col = new_row, new_col
             grid[player_row][player_col] = "P"
+            
+            draw_grid()
+            pygame.display.flip()
 
             return True
 
@@ -1660,9 +1696,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     running = True # Main loop flag
     clock = pygame.time.Clock()
 
-# ...existing code...
     # --- Main Game Loop ---
     while running:
+        enemy_collision_played_this_tick = False # Reset flag at the start of each loop iteration
         dt_ms = clock.tick(GAME_TICK_RATE) # Delta time in milliseconds
         # dt_sec = dt_ms / 1000.0 # Delta time in seconds if needed
 
@@ -1780,4 +1816,3 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
 
     # --- End of Main Game Loop ---
     print("Exiting game loop.") # Debug message
-# ...existing code...

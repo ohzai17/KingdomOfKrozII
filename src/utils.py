@@ -19,7 +19,6 @@ CHAR_WIDTH, CHAR_HEIGHT = WIDTH / 80, HEIGHT / 25
 pygame.display.set_caption("Kingdom of Kroz II")
 
 color_input = ""
-difficulty_input = ""
 hud_input = ""
 
 def rgb(r, g, b):
@@ -57,16 +56,66 @@ whip_cycle_colors = [RED, YELLOW, GREEN, BLUE, CYAN, MAGENTA, WHITE]
 
 rand_color = random.choice(logo_color_list)
 
-# Define the base directory
-base_dir = os.path.dirname(os.path.abspath(__file__))
-saves_dir = os.path.join(base_dir, "saves")
-assets_dir = os.path.join(base_dir, "assets")
-sprites_dir = os.path.join(assets_dir, "sprites")
-screen_assets_dir = os.path.join(assets_dir, "screens_assets")
-audio_dir = os.path.join(assets_dir, "audio")
-font_path = os.path.join(assets_dir, "PressStart2P - Regular.ttf")
-logo_path = os.path.join(assets_dir, "kroz_logo.png")
-leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        # Base path is the root of the temporary folder
+        base_path = sys._MEIPASS
+        # Spec file places assets in 'src/assets' relative to bundle root
+        final_path = os.path.join(base_path, 'src', 'assets', relative_path)
+        # print(f"DEBUG (Bundled): final='{final_path}'") # Optional bundle debug
+
+    except Exception:
+        # utils.py is directly inside 'src'. Assets are in 'src/assets'.
+        src_dir = os.path.dirname(os.path.abspath(__file__)) # This IS the 'src' directory
+        assets_folder = os.path.join(src_dir, 'assets')      # Correctly gets 'src/assets'
+        final_path = os.path.join(assets_folder, relative_path) # Joins 'src/assets' with the relative file path
+        # --- End Correction ---
+
+    return final_path
+
+# --- Asset Paths (Using resource_path) ---
+# Pass the path *relative* to the 'assets' folder structure defined in the spec file ('src/assets')
+sprites_dir = resource_path("sprites")
+screen_assets_dir = resource_path("screens_assets")
+audio_dir = resource_path("audio")
+font_path = resource_path("PressStart2P-Regular.ttf") # Font path relative to assets
+logo_path = resource_path("kroz_logo.png")           # Logo path relative to assets
+right_hud_path = resource_path("right_hud.png")
+bottom_hud_path = resource_path("original_hud.png")
+
+# --- Saves Directory Handling ---
+# Saves should NOT use resource_path, as they shouldn't be bundled inside.
+try:
+    if getattr(sys, 'frozen', False):
+        # Running bundled: Create saves next to the .app or executable directory
+        if sys.platform == "darwin":
+            # Correct path for saves next to .app bundle
+            app_dir = os.path.dirname(os.path.dirname(os.path.dirname(sys.executable)))
+            saves_dir = os.path.join(app_dir, "saves") # Put in a clearly named folder
+        else:
+            # Windows/Linux: Create saves next to executable
+            app_dir = os.path.dirname(sys.executable)
+            saves_dir = os.path.join(app_dir, "saves")
+    else:
+        # Running from source: Use original location relative to project root
+        # Assumes utils.py is in src/utilities
+        project_root_dev = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        saves_dir = os.path.join(project_root_dev, "src", "saves") # Original location
+
+    # --- Ensure saves directory exists at runtime ---
+    if not os.path.exists(saves_dir):
+        os.makedirs(saves_dir)
+        # print(f"Created saves directory at: {saves_dir}") # Optional info message
+
+    leaderboard_path = os.path.join(saves_dir, "leaderboard.json")
+
+except Exception as e:
+    print(f"ERROR: Could not set up saves directory: {e}")
+    print("Saving/loading might fail.")
+    leaderboard_path = None # Indicate saving might be broken
+    saves_dir = None
 
 def format_centered_int(value, width) -> str:
     s_value = str(value)
@@ -101,7 +150,7 @@ pygame.font.init()
 def load_font(size):
     return pygame.font.Font(font_path, size)
 
-def apply_grayscale(image):
+""" def apply_grayscale(image):
     grayscale_image = pygame.Surface(image.get_size(), pygame.SRCALPHA) # Create alpha channel over image
     for x in range(image.get_width()):
         for y in range(image.get_height()):
@@ -109,9 +158,9 @@ def apply_grayscale(image):
             gray_formula = int(0.299 * r + 0.587 * g + 0.114 * b) # Standard grayscale formula
             gray = min(255, gray_formula + 70) # Increase brightness
             grayscale_image.set_at((x, y), (gray, gray, gray, a))
-    return grayscale_image
+    return grayscale_image """
 
-def apply_grayscale_f(surface):
+def apply_grayscale(surface):
     surface = surface.convert()  # Ensures it's in the RGB format (or RGBA)
     
     arr_rgb = pygame.surfarray.pixels3d(surface).copy()
@@ -141,7 +190,13 @@ def change_logo_color(image, time, color_user_input):
         # Reset state if switching to monochrome
         last_interval_index = -1
         last_random_color = None
-        return apply_grayscale(image)
+        # Tint the image with LIGHT_GRAY instead of applying grayscale
+        color_filter = pygame.Surface(image.get_size())
+        color_filter.fill(LIGHT_GRAY) # Use LIGHT_GRAY
+        colorized_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+        colorized_image.blit(image, (0, 0))
+        colorized_image.blit(color_filter, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+        return colorized_image
     else:
         # Calculate the current time interval index (changes every 300ms)
         current_interval_index = time // 100

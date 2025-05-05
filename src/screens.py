@@ -5,6 +5,8 @@ from utilities.draw_text import draw_text
 import gameplay as gp
 from utilities.game_text import scale_loaded_sprites
 
+C_YELLOW = YELLOW if color_input == "C" else LIGHT_GRAY
+
 ############################################################################################################################################################################################################################
 
 def color(): # From KINGDOM4.INC (line 66)
@@ -104,10 +106,16 @@ def title(color_input): # From KINGDOM3.INC (line 64)
         screen.blit(colorized_logo, (logo_x, logo_y))
 
         draw_text(2, title_heading_1)
-        draw_text(19, title_subtext_1, YELLOW)
-        draw_text(21, title_subtext_2, YELLOW)
-        draw_text(23, title_subtext_3, YELLOW)
-        draw_text(25, press_any_key_dot, LIGHT_CYAN)
+        if color_input == "C":
+            draw_text(19, title_subtext_1, YELLOW)
+            draw_text(21, title_subtext_2, YELLOW)
+            draw_text(23, title_subtext_3, YELLOW)
+            draw_text(25, press_any_key_dot, LIGHT_CYAN)
+        else:
+            draw_text(19, title_subtext_1, None)
+            draw_text(21, title_subtext_2, LIGHT_GRAY)
+            draw_text(23, title_subtext_3, LIGHT_GRAY)
+            draw_text(25, press_any_key_dot, LIGHT_GRAY)
 
         pygame.display.flip()
 
@@ -123,34 +131,44 @@ def title(color_input): # From KINGDOM3.INC (line 64)
                     
 ############################################################################################################################################################################################################################
 
-def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
+def difficulty(color_input, BACKGROUND): # From KINGDOM3.INC (line 86)
 
     blinking_difficulty_text = ""
     running = True
     
+    difficulty_input = "N"
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, difficulty_title, "CHANGING", False, True, RED, True)
+        L_CYAN = LIGHT_CYAN if color_input == "C" else LIGHT_GRAY
+        L_GREEN = LIGHT_GREEN if color_input == "C" else LIGHT_GRAY
+        DIFF = YELLOW if color_input == "C" else None
+        PLAYER_COLOR = None if color_input == "C" else BLACK
+
+        if color_input == "C":
+            draw_text(2, difficulty_title, "CHANGING", False, True, RED, True)
+        else:
+            draw_text(2, difficulty_title, BLACK, False, True, LIGHT_GRAY, True)
         draw_text(5, difficulty_heading_1)
         draw_text(7, difficulty_heading_2)
-        draw_text(9, difficulty_subtext_1, LIGHT_CYAN)
-        draw_text(10, difficulty_subtext_2, LIGHT_CYAN)
-        draw_text(11, difficulty_subtext_3, LIGHT_CYAN)
-        draw_text(12, difficulty_subtext_4, LIGHT_CYAN)
-        draw_text(13, difficulty_subtext_5, LIGHT_CYAN)
-        draw_text(14, difficulty_subtext_6, LIGHT_CYAN)
-        draw_text(17, difficulty_subtext_7, LIGHT_GREEN)
-        draw_text(17, difficulty_subtext_7a)
-        draw_text(18, difficulty_subtext_8, LIGHT_GREEN)
-        draw_text(19, difficulty_subtext_9, LIGHT_GREEN)
-        draw_text(20, difficulty_subtext_10, LIGHT_GREEN)
+        draw_text(9, difficulty_subtext_1, L_CYAN)
+        draw_text(10, difficulty_subtext_2, L_CYAN)
+        draw_text(11, difficulty_subtext_3, L_CYAN)
+        draw_text(12, difficulty_subtext_4, L_CYAN)
+        draw_text(13, difficulty_subtext_5, L_CYAN)
+        draw_text(14, difficulty_subtext_6, L_CYAN)
+        draw_text(17, difficulty_subtext_7, L_GREEN)
+        draw_text(17, difficulty_subtext_7a, PLAYER_COLOR)
+        draw_text(18, difficulty_subtext_8, L_GREEN)
+        draw_text(19, difficulty_subtext_9, L_GREEN)
+        draw_text(20, difficulty_subtext_10, L_GREEN)
         if blinking_difficulty_text == "":
-            draw_text(22, difficulty_heading_3_1, YELLOW)
+            draw_text(22, difficulty_heading_3_1, C_YELLOW)
             draw_text(22, difficulty_heading_3_2)
-            draw_text(22, difficulty_cursor, BROWN, True)
+            if color_input == "C":
+                draw_text(22, difficulty_cursor, BROWN, True)
         else:
-            draw_text(22, blinking_difficulty_text, YELLOW, True)
+            draw_text(22, blinking_difficulty_text, DIFF, True)
             draw_text(25, difficulty_footer, LIGHT_GRAY)
 
         pygame.display.flip()
@@ -191,7 +209,9 @@ def difficulty(BACKGROUND): # From KINGDOM3.INC (line 86)
 ############################################################################################################################################################################################################################
 
 # START of shareware (info_screen)
-def shareware(BACKGROUND): # From KINGDOM3.INC (lines 495-541)
+def shareware(color_input, BACKGROUND): # From KINGDOM3.INC (lines 495-541)
+
+    BOT_BAR = rand_color if color_input == "C" else LIGHT_GRAY
 
     running = True
     while running:
@@ -207,7 +227,10 @@ def shareware(BACKGROUND): # From KINGDOM3.INC (lines 495-541)
 
         for i, line in enumerate(shareware_kroz_volumes):
             row = 9 + i
-            draw_text(row, line, None, False, False)
+            if color_input == "C":
+                draw_text(row, line, None, False, False)
+            else:
+                draw_text(row, line, LIGHT_GRAY, False, False)
 
         for i, line in enumerate(shareware_paragraph_2):
             row = 16 + i
@@ -215,9 +238,12 @@ def shareware(BACKGROUND): # From KINGDOM3.INC (lines 495-541)
 
         for i, line in enumerate(shareware_check_info):
             row = 20 + i
-            draw_text(row, line, YELLOW, False, False)
+            if color_input == "C":
+                draw_text(row, line, YELLOW, False, False)
+            else:
+                draw_text(row, line, LIGHT_GRAY, False, False)
 
-        draw_text(25, "█" * 82, rand_color)
+        draw_text(25, "█" * 82, BOT_BAR)
         draw_text(25, press_any_key_dot, BLACK, True)
 
         pygame.display.update()
@@ -233,14 +259,14 @@ def shareware(BACKGROUND): # From KINGDOM3.INC (lines 495-541)
 ############################################################################################################################################################################################################################                    
 
 # START of instructions_1
-def instructions_1(BACKGROUND): #
-    
+def instructions_1(color_input, BACKGROUND):
+
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, instructions_title, YELLOW)
-        draw_text(3, instructions_subtitle, YELLOW)
+        draw_text(2, instructions_title, C_YELLOW)
+        draw_text(3, instructions_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(instruction1_paragraphs):
@@ -259,15 +285,15 @@ def instructions_1(BACKGROUND): #
 # END of instructions_1       
 
 # START of instructions_2
-def instructions_2(BACKGROUND): #
+def instructions_2(color_input, BACKGROUND): #
 
         
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, instructions_title, YELLOW)
-        draw_text(3, instructions_subtitle, YELLOW)
+        draw_text(2, instructions_title, C_YELLOW)
+        draw_text(3, instructions_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(instruction2_paragraphs):
@@ -286,14 +312,14 @@ def instructions_2(BACKGROUND): #
 # END of instructions_2
 
 # START of instructions_3
-def instructions_3(BACKGROUND):
+def instructions_3(color_input, BACKGROUND):
 
     running = True
     while running:
         screen.fill(BACKGROUND)
         
-        draw_text(2, instructions_title, YELLOW)
-        draw_text(3, instructions_subtitle, YELLOW)
+        draw_text(2, instructions_title, C_YELLOW)
+        draw_text(3, instructions_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(instruction3_paragraphs):
@@ -312,14 +338,14 @@ def instructions_3(BACKGROUND):
 # END of instructions_3  
 
 # START of instructions_4
-def instructions_4(BACKGROUND): #
+def instructions_4(color_input, BACKGROUND): #
 
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, instruction4_title, YELLOW)
-        draw_text(3, instruction4_subtitle, YELLOW)
+        draw_text(2, instruction4_title, C_YELLOW)
+        draw_text(3, instruction4_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(instruction4_paragraphs):
@@ -339,14 +365,14 @@ def instructions_4(BACKGROUND): #
 
 ############################################################################################################################################################################################################################
 
-def marketing(BACKGROUND): # From KINGDOM3.INC (line 348)
+def marketing(color_input, BACKGROUND): # From KINGDOM3.INC (line 348)
 
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, marketing_title, YELLOW)
-        draw_text(3, marketing_subtitle, YELLOW)
+        draw_text(2, marketing_title, C_YELLOW)
+        draw_text(3, marketing_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(marketing_paragraphs):
@@ -365,14 +391,14 @@ def marketing(BACKGROUND): # From KINGDOM3.INC (line 348)
 
 ############################################################################################################################################################################################################################
 
-def story_1(BACKGROUND): # From KINGDOM4.INC (line 379)
+def story_1(color_input, BACKGROUND): # From KINGDOM4.INC (line 379)
 
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, story_title, YELLOW)
-        draw_text(3, story_subtitle, YELLOW)
+        draw_text(2, story_title, C_YELLOW)
+        draw_text(3, story_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(story1_paragraphs):
@@ -391,14 +417,14 @@ def story_1(BACKGROUND): # From KINGDOM4.INC (line 379)
 
 ############################################################################################################################################################################################################################
 
-def story_2(BACKGROUND): # From KINGDOM4.INC (line 379)
+def story_2(color_input, BACKGROUND): # From KINGDOM4.INC (line 379)
 
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, story_title, YELLOW)
-        draw_text(3, story_subtitle, YELLOW)
+        draw_text(2, story_title, C_YELLOW)
+        draw_text(3, story_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(story2_paragraphs):
@@ -417,14 +443,14 @@ def story_2(BACKGROUND): # From KINGDOM4.INC (line 379)
 
 ############################################################################################################################################################################################################################
 
-def original(BACKGROUND): # From KINGDOM4.INC (line 438)
+def original(color_input, BACKGROUND): # From KINGDOM4.INC (line 438)
 
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, original_title, YELLOW)
-        draw_text(3, original_subtitle, YELLOW)
+        draw_text(2, original_title, C_YELLOW)
+        draw_text(3, original_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(original_paragraphs):
@@ -442,14 +468,14 @@ def original(BACKGROUND): # From KINGDOM4.INC (line 438)
                 running = False
 ############################################################################################################################################################################################################################
 
-def about(BACKGROUND): # From KINGDOM4.INC (line 467)
+def about(color_input, BACKGROUND): # From KINGDOM4.INC (line 467)
 
     running = True
     while running:
         screen.fill(BACKGROUND)
 
-        draw_text(2, about_title, YELLOW)
-        draw_text(3, about_subtitle, YELLOW)
+        draw_text(2, about_title, C_YELLOW)
+        draw_text(3, about_subtitle, C_YELLOW)
         draw_text(25, press_any_key_dot, "CHANGING")
 
         for i, line in enumerate(about_paragraphs):
@@ -506,14 +532,15 @@ def sign_off(): # From KINGDOM1.INC (lines 471-493)
                     
 ############################################################################################################################################################################################################################
 
-def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
+def hud_selector(color_input): # Returns "O" or "R", which maps to bottom or right HUD
     global TILE_HEIGHT, TILE_WIDTH
     screen.fill(BLACK)
-    draw_text(4, "SELECT HUD STYLE", text_color=YELLOW, center=True)
+    text_col = YELLOW if color_input == "C" else None
+    draw_text(4, "SELECT HUD STYLE", text_col, center=True)
 
     # Load HUD preview images
-    bottom_hud_image = pygame.image.load(os.path.join("src", "assets", "original_hud.png")).convert_alpha()
-    right_hud_image = pygame.image.load(os.path.join("src", "assets", "right_hud.png")).convert_alpha()
+    bottom_hud_image = pygame.image.load(bottom_hud_path).convert_alpha()
+    right_hud_image = pygame.image.load(right_hud_path).convert_alpha()
 
     # Resize images
     image_width, image_height = 400, 280
@@ -525,13 +552,21 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
     right_x = WIDTH - image_width - 70
     image_y = 150
 
+    if color_input == "M":
+        bottom_hud_image = apply_grayscale(bottom_hud_image)
+        right_hud_image = apply_grayscale(right_hud_image)
+
     # Blit images
     screen.blit(bottom_hud_image, (left_x, image_y))
     screen.blit(right_hud_image, (right_x, image_y))
 
     # Approximate row to be below the images (based on your layout)
-    draw_text(23, "       ]O] UPDATED UI(BOTTOM)", text_color=WHITE, center=False)
-    draw_text(23, "                                             ]R] ORIGINAL UI(SIDEBAR)", text_color=WHITE, center=True)
+    if color_input == "C":
+        draw_text(23, "       ]O] UPDATED UI(BOTTOM)", center=False)
+        draw_text(23, "                                             ]R] ORIGINAL UI(SIDEBAR)", center=True)
+    else:
+        draw_text(23, "       (O) UPDATED UI(BOTTOM)", center=False)
+        draw_text(23, "                                             (R) ORIGINAL UI(SIDEBAR)", center=True)
 
     pygame.display.flip()
 
@@ -559,7 +594,7 @@ def hud_selector(): # Returns "O" or "R", which maps to bottom or right HUD
 
 
 # START of load
-def load(): # From KINGDOM3.INC (lines 141-495) includes other screens
+def load(color_input): # From KINGDOM3.INC (lines 141-495) includes other screens
 
     # Store user input
     load_selection = ""
@@ -575,30 +610,40 @@ def load(): # From KINGDOM3.INC (lines 141-495) includes other screens
         pygame.K_r: "r"
     }
 
+    TITLE_COLOR = None if color_input == "C" else LIGHT_BLUE
+    M_GREEN = GREEN if color_input == "C" else LIGHT_GRAY
+    M_BROWN = BROWN if color_input == "C" else LIGHT_GRAY
+    M_RED = RED if color_input == "C" else LIGHT_GRAY
+    L_CYAN = LIGHT_CYAN if color_input == "C" else LIGHT_GRAY
+    M_YELLOW = YELLOW if color_input == "C" else None
+    CURSOR_COLOR = None if color_input == "C" else BLACK
+    SELECT_COLOR = None if color_input == "C" else BLACK
+    SELECT_BG_COLOR = BLUE if color_input == "C" else LIGHT_GRAY
+
     # Event Handling
     running = True
     while running:
         screen.fill(BLACK)
 
-        draw_text(2, game_title)
-        draw_text(4, load_subtext_1, BROWN)
-        draw_text(6, load_subtext_2, BROWN)
-        draw_text(10, "—" * 82, RED)
-        draw_text(24, load_selector, None, False, False, BLUE)
-        draw_text(24, load_cursor, None, True, False) #investigate cursor size
+        draw_text(2, game_title, TITLE_COLOR)
+        draw_text(4, load_subtext_1, M_BROWN)
+        draw_text(6, load_subtext_2, M_BROWN)
+        draw_text(10, "—" * 82, M_RED)
+        draw_text(24, load_selector, SELECT_COLOR, False, False, SELECT_BG_COLOR)
+        draw_text(24, load_cursor, CURSOR_COLOR, True, False)
         draw_text(24, load_pad, BLACK, False, False)
 
         for i, line in enumerate(load_paragraph):
             row = 8 + i
-            draw_text(row, line, GREEN)
+            draw_text(row, line, M_GREEN)
 
-        for i, line in enumerate(load_choice_list): #investigate color
+        for i, line in enumerate(load_choice_list):
             row = 12 + i
-            draw_text(row, line, (85, 255, 255))
+            draw_text(row, line, L_CYAN)
 
         for i, line in enumerate(load_choice_list2):
             row = 12 + i
-            draw_text(row, line, YELLOW)
+            draw_text(row, line, M_YELLOW)
 
 
         for event in pygame.event.get():
@@ -722,8 +767,7 @@ def leaderboard_screen(score, level_num):
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_y:  # User wants to play again
                         popup_running = False
-                        user_choice = load()  # Return to load screen
-                        process_user_choice(user_choice)  # Reuse the function
+                        run_all_screens()
                     elif event.key == pygame.K_n:  # User does not want to play again
                         popup_running = False
                         sign_off() 
@@ -753,7 +797,7 @@ def update_leaderboard(leaderboard, name, score, level):
 
 ############################################################################################################################################################################################################################                    
 
-def process_user_choice(user_choice, hud_input, difficulty_input, color_input):
+def process_user_choice(user_choice, hud_input, difficulty_input, color_input, BACKGROUND):
     """Handle user choices and navigate through the game screens."""
     startGame = True
     while startGame:
@@ -765,28 +809,28 @@ def process_user_choice(user_choice, hud_input, difficulty_input, color_input):
                 startGame = False
             case "i":
                 print(f"Choice: I")
-                instructions_1(BACKGROUND)
-                instructions_2(BACKGROUND)
-                instructions_3(BACKGROUND)
-                instructions_4(BACKGROUND)
-                user_choice = load()
+                instructions_1(color_input, BACKGROUND)
+                instructions_2(color_input, BACKGROUND)
+                instructions_3(color_input, BACKGROUND)
+                instructions_4(color_input, BACKGROUND)
+                user_choice = load(color_input)
             case "m":
                 print(f"Choice: M")
-                marketing(BACKGROUND)
-                user_choice = load()
+                marketing(color_input, BACKGROUND)
+                user_choice = load(color_input)
             case "s":
                 print(f"Choice: S")
-                story_1(BACKGROUND)
-                story_2(BACKGROUND)
-                user_choice = load()
+                story_1(color_input, BACKGROUND)
+                story_2(color_input, BACKGROUND)
+                user_choice = load(color_input)
             case "o":
                 print(f"Choice: O")
-                original(BACKGROUND)
-                user_choice = load()
+                original(color_input, BACKGROUND)
+                user_choice = load(color_input)
             case "a":
                 print(f"Choice: A")
-                about(BACKGROUND)
-                user_choice = load()
+                about(color_input, BACKGROUND)
+                user_choice = load(color_input)
             case "r":
                 print(f"Choice: R")
                 descent()
@@ -796,12 +840,16 @@ def process_user_choice(user_choice, hud_input, difficulty_input, color_input):
 
 def run_all_screens():
     color_input = color()
+    if color_input == "M":
+        BACKGROUND = BLACK
+    else:
+        BACKGROUND = BLUE
     speed_user_input = speed(color_input)
     title(color_input)
-    difficulty(BACKGROUND)
-    shareware(BACKGROUND)
-    utils.hud_input = hud_selector()
+    difficulty_input = difficulty(color_input, BACKGROUND)
+    shareware(color_input, BACKGROUND)
+    utils.hud_input = hud_selector(color_input)
     scale_loaded_sprites()
     gp.scale_gameplay_sprites((TILE_WIDTH, TILE_HEIGHT), color_input)
-    user_choice = load()
-    process_user_choice(user_choice, utils.hud_input, difficulty_input, color_input)
+    user_choice = load(color_input)
+    process_user_choice(user_choice, utils.hud_input, difficulty_input, color_input, BACKGROUND)

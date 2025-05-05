@@ -113,12 +113,11 @@ def game_text(row, text, text_color=None, flashing=False, center=True, text_back
     current_actual_color = None # The color to apply to text sprites
     if text_color == "CHANGING":
         # Ensure the color list is not empty to avoid division by zero
-        if utils.blinking_text_color_list:
+        if utils.color_input == "C" and utils.blinking_text_color_list:
             color_index = (current_time // 50) % len(utils.blinking_text_color_list)
             current_actual_color = utils.blinking_text_color_list[color_index]
         else:
             current_actual_color = None
-            print("Warning: blinking_text_color_list is empty, cannot use 'CHANGING'.")
     elif isinstance(text_color, tuple): # Check if it's a static color tuple
         current_actual_color = text_color
     # If text_color is None or an invalid type, current_actual_color remains None
