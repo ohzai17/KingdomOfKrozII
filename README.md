@@ -1,10 +1,10 @@
-# Kingdom of Kroz II Port
+# Kingdom of Kroz II Pygame Port
 
-A retro-style 2D platformer adventure ported using Pygame!
+A Pygame-based reimagining of the classic ASCII game, Kingdom of Kroz II.
 
 ---
 
-## 🎮 Features
+## Features
 - Pixel art platforming
 - Multiple challenging levels
 - Save and load system
@@ -12,7 +12,7 @@ A retro-style 2D platformer adventure ported using Pygame!
 
 ---
 
-## 🕹️ Controls
+## Controls
 |   Action   |    Key    |
 |:----------:|:---------:|
 | Move Left  | ← |,| J |
@@ -27,87 +27,81 @@ A retro-style 2D platformer adventure ported using Pygame!
 Other commands you can invoke in the game:
 |            Action              |         Key        |
 |:------------------------------:|:------------------:|
-| Pause                          | P(any key unpauses)|
+| Pause/Unpause                  | P/Any Key          |
 | Save                           | S                  |
 | Restore                        | R                  |
 | Teleport                       | T                  |
 | Whip                           | W                  |
 | Cloak                          | C                  |
-| Quit                           | Q , Esc            |
+| Quit                           | Q, Esc             |
 | Reset found-item descriptions  | +                  |
 | Inhibit found-item descriptions| -                  |
 | Spawn level-skip stairs        | ( (SECRET mode)    |
 | Give extra items               | ) (SECRET mode)    |
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### Install Requirements
 First install the needed libraries:
 ```bash, cmd, powershell
 pip install -r requirements.txt
+```
+```
+Project Structure:
 
-PROJECT STRUCTURE:
-
-📁 KINGDOMOFKROZII
+KingdomOfKrozII
 │
-├── 📄 README.md
-├── 📄 requirements.txt
-├── 📄 run_game.py
-├── 📄 run_game.spec
-├── 📄 __init__.py
+├── README.md
+├── requirements.txt
+├── run_game.py
+├── run_game.spec
+├── __init__.py
 │
-├── 📁 build
+├── build
 │
-├── 📁 dist
-│   ├── 📄 run_game.exe # EXECUTABLE
-│   └── 📁 src
-│       ├── 📁 assets
-│       │   ├── 📁 audio
-│       │   │   └── 🎵 Example.wav
-│       │   ├── 📁 screens_assets
-│       │   │   └── 🖼️ Example.png
-│       │   └── 📁 sprites
-│       │       └── 🖼️ Example.png
-│       │
-│       └── 📁 saves
+├── dist
+│   ├── run_game.exe # Executable
+│   └── src
+│       ├── assets
+│       │   ├── audio
+│       │   │   └── example.wav
+│       │   ├── screens_assets
+│       │   │   └── example.png
+│       │   └── sprites
+│       │       └── example.png
+│       └── saves
 │
-└── 📁 src
-    ├── 📄 audio.py
-    ├── 📄 gameplay.py
-    ├── 📄 main.py
+└── src
+    ├── audio.py
+    ├── gameplay.py
+    ├── main.py
+    ├── screens.py
+    ├── utils.py
     │
-    ├── 📁 assets
-    │   ├── 📁 audio
-    │   │   ├── 🎵 Example.wav
-    │   ├── 📁 screens_assets
-    │   │   └── 🖼️ Example.png
-    │   └── 📁 sprites
-    │       └── 🖼️ Example.png
+    ├── assets
+    │   ├── audio
+    │   │   ├── example.wav
+    │   ├── screens_assets
+    │   │   └── example.png
+    │   └── sprites
+    │       └── example.png
     │
-    ├── 📁 levels
-    │   ├── 📄 maps.py
-    │   └── 📁 __pycache__
-    │       └── 🧹 maps.cpython-313.pyc
+    ├── levels
+    │   └── maps.py
     │
-    ├── 📁 saves
-    │   ├── 📄 KINGDOMA.json
-    │   ├── 📄 KINGDOMB.json
-    │   └── 📄 leaderboard.json
+    ├── ui
+    │   └── screens.py
     │
-    ├── 📁 ui
-    │   ├── 📄 screens.py
-    │   └── 📁 __pycache__
-    │
-    └── 📁 utils
-        ├── 📄 draw_text.py
-        ├── 📄 game_text.py
-        ├── 📄 texts.py
-        └── 📄 utils.py
+    └── utils
+        ├── draw_text.py
+        ├── game_text.py
+        └── texts.py
+```
 
 This project is licensed under the MIT License.
 
-👨‍💻 Credits
-Contributors: Erik Vodanovic, Hender Hernandez Caba, Au Sein, Edward Campion III
+Credits
+Contributors: Edward Campion III, Hender Hernandez Caba, Au Sein, Erik Vodanovic
 
-Sound Effects: numpy 
+Sound Effects: numpy
