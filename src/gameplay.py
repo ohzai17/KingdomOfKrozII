@@ -1,3 +1,4 @@
+import random
 from levels.maps import *
 from levels.traps import *
 from utils import *
@@ -252,6 +253,25 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
                   level12_map, level14_map, level16_map, level18_map, level20_map, level22_map,
                   level24_map, level25_map]
     current_level_index = 0
+
+    def place_teleport_item(level_maps):
+            for map_data in level_maps:
+                # Loop over the map data
+                empty_spaces = [
+                    (row_idx, col_idx)
+                    for row_idx, row in enumerate(map_data)
+                    for col_idx, tile in enumerate(row)
+                    if tile == " "
+                ]
+                if empty_spaces:
+                    row, col = random.choice(empty_spaces)
+                    # Convert the row to a list and assign the teleport item
+                    map_data[row] = list(map_data[row])  # Convert the string to a list
+                    map_data[row][col] = "_"  # Set the teleport item
+                    map_data[row] = ''.join(map_data[row])  # Convert the list back to a string
+                    
+    place_teleport_item(level_maps)
+
     grid = [list(row) for row in level_maps[current_level_index]]
 
     # Define collidable tiles (adjust as needed based on game rules)
@@ -292,20 +312,20 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
     # Initialize score tracking variables *Based off difficulty*
     match(difficulty_input):
         case "E":
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1 
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 15, 10, 0, 0, 0, 1 
         case "A":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 2, 0, 0, 0, 0, 1
         case "N" | " ":
             score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 20, 10, 0, 0, 0, 1
         case "X":
-            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 250, 100, 50, 0, 10, 1
+            score, level_num, gems, whips, teleports, keys, cloaks, whip_power = 0, 1, 250, 100, 50, 0, 1, 3
 
     if mixUp:
         # Adjust starting values if mixUp is True
         gems += 60
         whips += 30
         teleports += 15
-        cloaks += 2
+        cloaks += 1
 
     values = [score, level_num, gems, whips, teleports, keys, cloaks]
 
@@ -1032,7 +1052,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             keys += 1
             score += 10
             moved = True
-        elif target_char == "_": # Cloak item (using TP sprite visually)
+        elif target_char == "_": # Cloak item 
             cloaks += 1
             score += 60
             moved = True
@@ -1106,6 +1126,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             change_level(next_level_idx)
             current_level_index = next_level_idx % len(level_maps) # Update index tracker safely
             return True # Return True immediately as level changes
+        
+        elif target_char == "-":  # Stop tile
+            moved = True
 
         # --- If moved onto a collectable or empty space (and not handled above) ---
         if moved:
@@ -1180,7 +1203,7 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
              if target_char == "1": slow_enemies = [e for e in slow_enemies if not (e["row"] == new_row and e["col"] == new_col)]
              elif target_char == "2": medium_enemies = [e for e in medium_enemies if not (e["row"] == new_row and e["col"] == new_col)]
              elif target_char == "3": fast_enemies = [e for e in fast_enemies if not (e["row"] == new_row and e["col"] == new_col)]
-             return True
+             return True     
 
         elif target_char in {"»", "«"}:
             direction = "right" if target_char == "»" else "left"
@@ -1228,6 +1251,9 @@ def levels(difficulty_input, color_input="C", hud_input="O", mixUp=False):
             grid[player_row][player_col] = " "
             player_row, player_col = new_row, new_col
             grid[player_row][player_col] = "P"
+            
+            draw_grid()
+            pygame.display.flip()
 
             return True
 
